@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from dataclass import Message, ChatRequest
+import asyncio
+from fastapi.responses import StreamingResponse
 
 
 def initialize_rag_chain():
@@ -33,14 +35,20 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+async def stream_rag_response(rag_chain, question):
+    response = rag_chain.process_question(question)
+    for word in response.split():
+        yield f"{word} "
+        await asyncio.sleep(0.05)  # Adjust this value to control the speed
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def process_chat(request: ChatRequest):
     try:
-        # Process the new message
-        response = rag_chain.process_question(request.new_message)
+        async def stream_response():
+            async for word in rag_chain.process_question(request.new_message):
+                yield f"{word}"
 
-        return {"response": response}
+        return StreamingResponse(stream_response(), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

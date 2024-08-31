@@ -26,5 +26,4 @@ class Message(BaseModel):
     is_user: bool
 
 class ChatRequest(BaseModel):
-    messages: List[Message]
     new_message: str

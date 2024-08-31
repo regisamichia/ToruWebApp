@@ -1,12 +1,12 @@
 import time
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, AsyncGenerator
 from open_ai_client import OpenAILLMModel
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate, MessagesPlaceholder
 from langchain.chains import create_retrieval_chain, LLMChain, create_history_aware_retriever
 from langchain.chains.combine_documents import create_stuff_documents_chain
-
+import asyncio
 
 class RAGChain:
     """Manages the Retrieval-Augmented Generation chain."""
@@ -39,7 +39,7 @@ class RAGChain:
         """
         return self.chain.invoke({"input": input_text, "chat_history": self.chat_history})
 
-    def process_question(self, question):
+    async def process_question(self, question) -> AsyncGenerator[str, None]:
 
         msg = self.invoke(question)
         self.chat_history.extend([
@@ -47,7 +47,7 @@ class RAGChain:
             AIMessage(content=msg["answer"]),
         ])
         response = msg["answer"]
-        return response
-        # for word in response.split(" "):
-        #     yield word + " "
-        #     time.sleep(0.05)
+        #return response
+        for word in response.split(" "):
+            yield word + " "
+            await asyncio.sleep(0.05)

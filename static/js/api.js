@@ -1,11 +1,6 @@
-import { getToken } from "./auth.js";
+import { getToken } from './auth.js';
 
-export async function makeApiCall(
-  url,
-  method,
-  body = null,
-  contentType = "application/json",
-) {
+export async function makeApiCall(url, method, body = null, contentType = "application/json") {
   const headers = {};
   const token = getToken();
 
@@ -19,16 +14,8 @@ export async function makeApiCall(
   };
 
   if (body) {
-    if (body instanceof URLSearchParams) {
-      headers["Content-Type"] = "application/x-www-form-urlencoded";
-      options.body = body;
-    } else if (contentType === "application/json") {
-      headers["Content-Type"] = contentType;
-      options.body = JSON.stringify(body);
-    } else {
-      headers["Content-Type"] = contentType;
-      options.body = body;
-    }
+    headers["Content-Type"] = contentType;
+    options.body = JSON.stringify(body);
   }
 
   console.log("Making API call to:", url);
