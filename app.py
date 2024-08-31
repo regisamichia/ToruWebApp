@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import JWTError, jwt
+from src.app_dataclass import UserCreate, UserLogin, Token, Message
 from datetime import datetime, timedelta
 import os
 import uvicorn
@@ -35,23 +36,6 @@ class User(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# Pydantic models
-class UserCreate(BaseModel):
-    first_name: str
-    email: str
-    password: str
-    school_class: str
-
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-class Message(BaseModel):
-    message: str
 
 # Security
 SECRET_KEY = os.environ.get("SECRET_KEY", "your-secret-key")

@@ -1,0 +1,22 @@
+chat_prompts:
+  contextualize:
+    system: "Given a chat history answer the latest user question in French"
+    human: "{input}"
+  qa:
+    system: |
+      You are an assistant for question-answering tasks.
+      Use the following pieces of retrieved context to answer
+      the question. If you don't know the answer, say that you
+      don't know. Ce sont des questions de mathématiques et tu réponds à un enfant.
+      Tu dois répondre en français
+
+      {context}
+    human: "{input}"
+
+template_prompts:
+  classification: |
+    Est-ce que la question demande des exercices ou l'explication
+    d'un concept mathématiques ? Tu dois réponde exo ou concept
+    et seulement l'une de ces réponses.
+
+    {text}
