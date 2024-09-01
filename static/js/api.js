@@ -1,6 +1,11 @@
-import { getToken } from './auth.js';
+import { getToken } from "./auth.js";
 
-export async function makeApiCall(url, method, body = null, contentType = "application/json") {
+export async function makeApiCall(
+  url,
+  method,
+  body = null,
+  contentType = "application/json",
+) {
   const headers = {};
   const token = getToken();
 
@@ -14,16 +19,18 @@ export async function makeApiCall(url, method, body = null, contentType = "appli
   };
 
   if (body) {
-    headers["Content-Type"] = contentType;
-    options.body = JSON.stringify(body);
+    if (body instanceof FormData) {
+      // Don't set Content-Type for FormData, let the browser set it
+      options.body = body;
+    } else if (contentType === "application/json") {
+      headers["Content-Type"] = contentType;
+      options.body = JSON.stringify(body);
+    } else {
+      headers["Content-Type"] = contentType;
+      options.body = body;
+    }
   }
 
-  console.log("Making API call to:", url);
-  console.log("Request method:", method);
-  console.log("Request headers:", headers);
-  console.log("Request body:", options.body);
-
   const response = await fetch(url, options);
-  console.log("Response status:", response.status);
   return response;
 }

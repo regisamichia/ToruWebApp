@@ -1,8 +1,43 @@
-export function getToken() {
+function getToken() {
   return localStorage.getItem("token");
 }
 
-export async function handleLogin(e) {
+function initializeLoginForm() {
+  const loginForm = document.getElementById("login");
+  const registerForm = document.getElementById("register");
+  const showRegisterLink = document.getElementById("showRegister");
+  const showLoginLink = document.getElementById("showLogin");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  } else {
+    console.error("Login form not found");
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", handleRegister);
+  } else {
+    console.error("Register form not found");
+  }
+
+  if (showRegisterLink) {
+    showRegisterLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("registerForm").style.display = "block";
+    });
+  }
+
+  if (showLoginLink) {
+    showLoginLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("registerForm").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+    });
+  }
+}
+
+async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
@@ -43,7 +78,7 @@ export async function handleLogin(e) {
   }
 }
 
-export async function handleRegister(e) {
+async function handleRegister(e) {
   e.preventDefault();
   const first_name = document.getElementById("registerFirstName").value;
   const email = document.getElementById("registerEmail").value;
@@ -114,6 +149,7 @@ export async function handleRegister(e) {
   }
 }
 
+// This function can be exported and used in other files if needed
 export async function handleLogout(e) {
   e.preventDefault();
   try {
@@ -135,6 +171,7 @@ export async function handleLogout(e) {
   }
 }
 
+// This function can be exported and used in other files if needed
 export async function checkLoginStatus() {
   const token = getToken();
   if (!token) {
@@ -158,3 +195,8 @@ export async function checkLoginStatus() {
     window.location.href = "/";
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM content loaded"); // Debug log
+  initializeLoginForm();
+});

@@ -15,6 +15,9 @@
         ></script>
     </head>
     <body class="chat-body">
+        <header class="chat-header">
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </header>
         <aside class="chat-sidebar">
             <h1>Toru</h1>
             <nav>
@@ -53,9 +56,11 @@
                         id="userInput"
                         placeholder="Type your message..."
                     />
-                    <button onclick="sendMessage()">
+                    <button id="sendButton">
                         <i class="fas fa-paper-plane"></i>
                     </button>
+                    <button id="recordButton">Record Audio</button>
+                    <div id="recordingStatus"></div>
                 </div>
             </div>
         </main>

@@ -98,6 +98,34 @@ select:focus {
 }
 
 /* Chat Styles */
+
+.chat-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    z-index: 1000;
+}
+
+.logout-button {
+    background-color: #1877f2; /* Changed to Facebook blue */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 6px; /* Matching the border-radius of other buttons */
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #166fe5; /* Darker shade for hover state */
+}
+
 .chat-body {
     display: flex;
     height: 100vh;

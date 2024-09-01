@@ -55,6 +55,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def read_login():
     return FileResponse('static/login.html')
 
+# Serve the login.html file at the /login URL
+@app.get("/login")
+async def read_login():
+    return FileResponse("static/login.html")
+
 # Serve chat.html (your chat page) at /chat
 @app.get("/chat")
 async def read_index():
