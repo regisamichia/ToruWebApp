@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 class OpenAILLMModel:
     """Wrapper for the language model."""
 
-    def __init__(self, model_name: str = "chatgpt-4o-latest"):
+    def __init__(self, model_name: str = "gpt-4o-mini"):
         """
         Initialize the LLM model.
 
