@@ -1,4 +1,4 @@
-import { getToken } from "./login.js";
+import { getToken, refreshToken } from "./login.js";
 
 export async function makeApiCall(
   url,
@@ -31,6 +31,23 @@ export async function makeApiCall(
     }
   }
 
-  const response = await fetch(url, options);
+  let response = await fetch(url, options);
+
+  if (response.status === 401) {
+    // Unauthorized, token might be expired
+    // Try to refresh the token
+    const newToken = await refreshToken();
+    if (newToken) {
+      // Update the Authorization header with the new token
+      headers["Authorization"] = `Bearer ${newToken}`;
+      // Retry the original request
+      response = await fetch(url, options);
+    } else {
+      // If we couldn't refresh the token, redirect to login
+      window.location.href = "/login";
+      return;
+    }
+  }
+
   return response;
 }

@@ -2,6 +2,36 @@ export function getToken() {
   return localStorage.getItem("token");
 }
 
+export async function refreshToken() {
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (!refreshToken) return null;
+
+  try {
+    const response = await fetch("http://localhost:8000/api/refresh", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refreshToken", data.refresh_token);
+      return data.access_token;
+    } else {
+      // If refresh failed, clear tokens and return null
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    return null;
+  }
+}
+
 function initializeLoginForm() {
   const loginForm = document.getElementById("login");
   const registerForm = document.getElementById("register");

@@ -1,4 +1,5 @@
 import { makeApiCall } from "./api.js";
+import { getToken, handleLogout } from "./login.js";
 import { sendMessage, addMessageToChat } from "./chat.js";
 
 let mediaRecorder;
@@ -54,7 +55,7 @@ function initializeAudioRecording() {
 async function sendAudioMessage(audioBlob) {
   try {
     const formData = new FormData();
-    formData.append("audio", audioBlob, "audio.webm");
+    formData.append("audio", audioBlob, "audio/webm");
 
     const response = await makeApiCall(
       "http://localhost:8002/transcribe",
@@ -116,9 +117,91 @@ async function sendChatMessage(message) {
   }
 }
 
+export async function sendImageMessage(imageFile) {
+  /**
+   * Sends an image for text extraction and processes the extracted text through the chat system.
+   *
+   * This function performs the following steps:
+   * 1. Uploads the image to the text extraction API.
+   * 2. Displays the extracted text in the chat interface.
+   * 3. Sends the extracted text to the chat API for processing.
+   * 4. Displays the bot's response to the extracted text.
+   *
+   * @param {File} imageFile - The image file to be processed.
+   * @throws {Error} If there's an issue with the API calls or data processing.
+   *
+   * @example
+   * // Assuming you have a file input element
+   * const imageInput = document.getElementById('imageInput');
+   * imageInput.addEventListener('change', (event) => {
+   *   const file = event.target.files[0];
+   *   if (file) {
+   *     sendImageMessage(file);
+   *   }
+   * });
+   */
+
+  try {
+    const formData = new FormData();
+    formData.append("image", imageFile, imageFile.name);
+
+    const extractResponse = await makeApiCall(
+      "http://localhost:8000/api/extract_text",
+      "POST",
+      formData,
+    );
+
+    if (extractResponse.ok) {
+      const data = await extractResponse.json();
+
+      // Add the extracted text to the chat as a user message
+      addMessageToChat(data.text, "user-message");
+
+      // Send the extracted text to the chat route
+      const chatResponse = await makeApiCall(
+        "http://localhost:8001/api/chat",
+        "POST",
+        { new_message: data.text },
+        "application/json",
+      );
+
+      if (chatResponse.ok) {
+        const botMessage = document.createElement("div");
+        botMessage.className = "message bot-message";
+        const chatMessages = document.getElementById("chatMessages");
+        chatMessages.appendChild(botMessage);
+
+        const reader = chatResponse.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          botMessage.textContent += chunk;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+      } else {
+        console.error("Failed to send extracted text to chat");
+        const errorText = await chatResponse.text();
+        console.error("Error details:", errorText);
+      }
+    } else {
+      console.error("Failed to extract text from image");
+      const errorText = await extractResponse.text();
+      console.error("Error details:", errorText);
+    }
+  } catch (error) {
+    console.error("Error in sendImageMessage:", error);
+  }
+}
+
 function initializeChatInterface() {
   const userInput = document.getElementById("userInput");
   const sendButton = document.getElementById("sendButton");
+  const imageInput = document.getElementById("imageInput");
+  const uploadButton = document.getElementById("uploadButton");
 
   if (userInput) {
     userInput.addEventListener("keypress", function (e) {
@@ -134,27 +217,27 @@ function initializeChatInterface() {
       sendMessage();
     });
   }
+
+  if (uploadButton) {
+    uploadButton.addEventListener("click", function () {
+      imageInput.click();
+    });
+  }
+
+  if (imageInput) {
+    imageInput.addEventListener("change", function () {
+      const imageFile = imageInput.files[0];
+      if (imageFile) {
+        sendImageMessage(imageFile);
+      }
+    });
+  }
 }
 
 function initializeLogout() {
   const logoutButton = document.getElementById("logoutButton");
   if (logoutButton) {
     logoutButton.addEventListener("click", handleLogout);
-  }
-}
-
-async function handleLogout() {
-  try {
-    // Clear the token from localStorage
-    localStorage.removeItem("token");
-
-    // Optionally, you can also make an API call to invalidate the token on the server
-    // await makeApiCall("http://localhost:8000/api/logout", "POST");
-
-    // Redirect to the login page
-    window.location.href = "/login";
-  } catch (error) {
-    console.error("Error during logout:", error);
   }
 }
 

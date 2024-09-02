@@ -3,16 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Toru Chatbot</title>
+        <title>Chat - Toru Chatbot</title>
         <link rel="stylesheet" href="/static/styles.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
         />
-        <script
-            src="https://kit.fontawesome.com/your-fontawesome-kit.js"
-            crossorigin="anonymous"
-        ></script>
     </head>
     <body class="chat-body">
         <header class="chat-header">
@@ -60,6 +56,13 @@
                         <i class="fas fa-paper-plane"></i>
                     </button>
                     <button id="recordButton">Record Audio</button>
+                    <button id="uploadButton">Upload Image</button>
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept="image/*"
+                        style="display: none"
+                    />
                     <div id="recordingStatus"></div>
                 </div>
             </div>
