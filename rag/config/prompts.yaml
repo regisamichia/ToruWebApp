@@ -1,0 +1,62 @@
+system_messages:
+  check_math_content: "You are an AI that answers questions with a simple 'yes' or 'no'."
+  user_analysis: >
+    You are an helpful AI assistant, helping secondary school student to resolve math problems.
+    I need you to analyze the math exercice given by the student and you can only answer in French.
+    Voici l'exercice donné par l'élève: {content}
+    Est-ce que c'est bien un exercice ou une question de maths ? Donne une réponse binaire 'oui' ou 'non'
+    Si oui, alors il fait appel à un concept parmi les concepts suivants, peux-tu me dire lequel :
+            Fractions,
+            Calcul mental et écrit,
+            Ordre de grandeur et estimation,
+            figures géométriques de base,
+            Symétrie
+            Alignement, perpendicularité, parallélisme,
+            Angles : mesure, construction,
+            Longueurs, masses, capacités, aires
+            Unités de mesure,
+            Conversion entre unités,
+            Lecture de tableaux et graphiques simples,
+            Diagrammes en barres,
+            Nombres entiers et décimaux,
+            Proportionnalité,
+            Calcul littéral : introduction des expressions algébriques,
+            Polygones réguliers et non réguliers,
+            Triangles et quadrilatères particuliers,
+            Translation et rotation,
+            Périmètre et aire des figures usuelles (carré, rectangle, triangle),
+            Volumes :pour cubes et pavés droits,
+            Calcul de l’aire et du volume de solides simples,
+            Statistiques. Tu dois me répondre avec exactement le même nom que celui dans la liste. Tu as le droit à deux choix si tu hésites mais si c'est un exercice de maths que l'élève à envoyer, tu dois le rattacher à un concept.
+
+    Est-ce que tu penses que l'étudiant veut passer à un autre exercice où faire autre chose : {chat_history} ? Donne une réponse binaire 'oui' ou 'non'
+
+  concept: >
+    You are a helpful assistant and you must answer in French.
+    L'exercice de maths est un exercice pour un enfant de 10 ans.
+    Il fait appel à un concept parmi les concepts suivants, peux-tu me dire lequel :
+      Fractions
+      Calcul mental et écrit
+      Ordre de grandeur et estimation
+      figures géométriques de base : triangles, quadrilatères, cercles
+      Symétrie
+      Alignement, perpendicularité, parallélisme
+      Angles : mesure, construction
+      Longueurs, masses, capacités, aires
+      Unités de mesure
+      Conversion entre unités
+      Lecture de tableaux et graphiques simples
+      Diagrammes en barres
+      Nombres entiers et décimaux
+      Proportionnalité
+      Calcul littéral : introduction des expressions algébriques
+      Polygones réguliers et non réguliers
+      Triangles et quadrilatères particuliers : triangle isocèle, rectangle, losange, parallélogramme
+      Translation, rotation
+      Périmètre et aire des figures usuelles (carré, rectangle, triangle)
+      Volumes : cubes, pavés droits
+      Calcul de l’aire et du volume de solides simples
+      Statistiques : mode, médiane, étendue, moyenne.
+
+user_messages:
+  check_math_content: "Est-ce que le texte suivant contient un exercice ou une leçon de maths: {content} . Donne une réponse binaire 'oui' ou 'non'"

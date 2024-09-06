@@ -2,6 +2,9 @@ import { makeApiCall } from "./api.js";
 import { getToken, handleLogout } from "./login.js";
 import { sendMessage, addMessageToChat } from "./chat.js";
 
+// Declare sessionId at the top level of the module
+let sessionId = null;
+
 let mediaRecorder;
 let audioChunks = [];
 let stream;
@@ -83,32 +86,49 @@ async function sendAudioMessage(audioBlob) {
   }
 }
 
-async function sendChatMessage(message) {
+async function initializeSession() {
   try {
     const response = await makeApiCall(
-      "http://localhost:8001/api/chat",
+      "http://localhost:8001/new_session",
       "POST",
-      { new_message: message },
+    );
+    if (response.ok) {
+      const data = await response.json();
+      sessionId = data.session_id; // Assign to the module-scoped sessionId
+      console.log("New session created:", sessionId);
+    } else {
+      console.error("Failed to create new session");
+    }
+  } catch (error) {
+    console.error("Error creating new session:", error);
+  }
+}
+
+async function sendChatMessage(message) {
+  if (!sessionId) {
+    console.error("No active session");
+    return;
+  }
+
+  try {
+    const response = await makeApiCall(
+      "http://localhost:8001/api/argentic_chat",
+      "POST",
+      {
+        session_id: sessionId,
+        message: message,
+      },
       "application/json",
     );
 
     if (response.ok) {
+      const data = await response.json();
       const botMessage = document.createElement("div");
       botMessage.className = "message bot-message";
+      botMessage.textContent = data.response;
       document.getElementById("chatMessages").appendChild(botMessage);
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        botMessage.textContent += chunk;
-        document.getElementById("chatMessages").scrollTop =
-          document.getElementById("chatMessages").scrollHeight;
-        await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay to allow rendering
-      }
+      document.getElementById("chatMessages").scrollTop =
+        document.getElementById("chatMessages").scrollHeight;
     } else {
       console.error("Failed to send message to chat");
     }
@@ -116,6 +136,40 @@ async function sendChatMessage(message) {
     console.error("Error:", error);
   }
 }
+
+// async function sendChatMessage(message) {
+//   try {
+//     const response = await makeApiCall(
+//       "http://localhost:8001/api/chat",
+//       "POST",
+//       { new_message: message },
+//       "application/json",
+//     );
+
+//     if (response.ok) {
+//       const botMessage = document.createElement("div");
+//       botMessage.className = "message bot-message";
+//       document.getElementById("chatMessages").appendChild(botMessage);
+
+//       const reader = response.body.getReader();
+//       const decoder = new TextDecoder();
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+//         const chunk = decoder.decode(value);
+//         botMessage.textContent += chunk;
+//         document.getElementById("chatMessages").scrollTop =
+//           document.getElementById("chatMessages").scrollHeight;
+//         await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay to allow rendering
+//       }
+//     } else {
+//       console.error("Failed to send message to chat");
+//     }
+//   } catch (error) {
+//     console.error("Error:", error);
+//   }
+// }
 
 export async function sendImageMessage(imageFile) {
   /**
@@ -207,14 +261,24 @@ function initializeChatInterface() {
     userInput.addEventListener("keypress", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        sendMessage();
+        const message = userInput.value.trim();
+        if (message) {
+          addMessageToChat(message, "user-message");
+          sendChatMessage(message);
+          userInput.value = "";
+        }
       }
     });
   }
 
   if (sendButton) {
     sendButton.addEventListener("click", function () {
-      sendMessage();
+      const message = userInput.value.trim();
+      if (message) {
+        addMessageToChat(message, "user-message");
+        sendChatMessage(message);
+        userInput.value = "";
+      }
     });
   }
 
@@ -242,9 +306,11 @@ function initializeLogout() {
 }
 
 function initializeChatPage() {
-  initializeChatInterface();
-  initializeAudioRecording();
-  initializeLogout();
+  initializeSession().then(() => {
+    initializeChatInterface();
+    initializeAudioRecording();
+    initializeLogout();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", initializeChatPage);
