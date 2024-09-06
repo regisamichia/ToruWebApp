@@ -16,10 +16,25 @@ class Chatbot(UserAnalysis):
             template="Chat History:\n{history}\nHuman: {input}\nAI:"
         )
 
-    def build_message_history(self, state: State) -> str:
-        return "\n".join([f"{message.type}: {message.content}" for message in state["messages"]])
+    def build_message_history_chatbot(self, messages: dict) -> str:
+        return "\n".join([f"{message.type}: {message.content}" for message in messages["messages"]])
 
     def generate_response(self, state: State) -> State:
+        """ 
+        Generate a response based on the current state.
+
+        Args:
+            state (State): The current state of the chat.
+
+        Returns:
+            State: The updated state with the generated response.
+        """
+        
+        # Get the last 10 messages (or all if less than 10)
+        last_messages = state["messages"][-10:]
+
+        # Build the history string from these messages
+        history = self.build_message_history_chatbot({"messages": last_messages})
 
         history = self.build_message_history(state)
         prompt = self.prompt_template.format(
@@ -38,10 +53,27 @@ class Chatbot(UserAnalysis):
         return state
 
     def get_user_input(self, state: State) -> State:
+        """ 
+        Get user input from the state.
+
+        Args:
+            state (State): The current state of the chat.
+
+        Returns:
+            State: The updated state with user input.
+        """
 
         return state
 
     def build_graph(self):
+
+        """
+        Build the state graph for the chatbot.
+
+        Returns:
+            StateGraph: The compiled state graph.
+        """
+
         print("Building graph...")
         graph_builder = StateGraph(State)
 
@@ -59,11 +91,19 @@ class Chatbot(UserAnalysis):
 
     def process_input(self, user_input: str, state: Dict[str, Any]) -> Dict[str, Any]:
 
+        """
+        Process user input and generate a response.
+
+        Args:
+            user_input (str): The user's input message.
+            state (Dict[str, Any]): The current state of the chat.
+
+        Returns:
+        """
         state["messages"].append(HumanMessage(content=user_input))
         for event in self.graph.stream(state):
             if isinstance(event, dict):
                 state = event[list(event.keys())[0]]
-                print(f"Updated state: {state}")
             if state.get("end_conversation", False):
                 break
 

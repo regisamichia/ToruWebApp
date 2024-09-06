@@ -8,7 +8,12 @@ from open_ai_client import OpenAILLMModel
 class UserAnalysis(OpenAILLMModel):
 
     def __init__(self, model_name: str = "gpt-4o-mini") -> None:
+        """
+        Initialize the UserAnalysis class.
 
+        Args:
+            model_name (str): The name of the model to use for analysis.
+        """
         super().__init__(model_name)
         with open('rag/config/prompts.yaml', 'r') as file:
             self.prompts = yaml.safe_load(file)
@@ -19,26 +24,44 @@ class UserAnalysis(OpenAILLMModel):
                 )
 
     def build_message_history(self, state: State) -> str:
-            return "\n".join([f"{message.type}: {message.content}" for message in state["messages"]])
+        """
+        Build the message history from the state.
+
+        Args:
+            state (State): The current state of the chat.
+
+        Returns:
+            str: The message history.
+        """
+        return "\n".join([f"{message.type}: {message.content}" for message in state["messages"]])
 
     def user_analysis(self, state: State) -> State:
-        print(f"STARTING USER ANALYSIS with prompt")
+        """
+        Perform user analysis and update the state.
+
+        Args:
+            state (State): The current state of the chat.
+
+        Returns:
+            State: The updated state with user analysis.
+        """
         llm_analysis = self.llm.with_structured_output(StudentState)
-        # prompt_analysis = PromptTemplate(
-        #             template=self.prompt_analysis,
-        #             input_variables=["content", "chat_history"]
-        #         )
-        print("PROMPT ANALYSIS BUILT")
         chain = self.prompt_analysis | llm_analysis
-        print("chain is ok")
-        print(f"content : {state["first_user_message"]}")
-        print(f"content : {self.build_message_history(state)}")
         student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
 
         return self.update_state(state, student_analysis)
 
     def update_state(self, state, student_analysis):
+        """
+        Update the state with user analysis results.
 
+        Args:
+            state (State): The current state of the chat.
+            student_analysis (StudentState): The analysis results for the user.
+
+        Returns:
+            State: The updated state with user analysis.
+        """
         state["clear_conversation"] = student_analysis.clear_conversation
         state["math_concept"] = student_analysis.math_concept
         state["end_conversation"] = student_analysis.clear_conversation

@@ -1,5 +1,8 @@
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
 
 class OpenAILLMModel:
     """Wrapper for the language model."""
@@ -10,4 +13,4 @@ class OpenAILLMModel:
 
         :param model_name: Name of the model to use.
         """
-        self.llm = ChatOpenAI(model=model_name)
+        self.llm = ChatOpenAI(model=model_name, temperature = 0)
