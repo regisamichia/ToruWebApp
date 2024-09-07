@@ -80,7 +80,7 @@ async def chat(chat_input: ChatInput):
     try:
         print(f"Processing message: {chat_input.message}")
         updated_state = chatbot.process_input(chat_input.message, session)
-        print(f"Updated state after processing: {updated_state}")
+        #print(f"Updated state after processing: {updated_state}")
 
         # Update the session with the new state
         sessions[chat_input.session_id] = updated_state

@@ -1,7 +1,8 @@
 from typing import List, Tuple, Dict, Any
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+#from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_core.retrievers import BaseRetriever
 from dotenv import load_dotenv
 
