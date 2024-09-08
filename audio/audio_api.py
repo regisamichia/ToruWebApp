@@ -36,7 +36,7 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         # Convert the audio to wav format (which is more widely supported)
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
             try:
-                audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format=file_format)
+                audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="webm")
                 logger.debug("Successfully read audio file")
             except Exception as e:
                 logger.error(f"Error reading audio file: {str(e)}")

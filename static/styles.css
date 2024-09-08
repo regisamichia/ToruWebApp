@@ -299,3 +299,26 @@ select:focus {
         max-width: 85%;
     }
 }
+
+.bot-message p {
+    margin: 0 0 10px 0;
+}
+
+.bot-message ul,
+.bot-message ol {
+    margin: 0 0 10px 20px;
+}
+
+.bot-message pre {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.bot-message code {
+    font-family: monospace;
+    background-color: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 3px;
+}

@@ -66,9 +66,11 @@ class UserAnalysis(OpenAILLMModel):
         state["math_concepts"] = student_analysis.math_concepts
         state["end_conversation"] = student_analysis.clear_conversation
         state["concept_understood"] = student_analysis.concept_understood
+        state["need_lesson"] = student_analysis.need_lesson
 
-        concept_string = ",".join(f"{i}. {concept}" for i, concept in enumerate(student_analysis.math_concepts, 1))
-        new_message = AIMessage(content=f"Voici les conceptes de maths qui font référence à l'exercice : {concept_string}")
-        state["messages"] = state["messages"] + [new_message]
+        #concept_string = ",".join(f"{i}. {concept}" for i, concept in enumerate(student_analysis.math_concepts, 1))
+        #new_message = AIMessage(content=f"Voici les conceptes de maths qui font référence à l'exercice : {concept_string}")
+
+        #state["messages"] = state["messages"] + [new_message]
 
         return state

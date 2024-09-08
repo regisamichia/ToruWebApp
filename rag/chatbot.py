@@ -24,6 +24,8 @@ class Chatbot(UserAnalysis):
 
         docs = self.retriever.invoke(state["messages"][0].content)
         doc_content = docs[0].page_content
+        print(f"DOC IS : {docs[0]}")
+        state["lesson_example"] = doc_content
 
         prompt_builder = PromptBuilder(state)
         prompt = prompt_builder.build_prompt()

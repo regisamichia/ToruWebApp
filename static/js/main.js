@@ -125,7 +125,7 @@ async function sendChatMessage(message) {
       const data = await response.json();
       const botMessage = document.createElement("div");
       botMessage.className = "message bot-message";
-      botMessage.textContent = data.response;
+      botMessage.innerHTML = marked.parse(data.response);
       document.getElementById("chatMessages").appendChild(botMessage);
       document.getElementById("chatMessages").scrollTop =
         document.getElementById("chatMessages").scrollHeight;

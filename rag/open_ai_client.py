@@ -13,4 +13,4 @@ class OpenAILLMModel:
 
         :param model_name: Name of the model to use.
         """
-        self.llm = ChatOpenAI(model=model_name, temperature = 0)
+        self.llm = ChatOpenAI(model=model_name, temperature = 0.8)
