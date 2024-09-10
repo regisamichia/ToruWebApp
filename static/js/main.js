@@ -137,42 +137,26 @@ async function sendChatMessage(message) {
   }
 }
 
-// async function sendChatMessage(message) {
-//   try {
-//     const response = await makeApiCall(
-//       "http://localhost:8001/api/chat",
-//       "POST",
-//       { new_message: message },
-//       "application/json",
-//     );
-
-//     if (response.ok) {
-//       const botMessage = document.createElement("div");
-//       botMessage.className = "message bot-message";
-//       document.getElementById("chatMessages").appendChild(botMessage);
-
-//       const reader = response.body.getReader();
-//       const decoder = new TextDecoder();
-
-//       while (true) {
-//         const { done, value } = await reader.read();
-//         if (done) break;
-//         const chunk = decoder.decode(value);
-//         botMessage.textContent += chunk;
-//         document.getElementById("chatMessages").scrollTop =
-//           document.getElementById("chatMessages").scrollHeight;
-//         await new Promise((resolve) => setTimeout(resolve, 10)); // Small delay to allow rendering
-//       }
-//     } else {
-//       console.error("Failed to send message to chat");
-//     }
-//   } catch (error) {
-//     console.error("Error:", error);
-//   }
-// }
 
 export async function sendImageMessage(imageFile) {
   try {
+
+    // Create a preview of the image
+    const imagePreview = URL.createObjectURL(imageFile);
+
+    // Add the image to the chat as a user message
+    const userMessageDiv = document.createElement("div");
+    userMessageDiv.className = "message user-message";
+    const img = document.createElement("img");
+    img.src = imagePreview;
+    img.style.maxWidth = "100%";
+    img.style.maxHeight = "200px"; // Adjust this value as needed
+    userMessageDiv.appendChild(img);
+    document.getElementById("chatMessages").appendChild(userMessageDiv);
+
+    // Scroll to the bottom of the chat
+    document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+
     // First, send the image to the extract_text route
     const extractFormData = new FormData();
     extractFormData.append("image", imageFile, imageFile.name);
@@ -208,10 +192,6 @@ export async function sendImageMessage(imageFile) {
 
     if (chatResponse.ok) {
       const data = await chatResponse.json();
-      addMessageToChat(
-        `Image uploaded. Extracted text: ${extractedText}`,
-        "user-message",
-      );
       const botMessage = document.createElement("div");
       botMessage.className = "message bot-message";
       botMessage.innerHTML = marked.parse(data.response);
