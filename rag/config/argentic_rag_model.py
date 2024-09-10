@@ -18,6 +18,8 @@ class State(TypedDict):
     clear_conversation : bool
     lesson_example : str
     need_lesson : bool
+    image_description : str
+    is_geometry : bool
 
 class StudentState(BaseModel):
     # This data class encapsulate the current state of the student to be used by the user_analysis step
@@ -25,4 +27,5 @@ class StudentState(BaseModel):
     math_concepts: list = Field(description="Concept of Math of the exercice")
     is_math_question : str = Field(description="is math the subject of the discussion score 'yes' or 'no'")
     concept_understood : bool = Field(description="does the user already understood the math concept discussed in the exercice")
-    need_lesson : bool = Field(description="does the student need to review the lesson on the maths topic ")
+    need_lesson : bool = Field(description="does the student need to review the lesson on the maths topic ?")
+    is_geometry : bool = Field(description="does the student ask a question about a geometry problem ?")

@@ -3,45 +3,77 @@ from config.argentic_rag_model import State
 from vector_store import OpenAIChromaVectorStore
 from prompt_builder import PromptBuilder
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.prompts import PromptTemplate
 from langgraph.graph import StateGraph
 from user_analysis import UserAnalysis
-from typing import Dict, Any
+from typing import Dict, Any, Union
+import aiohttp
+from fastapi import UploadFile
+import json
+import tempfile
+import os
+import aiofiles
+
 
 class Chatbot(UserAnalysis):
 
     def __init__(self, model_name: str = "gpt-4o-mini") -> None:
         super().__init__(model_name)
         self.graph = self.build_graph()
-        self.prompt_template = PromptTemplate(
-            input_variables=["history", "input"],
-            template="Chat History:\n{history}\nHuman: {input}\nAI:"
-        )
         self.vector_store = OpenAIChromaVectorStore(collection_name="toru_v2")
         self.retriever = self.vector_store.as_retriever()
+        self.multimodal_api_url = "http://localhost:8003/api/multimodal"
 
-    def generate_response(self, state: State) -> State:
+    async def process_image(self, image: UploadFile) -> str:
+        async with aiohttp.ClientSession() as session:
+            data = aiohttp.FormData()
+            data.add_field('image', await image.read(), filename=image.filename, content_type=image.content_type)
+
+            try:
+                # Disable SSL verification for localhost
+                async with session.post(self.multimodal_api_url, data=data, ssl=False) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        return result['response']
+                    else:
+                        error_text = await response.text()
+                        raise Exception(f"Error from multimodal API: Status {response.status}, {error_text}")
+            except aiohttp.ClientConnectorError as e:
+                raise Exception(f"Unable to connect to multimodal API: {str(e)}")
+            except Exception as e:
+                raise
+
+    async def generate_response(self, state: State) -> State:
+        last_message = state["messages"][-1]
+        if isinstance(last_message.content, str):
+            try:
+                print("gen response 1")
+                content_dict = json.loads(last_message.content)
+                print("gen response 2")
+                if 'image' in content_dict and state.get("is_geometry", False):
+                    print("gen response 3")
+                    image_description = content_dict['extracted_text']
+                    state["image_description"] = image_description
+                    state["messages"][-1] = HumanMessage(content=f"[Image Description]: {image_description}")
+                    print("gen response 4")
+            except json.JSONDecodeError:
+                # If it's not JSON, it's a regular text message, so we don't need to do anything special
+                pass
 
         docs = self.retriever.invoke(state["messages"][0].content)
         doc_content = docs[0].page_content
-        print(f"DOC IS : {docs[0]}")
         state["lesson_example"] = doc_content
 
         prompt_builder = PromptBuilder(state)
         prompt = prompt_builder.build_prompt()
-        response = self.llm.invoke(prompt)
+        response = await self.llm.ainvoke(prompt)
 
-        # Create a new SystemMessage with the response content
         new_message = SystemMessage(content=response.content)
-
-        # Append the new message to the state
         state["messages"].append(new_message)
         state["end_conversation"] = True
 
         return state
 
     def get_user_input(self, state: State) -> State:
-
         return state
 
     def build_graph(self):
@@ -60,13 +92,27 @@ class Chatbot(UserAnalysis):
         compiled_graph = graph_builder.compile()
         return compiled_graph
 
-    def process_input(self, user_input: str, state: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_input(self, user_input: Union[str, Dict[str, Any]], state: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(user_input, str):
+            state["messages"].append(HumanMessage(content=user_input))
+        elif isinstance(user_input, dict) and 'image' in user_input and 'extracted_text' in user_input:
+            # Process the image immediately
+            image_description = await self.process_image(user_input['image'])
 
-        state["messages"].append(HumanMessage(content=user_input))
-        for event in self.graph.stream(state):
+            # Convert the dictionary to a JSON string
+            image_content = json.dumps({
+                'image': user_input['image'].filename,
+                'extracted_text': user_input['extracted_text'],
+                'image_description': image_description
+            })
+            state["messages"].append(HumanMessage(content=image_content))
+        else:
+            raise ValueError(f"Invalid input format: {type(user_input)}")
+
+        async for event in self.graph.astream(state):
             if isinstance(event, dict):
                 state = event[list(event.keys())[0]]
-                #print(f"Updated state: {state}")
+                print(f"updated state : {state}")
             if state.get("end_conversation", False):
                 break
 

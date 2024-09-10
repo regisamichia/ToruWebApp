@@ -45,6 +45,7 @@ class UserAnalysis(OpenAILLMModel):
         Returns:
             State: The updated state with user analysis.
         """
+
         llm_analysis = self.llm.with_structured_output(StudentState)
         chain = self.prompt_analysis | llm_analysis
         student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
@@ -67,6 +68,8 @@ class UserAnalysis(OpenAILLMModel):
         state["end_conversation"] = student_analysis.clear_conversation
         state["concept_understood"] = student_analysis.concept_understood
         state["need_lesson"] = student_analysis.need_lesson
+        state["is_geometry"] = student_analysis.is_geometry
+
 
         #concept_string = ",".join(f"{i}. {concept}" for i, concept in enumerate(student_analysis.math_concepts, 1))
         #new_message = AIMessage(content=f"Voici les conceptes de maths qui font référence à l'exercice : {concept_string}")

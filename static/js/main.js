@@ -111,14 +111,14 @@ async function sendChatMessage(message) {
   }
 
   try {
+    const formData = new FormData();
+    formData.append("session_id", sessionId);
+    formData.append("message", message);
+
     const response = await makeApiCall(
       "http://localhost:8001/api/argentic_chat",
       "POST",
-      {
-        session_id: sessionId,
-        message: message,
-      },
-      "application/json",
+      formData,
     );
 
     if (response.ok) {
@@ -172,78 +172,55 @@ async function sendChatMessage(message) {
 // }
 
 export async function sendImageMessage(imageFile) {
-  /**
-   * Sends an image for text extraction and processes the extracted text through the chat system.
-   *
-   * This function performs the following steps:
-   * 1. Uploads the image to the text extraction API.
-   * 2. Displays the extracted text in the chat interface.
-   * 3. Sends the extracted text to the chat API for processing.
-   * 4. Displays the bot's response to the extracted text.
-   *
-   * @param {File} imageFile - The image file to be processed.
-   * @throws {Error} If there's an issue with the API calls or data processing.
-   *
-   * @example
-   * // Assuming you have a file input element
-   * const imageInput = document.getElementById('imageInput');
-   * imageInput.addEventListener('change', (event) => {
-   *   const file = event.target.files[0];
-   *   if (file) {
-   *     sendImageMessage(file);
-   *   }
-   * });
-   */
-
   try {
-    const formData = new FormData();
-    formData.append("image", imageFile, imageFile.name);
+    // First, send the image to the extract_text route
+    const extractFormData = new FormData();
+    extractFormData.append("image", imageFile, imageFile.name);
 
     const extractResponse = await makeApiCall(
       "http://localhost:8000/api/extract_text",
       "POST",
-      formData,
+      extractFormData,
     );
 
-    if (extractResponse.ok) {
-      const data = await extractResponse.json();
-
-      // Add the extracted text to the chat as a user message
-      addMessageToChat(data.text, "user-message");
-
-      // Send the extracted text to the chat route
-      const chatResponse = await makeApiCall(
-        "http://localhost:8001/api/chat",
-        "POST",
-        { new_message: data.text },
-        "application/json",
-      );
-
-      if (chatResponse.ok) {
-        const botMessage = document.createElement("div");
-        botMessage.className = "message bot-message";
-        const chatMessages = document.getElementById("chatMessages");
-        chatMessages.appendChild(botMessage);
-
-        const reader = chatResponse.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          botMessage.textContent += chunk;
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-          await new Promise((resolve) => setTimeout(resolve, 10));
-        }
-      } else {
-        console.error("Failed to send extracted text to chat");
-        const errorText = await chatResponse.text();
-        console.error("Error details:", errorText);
-      }
-    } else {
+    if (!extractResponse.ok) {
       console.error("Failed to extract text from image");
       const errorText = await extractResponse.text();
+      console.error("Error details:", errorText);
+      return;
+    }
+
+    const extractData = await extractResponse.json();
+    const extractedText = extractData.text;
+
+    // Now, send both the image and extracted text to the argentic_chat route
+    const chatFormData = new FormData();
+    chatFormData.append("session_id", sessionId);
+    chatFormData.append("image", imageFile, imageFile.name);
+    chatFormData.append("extracted_text", extractedText);
+
+    const chatResponse = await makeApiCall(
+      "http://localhost:8001/api/argentic_chat",
+      "POST",
+      chatFormData,
+      "multipart/form-data",
+    );
+
+    if (chatResponse.ok) {
+      const data = await chatResponse.json();
+      addMessageToChat(
+        `Image uploaded. Extracted text: ${extractedText}`,
+        "user-message",
+      );
+      const botMessage = document.createElement("div");
+      botMessage.className = "message bot-message";
+      botMessage.innerHTML = marked.parse(data.response);
+      document.getElementById("chatMessages").appendChild(botMessage);
+      document.getElementById("chatMessages").scrollTop =
+        document.getElementById("chatMessages").scrollHeight;
+    } else {
+      console.error("Failed to process image and text in chat");
+      const errorText = await chatResponse.text();
       console.error("Error details:", errorText);
     }
   } catch (error) {

@@ -31,8 +31,9 @@ system_messages:
 
     Est-ce que l'étudiant a compris le concept dont on parle ?
     Si l'IA n'a jamais posé la question tu peux répondre non, si la question a déjà été posé, tu dois analyser si l'étudiant a bien compris de quel concept on parle. Donne une réponse binaire.
-    Si l'étudiant a compris le concept, est-ce qu'il a exprimé le besoin de revoir la leçon ? Donne une réponse binaire 'oui' ou 'non'
-    Est-ce que tu penses que l'étudiant veut passer à un autre exercice où faire autre chose : {chat_history} ? Donne une réponse binaire 'oui' ou 'non'
+    Si l'étudiant a compris le concept, est-ce qu'il a exprimé le besoin de revoir la leçon ? Donne une réponse binaire
+    Est-ce que tu penses que l'étudiant veut passer à un autre exercice où faire autre chose : {chat_history} ? Donne une réponse binaire
+    Est-ce que tu penses que l'exercice est un sujet de geometrie ? Donne une réponse binaire
 
   concept: >
     You are a helpful assistant and you must answer in French.
