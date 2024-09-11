@@ -1,6 +1,6 @@
 import { makeApiCall } from "./api.js";
-import { getToken, handleLogout } from "./login.js";
-import { sendMessage, addMessageToChat } from "./chat.js";
+import { handleLogout } from "./login.js";
+import { addMessageToChat, addLoadingAnimation } from "./chat.js";
 
 // Declare sessionId at the top level of the module
 let sessionId = null;
@@ -137,10 +137,8 @@ async function sendChatMessage(message) {
   }
 }
 
-
 export async function sendImageMessage(imageFile) {
   try {
-
     // Create a preview of the image
     const imagePreview = URL.createObjectURL(imageFile);
 
@@ -157,51 +155,61 @@ export async function sendImageMessage(imageFile) {
     // Scroll to the bottom of the chat
     document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
 
-    // First, send the image to the extract_text route
-    const extractFormData = new FormData();
-    extractFormData.append("image", imageFile, imageFile.name);
+    // Add loading animation
+    const loadingAnimation = addLoadingAnimation();
 
-    const extractResponse = await makeApiCall(
-      "http://localhost:8000/api/extract_text",
-      "POST",
-      extractFormData,
-    );
+    try {
+      // First, send the image to the extract_text route
+      const extractFormData = new FormData();
+      extractFormData.append("image", imageFile, imageFile.name);
 
-    if (!extractResponse.ok) {
-      console.error("Failed to extract text from image");
-      const errorText = await extractResponse.text();
-      console.error("Error details:", errorText);
-      return;
-    }
+      const extractResponse = await makeApiCall(
+        "http://localhost:8000/api/extract_text",
+        "POST",
+        extractFormData,
+      );
 
-    const extractData = await extractResponse.json();
-    const extractedText = extractData.text;
+      if (!extractResponse.ok) {
+        console.error("Failed to extract text from image");
+        const errorText = await extractResponse.text();
+        console.error("Error details:", errorText);
+        return;
+      }
 
-    // Now, send both the image and extracted text to the argentic_chat route
-    const chatFormData = new FormData();
-    chatFormData.append("session_id", sessionId);
-    chatFormData.append("image", imageFile, imageFile.name);
-    chatFormData.append("extracted_text", extractedText);
+      const extractData = await extractResponse.json();
+      const extractedText = extractData.text;
 
-    const chatResponse = await makeApiCall(
-      "http://localhost:8001/api/argentic_chat",
-      "POST",
-      chatFormData,
-      "multipart/form-data",
-    );
+      // Now, send both the image and extracted text to the argentic_chat route
+      const chatFormData = new FormData();
+      chatFormData.append("session_id", sessionId);
+      chatFormData.append("image", imageFile, imageFile.name);
+      chatFormData.append("extracted_text", extractedText);
 
-    if (chatResponse.ok) {
-      const data = await chatResponse.json();
-      const botMessage = document.createElement("div");
-      botMessage.className = "message bot-message";
-      botMessage.innerHTML = marked.parse(data.response);
-      document.getElementById("chatMessages").appendChild(botMessage);
-      document.getElementById("chatMessages").scrollTop =
-        document.getElementById("chatMessages").scrollHeight;
-    } else {
-      console.error("Failed to process image and text in chat");
-      const errorText = await chatResponse.text();
-      console.error("Error details:", errorText);
+      const chatResponse = await makeApiCall(
+        "http://localhost:8001/api/argentic_chat",
+        "POST",
+        chatFormData,
+        "multipart/form-data",
+      );
+
+      if (chatResponse.ok) {
+        const data = await chatResponse.json();
+        const botMessage = document.createElement("div");
+        botMessage.className = "message bot-message";
+        botMessage.innerHTML = marked.parse(data.response);
+        document.getElementById("chatMessages").appendChild(botMessage);
+        document.getElementById("chatMessages").scrollTop =
+          document.getElementById("chatMessages").scrollHeight;
+      } else {
+        console.error("Failed to process image and text in chat");
+        const errorText = await chatResponse.text();
+        console.error("Error details:", errorText);
+      }
+    } catch (error) {
+      console.error("Error in sendImageMessage:", error);
+    } finally {
+      // Remove loading animation
+      loadingAnimation.remove();
     }
   } catch (error) {
     console.error("Error in sendImageMessage:", error);

@@ -9,6 +9,17 @@ export function addMessageToChat(message, className) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+export function addLoadingAnimation() {
+  const chatMessages = document.getElementById("chatMessages");
+  const loadingDiv = document.createElement("div");
+  loadingDiv.className = "message bot-message loading-animation";
+  loadingDiv.innerHTML =
+    '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  chatMessages.appendChild(loadingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return loadingDiv;
+}
+
 export async function sendMessage() {
   const userInput = document.getElementById("userInput");
   const chatMessages = document.getElementById("chatMessages");
