@@ -8,9 +8,7 @@ let isListening = false;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
 let currentTranscription = "";
-let transcriptionTimer = null;
-let lastTranscriptionTime = 0;
-const transcriptionDelay = 1000; // 1 second delay
+let fullTranscription = "";
 
 // Audio context and related variables
 let audioContext;
@@ -159,26 +157,27 @@ function initializeWebSocket() {
     try {
       const data = JSON.parse(event.data);
       if (data.type === "transcription") {
-        console.log(
-          "Transcription received:",
-          data.text,
-          "Is final:",
-          data.is_final,
-          data.speech_final,
-        );
+        console.log("Transcription received:", data.text, "Is final:", data.is_final, "Speech final:", data.speech_final);
 
-        if (data.is_final && data.speech_final) {
-          currentTranscription += data.text + " ";
-
-          // Clear any existing timer
-          if (transcriptionTimer) {
-            clearTimeout(transcriptionTimer);
+        if (data.is_final) {
+          currentTranscription = data.text;
+          fullTranscription += currentTranscription + " ";
+          
+          // Update the current transcription display
+          const transcriptionElement = document.getElementById("currentTranscription");
+          if (transcriptionElement) {
+            transcriptionElement.textContent = fullTranscription;
           }
-
-          // Set a new timer to finalize the transcription
-          transcriptionTimer = setTimeout(() => {
+          
+          if (data.speech_final) {
             finalizeTranscription();
-          }, 1000); // Wait 1 second before finalizing
+          }
+        } else {
+          // Display interim results
+          const transcriptionElement = document.getElementById("currentTranscription");
+          if (transcriptionElement) {
+            transcriptionElement.textContent = fullTranscription + data.text;
+          }
         }
       }
     } catch (error) {
@@ -209,11 +208,20 @@ function initializeWebSocket() {
 }
 
 function finalizeTranscription() {
-  if (currentTranscription.trim() !== "") {
-    console.log("Final Transcription:", currentTranscription);
-    addMessageToChat(currentTranscription.trim(), "user-message");
-    sendMessage(currentTranscription.trim(), sessionId);
+  if (fullTranscription.trim() !== "") {
+    console.log("Final Transcription:", fullTranscription);
+    addMessageToChat(fullTranscription.trim(), "user-message");
+    sendMessage(fullTranscription.trim(), sessionId);
+    
+    // Clear the transcriptions
+    fullTranscription = "";
     currentTranscription = "";
+    
+    // Clear the current transcription display
+    const transcriptionElement = document.getElementById("currentTranscription");
+    if (transcriptionElement) {
+      transcriptionElement.textContent = "";
+    }
   }
 }
 
