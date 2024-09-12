@@ -16,6 +16,13 @@ let sourceNode;
 let processorNode;
 let analyser;
 
+// Add these constants at the top of your file
+const SILENCE_THRESHOLD = 0.01;
+const SILENCE_DURATION = 3000; // 3 seconds
+
+let lastNonSilenceTime = Date.now();
+let isSendingAudio = true;
+
 // Initialize the chat page
 async function initializeChatPage() {
   await initializeSession();
@@ -121,24 +128,53 @@ function processAudio(audioProcessingEvent) {
   const inputBuffer = audioProcessingEvent.inputBuffer;
   const inputData = inputBuffer.getChannelData(0);
 
+  // Check for silence
+  const energy = calculateRMSEnergy(inputData);
+  const currentTime = Date.now();
+  const isSilent = energy < SILENCE_THRESHOLD;
+
+  if (!isSilent) {
+    lastNonSilenceTime = currentTime;
+    if (!isSendingAudio) {
+      isSendingAudio = true;
+      console.log("Resuming audio transmission");
+    }
+  } else if (currentTime - lastNonSilenceTime > SILENCE_DURATION) {
+    if (isSendingAudio) {
+      isSendingAudio = false;
+      console.log("Pausing audio transmission due to silence");
+    }
+  }
+
   // Convert float32 audio data to 16-bit PCM
   const pcmData = new Int16Array(inputData.length);
   for (let i = 0; i < inputData.length; i++) {
     pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
   }
 
-  // Send audio data if not silent
-  if (isListening && socket && socket.readyState === WebSocket.OPEN) {
+  // Send audio data if not silent for more than 3 seconds and the connection is open
+  if (isSendingAudio && isListening && socket && socket.readyState === WebSocket.OPEN) {
     socket.send(pcmData.buffer);
     console.log("Sent audio data, size:", pcmData.buffer.byteLength, "bytes");
   } else {
     console.log(
-      "Not sending audio. isListening:",
+      "Not sending audio. isSendingAudio:",
+      isSendingAudio,
+      "isListening:",
       isListening,
       "socket state:",
-      socket ? socket.readyState : "no socket",
+      socket ? socket.readyState : "no socket"
     );
   }
+}
+
+// Add this helper function to calculate RMS energy
+function calculateRMSEnergy(buffer) {
+  let sum = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    sum += buffer[i] * buffer[i];
+  }
+  return Math.sqrt(sum / buffer.length);
 }
 
 // Initialize WebSocket connection
@@ -157,24 +193,35 @@ function initializeWebSocket() {
     try {
       const data = JSON.parse(event.data);
       if (data.type === "transcription") {
-        console.log("Transcription received:", data.text, "Is final:", data.is_final, "Speech final:", data.speech_final);
+        console.log(
+          "Transcription received:",
+          data.text,
+          "Is final:",
+          data.is_final,
+          "Speech final:",
+          data.speech_final,
+        );
 
         if (data.is_final) {
           currentTranscription = data.text;
           fullTranscription += currentTranscription + " ";
-          
+
           // Update the current transcription display
-          const transcriptionElement = document.getElementById("currentTranscription");
+          const transcriptionElement = document.getElementById(
+            "currentTranscription",
+          );
           if (transcriptionElement) {
             transcriptionElement.textContent = fullTranscription;
           }
-          
+
           if (data.speech_final) {
             finalizeTranscription();
           }
         } else {
           // Display interim results
-          const transcriptionElement = document.getElementById("currentTranscription");
+          const transcriptionElement = document.getElementById(
+            "currentTranscription",
+          );
           if (transcriptionElement) {
             transcriptionElement.textContent = fullTranscription + data.text;
           }
@@ -212,13 +259,15 @@ function finalizeTranscription() {
     console.log("Final Transcription:", fullTranscription);
     addMessageToChat(fullTranscription.trim(), "user-message");
     sendMessage(fullTranscription.trim(), sessionId);
-    
+
     // Clear the transcriptions
     fullTranscription = "";
     currentTranscription = "";
-    
+
     // Clear the current transcription display
-    const transcriptionElement = document.getElementById("currentTranscription");
+    const transcriptionElement = document.getElementById(
+      "currentTranscription",
+    );
     if (transcriptionElement) {
       transcriptionElement.textContent = "";
     }
