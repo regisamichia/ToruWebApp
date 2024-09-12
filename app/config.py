@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 240
     ALLOWED_ORIGINS: list = ["*"]
     OPENAI_API_KEY: str
+    DEEPGRAM_API_KEY : str
 
     class Config:
         env_file = ".env"

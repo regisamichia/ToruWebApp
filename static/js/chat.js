@@ -20,44 +20,47 @@ export function addLoadingAnimation() {
   return loadingDiv;
 }
 
-export async function sendMessage() {
-  const userInput = document.getElementById("userInput");
-  const chatMessages = document.getElementById("chatMessages");
+export async function sendMessage(messageText, sessionId) {
+  if (messageText.trim() === "") return;
 
-  const messageText = userInput.value.trim();
-  if (messageText === "") return;
-  userInput.value = "";
-
-  addMessageToChat(messageText, "user-message");
+  const loadingAnimation = addLoadingAnimation();
 
   try {
+    const formData = new FormData();
+    formData.append('session_id', sessionId);
+    formData.append('message', messageText);
+
     const response = await makeApiCall(
-      "http://localhost:8001/api/chat",
+      "http://localhost:8001/api/argentic_chat",
       "POST",
-      { new_message: messageText },
-      "application/json",
+      formData
     );
 
     if (response.ok) {
       const botMessage = document.createElement("div");
       botMessage.className = "message bot-message";
-      chatMessages.appendChild(botMessage);
+      document.getElementById("chatMessages").appendChild(botMessage);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        botMessage.textContent += chunk;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
+      const data = await response.json();
+      botMessage.innerHTML = marked.parse(data.response);
+      document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
     } else {
       console.error("Failed to send message");
     }
   } catch (error) {
     console.error("Error:", error);
+  } finally {
+    loadingAnimation.remove();
+  }
+}
+
+// Add this function to handle user input from the text field
+export function handleUserInput() {
+  const userInput = document.getElementById("userInput");
+  const messageText = userInput.value.trim();
+  if (messageText !== "") {
+    addMessageToChat(messageText, "user-message");
+    sendMessage(messageText, sessionId);
+    userInput.value = "";
   }
 }
