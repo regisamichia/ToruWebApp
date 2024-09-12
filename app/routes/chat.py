@@ -51,7 +51,8 @@ async def on_message(self, result):
         message_queue.put({
             "type": "transcription",
             "text": sentence,
-            "is_final": result.is_final
+            "is_final": result.is_final,
+            "speech_final": result.speech_final,
         })
 
         if result.is_final:

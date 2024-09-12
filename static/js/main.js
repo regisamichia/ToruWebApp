@@ -159,16 +159,22 @@ function initializeWebSocket() {
     try {
       const data = JSON.parse(event.data);
       if (data.type === "transcription") {
-        console.log("Transcription received:", data.text, "Is final:", data.is_final);
+        console.log(
+          "Transcription received:",
+          data.text,
+          "Is final:",
+          data.is_final,
+          data.speech_final,
+        );
 
-        if (data.is_final) {
+        if (data.is_final && data.speech_final) {
           currentTranscription += data.text + " ";
-          
+
           // Clear any existing timer
           if (transcriptionTimer) {
             clearTimeout(transcriptionTimer);
           }
-          
+
           // Set a new timer to finalize the transcription
           transcriptionTimer = setTimeout(() => {
             finalizeTranscription();

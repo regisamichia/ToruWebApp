@@ -27,13 +27,13 @@ export async function sendMessage(messageText, sessionId) {
 
   try {
     const formData = new FormData();
-    formData.append('session_id', sessionId);
-    formData.append('message', messageText);
+    formData.append("session_id", sessionId);
+    formData.append("message", messageText);
 
     const response = await makeApiCall(
       "http://localhost:8001/api/argentic_chat",
       "POST",
-      formData
+      formData,
     );
 
     if (response.ok) {
@@ -43,7 +43,8 @@ export async function sendMessage(messageText, sessionId) {
 
       const data = await response.json();
       botMessage.innerHTML = marked.parse(data.response);
-      document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+      document.getElementById("chatMessages").scrollTop =
+        document.getElementById("chatMessages").scrollHeight;
     } else {
       console.error("Failed to send message");
     }
