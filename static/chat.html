@@ -14,6 +14,9 @@
             src="https://kit.fontawesome.com/your-fontawesome-kit.js"
             crossorigin="anonymous"
         ></script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <!-- Remove KaTeX related scripts and stylesheets -->
     </head>
     <body class="chat-body">
         <header class="chat-header">
@@ -51,6 +54,7 @@
                 <div class="chat-messages" id="chatMessages">
                     <!-- Messages will be dynamically added here -->
                 </div>
+                <div id="currentTranscription" class="current-transcription"></div>
                 <div class="chat-input-container">
                     <div class="input-row">
                         <input
@@ -71,6 +75,5 @@
             </div>
         </main>
         <script type="module" src="/static/js/main.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     </body>
 </html>

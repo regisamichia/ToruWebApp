@@ -46,15 +46,11 @@ class Chatbot(UserAnalysis):
         last_message = state["messages"][-1]
         if isinstance(last_message.content, str):
             try:
-                print("gen response 1")
                 content_dict = json.loads(last_message.content)
-                print("gen response 2")
                 if 'image' in content_dict and state.get("is_geometry", False):
-                    print("gen response 3")
                     image_description = content_dict['extracted_text']
                     state["image_description"] = image_description
                     state["messages"][-1] = HumanMessage(content=f"[Image Description]: {image_description}")
-                    print("gen response 4")
             except json.JSONDecodeError:
                 # If it's not JSON, it's a regular text message, so we don't need to do anything special
                 pass
@@ -65,6 +61,7 @@ class Chatbot(UserAnalysis):
 
         prompt_builder = PromptBuilder(state)
         prompt = prompt_builder.build_prompt()
+        #print(f"PROMPT : {prompt}")
         response = await self.llm.ainvoke(prompt)
 
         new_message = SystemMessage(content=response.content)
@@ -74,6 +71,10 @@ class Chatbot(UserAnalysis):
         return state
 
     def get_user_input(self, state: State) -> State:
+        if "response_count" not in state:
+            state["response_count"] = 0
+        else:
+            state["response_count"] += 1
         return state
 
     def build_graph(self):
@@ -112,7 +113,6 @@ class Chatbot(UserAnalysis):
         async for event in self.graph.astream(state):
             if isinstance(event, dict):
                 state = event[list(event.keys())[0]]
-                print(f"updated state : {state}")
             if state.get("end_conversation", False):
                 break
 

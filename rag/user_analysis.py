@@ -1,7 +1,12 @@
 import yaml
 from langchain_core.prompts import PromptTemplate
 from langchain_core.messages import AIMessage
-from config.argentic_rag_model import State, StudentState
+from config.argentic_rag_model import (State,
+    StudentState,
+    StudentStateIntroduction,
+    StudentStateConcept,
+    StudentStateLesson,
+    StudentStateResolution)
 from open_ai_client import OpenAILLMModel
 
 
@@ -18,8 +23,11 @@ class UserAnalysis(OpenAILLMModel):
         with open('rag/config/prompts.yaml', 'r') as file:
             self.prompts = yaml.safe_load(file)
 
-        self.prompt_analysis = PromptTemplate(
-                    template=self.prompts["system_messages"]["user_analysis"],
+
+    def build_prompt(self, prompt_key):
+
+        return PromptTemplate(
+                    template=self.prompts["system_messages"][prompt_key],
                     input_variables=["content", "chat_history"]
                 )
 
@@ -46,34 +54,71 @@ class UserAnalysis(OpenAILLMModel):
             State: The updated state with user analysis.
         """
 
-        llm_analysis = self.llm.with_structured_output(StudentState)
-        chain = self.prompt_analysis | llm_analysis
+        if state["response_count"] == 0:
+            print("START USER ANALYSIS INTRO")
+            return self.user_analysis_intro(state)
+        elif not state["introduction"] and ("concept_understood" not in state or state["concept_understood"] == False):
+            print("START USER ANALYSIS CONCEPT")
+            return self.user_analysis_concept(state)
+        elif state["concept_understood"] and ("lesson_understood" not in state or not state["lesson_understood"]):
+            print("START USER ANALYSIS LESSON")
+            return self.user_analysis_lesson(state)
+        else:
+            return state
+
+        # llm_analysis = self.llm.with_structured_output(StudentState)
+        # chain = self.prompt_analysis | llm_analysis
+        # student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
+
+        # return self.update_state(state, student_analysis)
+
+    def user_analysis_intro(self, state: State) -> State:
+
+        #print("START USER ANALYSIS INTRO")
+        prompt = self.build_prompt("user_analysis_introduction")
+        llm_analysis = self.llm.with_structured_output(StudentStateIntroduction)
+        chain = prompt | llm_analysis
         student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
 
-        return self.update_state(state, student_analysis)
-
-    def update_state(self, state, student_analysis):
-        """
-        Update the state with user analysis results.
-
-        Args:
-            state (State): The current state of the chat.
-            student_analysis (StudentState): The analysis results for the user.
-
-        Returns:
-            State: The updated state with user analysis.
-        """
-        state["clear_conversation"] = student_analysis.clear_conversation
         state["math_concepts"] = student_analysis.math_concepts
-        state["end_conversation"] = student_analysis.clear_conversation
-        state["concept_understood"] = student_analysis.concept_understood
-        state["need_lesson"] = student_analysis.need_lesson
         state["is_geometry"] = student_analysis.is_geometry
+        state["is_math_question"] = student_analysis.is_math_question
+        state["introduction"] = False
 
+        return state
 
-        #concept_string = ",".join(f"{i}. {concept}" for i, concept in enumerate(student_analysis.math_concepts, 1))
-        #new_message = AIMessage(content=f"Voici les conceptes de maths qui font référence à l'exercice : {concept_string}")
+    def user_analysis_concept(self, state: State) -> State:
+        #print("START USER ANALYSIS CONCEPT")
+        prompt = self.build_prompt("user_analysis_concept")
+        llm_analysis = self.llm.with_structured_output(StudentStateConcept)
+        chain = prompt | llm_analysis
+        student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
+        #print(f"STUDENT ANALYSIS : {student_analysis}")
+        state["concept_understood"] = student_analysis.concept_understood
 
-        #state["messages"] = state["messages"] + [new_message]
+        return state
+
+    def user_analysis_lesson(self, state: State) -> State:
+
+        #print("START USER ANALYSIS LESSON")
+        prompt = self.build_prompt("user_analysis_lesson")
+        llm_analysis = self.llm.with_structured_output(StudentStateLesson)
+        chain = prompt | llm_analysis
+        student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
+
+        state["need_lesson"] = student_analysis.need_lesson
+        state["lesson_understood"] = student_analysis.lesson_understood
+
+        return state
+
+    def user_analysis_resolution(self, state: State) -> State:
+
+        #print("START USER ANALYSIS RESOLUTION")
+        prompt = self.build_prompt("user_analysis_resolution")
+        llm_analysis = self.llm.with_structured_output(StudentStateResolution)
+        chain = prompt | llm_analysis
+        student_analysis = chain.invoke({"chat_history" : self.build_message_history(state)})
+
+        state["good_answer"] = student_analysis.good_answer
 
         return state

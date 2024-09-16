@@ -1,14 +1,12 @@
 system_messages:
   check_math_content: "You are an AI that answers questions with a simple 'yes' or 'no'."
-  user_analysis: >
+  user_analysis_introduction: >
     You are an helpful AI assistant, helping secondary school student to resolve math problems.
-    I need you to analyze the math exercice given by the student and you can only answer in French.
-    Voici l'exercice donné par l'élève: {content}
-    Est-ce que c'est bien un exercice ou une question de maths ? Donne une réponse binaire 'oui' ou 'non'
+    L'élève t'as demandé de résoudre ce problème de mathématiques : {content}
+    Est-ce que c'est bien un exercice ou une question de mathématiques ? Donne une réponse binaire 'oui' ou 'non'
     Si oui, alors il fait appel à un concept parmi les concepts suivants, peux-tu me dire lequel :
             Fractions,
             Calcul mental et écrit,
-            Ordre de grandeur et estimation,
             figures géométriques de base,
             Symétrie
             Alignement, perpendicularité, parallélisme,
@@ -19,23 +17,32 @@ system_messages:
             Lecture de tableaux et graphiques simples,
             Diagrammes en barres,
             Nombres entiers et décimaux,
-            Proportionnalité,
-            Calcul littéral : introduction des expressions algébriques,
-            Polygones réguliers et non réguliers,
-            Triangles et quadrilatères particuliers,
-            Translation et rotation,
-            Périmètre et aire des figures usuelles (carré, rectangle, triangle),
-            Volumes :pour cubes et pavés droits,
-            Calcul de l’aire et du volume de solides simples,
-            Statistiques. Tu dois me répondre avec exactement le même nom que celui dans la liste. Tu as le droit à deux choix si tu hésites mais si c'est un exercice de maths que l'élève à envoyer, tu dois le rattacher à un concept.
-
-    Est-ce que l'étudiant a compris le concept dont on parle ?
-    Si l'IA n'a jamais posé la question tu peux répondre non, si la question a déjà été posé, tu dois analyser si l'étudiant a bien compris de quel concept on parle. Donne une réponse binaire.
-    Si l'étudiant a compris le concept, est-ce qu'il a exprimé le besoin de revoir la leçon ? Donne une réponse binaire
-    Est-ce que tu penses que l'étudiant veut passer à un autre exercice où faire autre chose : {chat_history} ? Donne une réponse binaire
+            Proportionnalité.
+    Tu dois me répondre avec exactement le même nom que celui dans la liste. Tu as le droit à deux choix si tu hésites mais si c'est un exercice de maths que l'élève à envoyer, tu dois le rattacher à un concept.
     Est-ce que tu penses que l'exercice est un sujet de geometrie ? Donne une réponse binaire
 
+  user_analysis_concept: >
+    You are an helpful AI assistant, helping secondary school student to resolve math problems.
+    You asked the student about a math concept associated with a math exercice. Here is the exercice : {content}
+    Here is the history of the conversation : {chat_history}
+    Est-ce que l'étudiant a compris le concept dont on parle ? Donne une réponse binaire.
+
+  user_analysis_lesson: >
+    You are an helpful AI assistant, helping secondary school student to resolve math problems.
+    You asked the student about a math concept associated with a math exercice. Here is the exercice : {content}
+    Here is the history of the conversation : {chat_history}
+    Est-ce que l'étudiant a émis le besoin de revoir la leçon ? Donne une réponse binaire.
+    Est-ce que l'étudiant a confirmé avoir compris la leçon ? Donne une réponse binaire.
+
+  user_analysis_resolution: >
+    You are an helpful AI assistant, helping secondary school student to resolve math problems.
+    Here is the history of the conversation : {chat_history}
+    Est-ce que l'étudiant a bien répondu à l'exercice ? Donne une réponse binaire.
+
   concept: >
+    Si l'étudiant a compris le concept, est-ce qu'il a exprimé le besoin de revoir la leçon ? Donne une réponse binaire
+    Est-ce que tu penses que l'étudiant veut passer à un autre exercice où faire autre chose : {chat_history} ? Donne une réponse binaire
+
     You are a helpful assistant and you must answer in French.
     L'exercice de maths est un exercice pour un enfant de 10 ans.
     Il fait appel à un concept parmi les concepts suivants, peux-tu me dire lequel :

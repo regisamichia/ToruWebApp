@@ -139,7 +139,7 @@ async def websocket_endpoint(websocket: WebSocket):
         await dg_connection.finish()
         message_queue.put(None)  # Signal the message processing thread to stop
         message_thread.join()
-        if websocket.client_state == WebSocket.CONNECTED:
+        if websocket.client_state == WebSocketState.CONNECTED:
             await websocket.close()
         logger.info("WebSocket connection closed")
 

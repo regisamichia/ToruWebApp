@@ -1,5 +1,8 @@
 import { makeApiCall } from "./api.js";
 
+// Import marked at the top of the file
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
   const messageElement = document.createElement("div");
@@ -18,6 +21,23 @@ export function addLoadingAnimation() {
   chatMessages.appendChild(loadingDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return loadingDiv;
+}
+
+function renderContent(text) {
+  // Parse Markdown
+  const htmlContent = marked.parse(text);
+  
+  // Create a temporary div to hold the content
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlContent;
+  
+  // Process LaTeX after Markdown parsing
+  MathJax.typesetPromise([tempDiv]).then(() => {
+    // MathJax processing is complete
+    console.log('MathJax rendering complete');
+  }).catch((err) => console.log('MathJax processing failed:', err));
+
+  return tempDiv.innerHTML;
 }
 
 export async function sendMessage(messageText, sessionId) {
@@ -42,7 +62,10 @@ export async function sendMessage(messageText, sessionId) {
       document.getElementById("chatMessages").appendChild(botMessage);
 
       const data = await response.json();
-      botMessage.innerHTML = marked.parse(data.response);
+      
+      // Render content (Markdown + LaTeX)
+      botMessage.innerHTML = renderContent(data.response);
+
       document.getElementById("chatMessages").scrollTop =
         document.getElementById("chatMessages").scrollHeight;
     } else {
