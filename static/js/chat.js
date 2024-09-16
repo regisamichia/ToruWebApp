@@ -40,6 +40,29 @@ function renderContent(text) {
   return tempDiv.innerHTML;
 }
 
+async function synthesizeAudio(text) {
+  try {
+    const response = await fetch('http://localhost:8000/api/synthesize_audio', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to synthesize audio');
+    }
+
+    const audioBlob = await response.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    await audio.play();
+  } catch (error) {
+    console.error('Error synthesizing audio:', error);
+  }
+}
+
 export async function sendMessage(messageText, sessionId) {
   if (messageText.trim() === "") return;
 
@@ -68,6 +91,9 @@ export async function sendMessage(messageText, sessionId) {
 
       document.getElementById("chatMessages").scrollTop =
         document.getElementById("chatMessages").scrollHeight;
+
+      // Synthesize and play audio
+      await synthesizeAudio(data.response);
     } else {
       console.error("Failed to send message");
     }

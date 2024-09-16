@@ -23,6 +23,9 @@ const SILENCE_DURATION = 3000; // 3 seconds
 let lastNonSilenceTime = Date.now();
 let isSendingAudio = true;
 
+const TRANSCRIPTION_TIMEOUT = 3000; // 3 seconds timeout
+let transcriptionTimer = null;
+
 // Initialize the chat page
 async function initializeChatPage() {
   await initializeSession();
@@ -153,7 +156,12 @@ function processAudio(audioProcessingEvent) {
   }
 
   // Send audio data if not silent for more than 3 seconds and the connection is open
-  if (isSendingAudio && isListening && socket && socket.readyState === WebSocket.OPEN) {
+  if (
+    isSendingAudio &&
+    isListening &&
+    socket &&
+    socket.readyState === WebSocket.OPEN
+  ) {
     socket.send(pcmData.buffer);
     console.log("Sent audio data, size:", pcmData.buffer.byteLength, "bytes");
   } else {
@@ -163,7 +171,7 @@ function processAudio(audioProcessingEvent) {
       "isListening:",
       isListening,
       "socket state:",
-      socket ? socket.readyState : "no socket"
+      socket ? socket.readyState : "no socket",
     );
   }
 }
@@ -202,6 +210,11 @@ function initializeWebSocket() {
           data.speech_final,
         );
 
+        // Clear any existing timeout
+        if (transcriptionTimer) {
+          clearTimeout(transcriptionTimer);
+        }
+
         if (data.is_final) {
           currentTranscription = data.text;
           fullTranscription += currentTranscription + " ";
@@ -216,6 +229,14 @@ function initializeWebSocket() {
 
           if (data.speech_final) {
             finalizeTranscription();
+          } else {
+            // Set a timeout to finalize the transcription if speech_final is not received
+            transcriptionTimer = setTimeout(() => {
+              console.log(
+                "Transcription timeout reached. Finalizing transcription.",
+              );
+              finalizeTranscription();
+            }, TRANSCRIPTION_TIMEOUT);
           }
         } else {
           // Display interim results
@@ -255,6 +276,11 @@ function initializeWebSocket() {
 }
 
 function finalizeTranscription() {
+  if (transcriptionTimer) {
+    clearTimeout(transcriptionTimer);
+    transcriptionTimer = null;
+  }
+
   if (fullTranscription.trim() !== "") {
     console.log("Final Transcription:", fullTranscription);
     addMessageToChat(fullTranscription.trim(), "user-message");
@@ -359,6 +385,15 @@ async function sendImageMessage(imageFile) {
         document.getElementById("chatMessages").appendChild(botMessage);
         document.getElementById("chatMessages").scrollTop =
           document.getElementById("chatMessages").scrollHeight;
+
+        // Render LaTeX after adding the message to the DOM
+        MathJax.typesetPromise([botMessage])
+          .then(() => {
+            console.log("MathJax rendering complete for image message");
+          })
+          .catch((err) =>
+            console.log("MathJax processing failed for image message:", err),
+          );
       } else {
         console.error("Failed to process image and text in chat");
         const errorText = await chatResponse.text();
