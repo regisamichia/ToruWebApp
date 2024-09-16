@@ -202,7 +202,7 @@ async def synthesize_audio_endpoint(request: TextToSpeechRequest):
                 }
         }
 
-        voice_id = "XrExE9yKIg1WjnnlVkGX" #à copier sur le site d'eleven labs'
+        voice_id = "cgSgspJ2msm6clMCkdW9" #à copier sur le site d'eleven labs'
         response = requests.post(
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream",
             json=payload,
