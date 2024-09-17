@@ -26,6 +26,8 @@ let isSendingAudio = true;
 const TRANSCRIPTION_TIMEOUT = 3000; // 3 seconds timeout
 let transcriptionTimer = null;
 
+let isRecording = false;
+
 // Initialize the chat page
 async function initializeChatPage() {
   await initializeSession();
@@ -119,6 +121,7 @@ async function initializeAudioRecording() {
 
     processorNode.onaudioprocess = processAudio;
 
+    isRecording = true;
     initializeWebSocket();
   } catch (error) {
     console.error("Error initializing audio:", error);
@@ -126,8 +129,22 @@ async function initializeAudioRecording() {
   }
 }
 
+// Pause audio recording
+export function pauseAudioRecording() {
+  isRecording = false;
+  console.log("Audio recording paused");
+}
+
+// Resume audio recording
+export function resumeAudioRecording() {
+  isRecording = true;
+  console.log("Audio recording resumed");
+}
+
 // Process audio data
 function processAudio(audioProcessingEvent) {
+  if (!isRecording) return;
+
   const inputBuffer = audioProcessingEvent.inputBuffer;
   const inputData = inputBuffer.getChannelData(0);
 

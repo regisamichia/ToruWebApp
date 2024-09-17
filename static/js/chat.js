@@ -1,7 +1,6 @@
 import { makeApiCall } from "./api.js";
-
-// Import marked at the top of the file
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+import { pauseAudioRecording, resumeAudioRecording } from "./main.js";
 
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
@@ -26,40 +25,44 @@ export function addLoadingAnimation() {
 function renderContent(text) {
   // Parse Markdown
   const htmlContent = marked.parse(text);
-  
+
   // Create a temporary div to hold the content
-  const tempDiv = document.createElement('div');
+  const tempDiv = document.createElement("div");
   tempDiv.innerHTML = htmlContent;
-  
+
   // Process LaTeX after Markdown parsing
-  MathJax.typesetPromise([tempDiv]).then(() => {
-    // MathJax processing is complete
-    console.log('MathJax rendering complete');
-  }).catch((err) => console.log('MathJax processing failed:', err));
+  MathJax.typesetPromise([tempDiv])
+    .then(() => {
+      // MathJax processing is complete
+      console.log("MathJax rendering complete");
+    })
+    .catch((err) => console.log("MathJax processing failed:", err));
 
   return tempDiv.innerHTML;
 }
 
 async function synthesizeAudio(text) {
   try {
-    const response = await fetch('http://localhost:8000/api/synthesize_audio', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8000/api/synthesize_audio", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ text }),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to synthesize audio');
+      throw new Error("Failed to synthesize audio");
     }
 
     const audioBlob = await response.blob();
     const audioUrl = URL.createObjectURL(audioBlob);
     const audio = new Audio(audioUrl);
     await audio.play();
+    return audio;
   } catch (error) {
-    console.error('Error synthesizing audio:', error);
+    console.error("Error synthesizing audio:", error);
+    return null;
   }
 }
 
@@ -69,6 +72,9 @@ export async function sendMessage(messageText, sessionId) {
   const loadingAnimation = addLoadingAnimation();
 
   try {
+    // Pause audio recording
+    pauseAudioRecording();
+
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
@@ -85,7 +91,7 @@ export async function sendMessage(messageText, sessionId) {
       document.getElementById("chatMessages").appendChild(botMessage);
 
       const data = await response.json();
-      
+
       // Render content (Markdown + LaTeX)
       botMessage.innerHTML = renderContent(data.response);
 
@@ -93,7 +99,15 @@ export async function sendMessage(messageText, sessionId) {
         document.getElementById("chatMessages").scrollHeight;
 
       // Synthesize and play audio
-      await synthesizeAudio(data.response);
+      await new Promise((resolve) => {
+        synthesizeAudio(data.response).then((audio) => {
+          if (audio) {
+            audio.onended = resolve;
+          } else {
+            resolve();
+          }
+        });
+      });
     } else {
       console.error("Failed to send message");
     }
@@ -101,6 +115,8 @@ export async function sendMessage(messageText, sessionId) {
     console.error("Error:", error);
   } finally {
     loadingAnimation.remove();
+    // Resume audio recording
+    resumeAudioRecording();
   }
 }
 
