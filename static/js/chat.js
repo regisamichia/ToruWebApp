@@ -9,6 +9,7 @@ export function addMessageToChat(message, className) {
   messageElement.textContent = message;
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  return messageElement; // Make sure to return the created element
 }
 
 export function addLoadingAnimation() {
@@ -41,7 +42,15 @@ function renderContent(text) {
   return tempDiv.innerHTML;
 }
 
-async function synthesizeAudio(text) {
+let audioContext;
+let audioQueue = [];
+let isPlaying = false;
+
+async function streamAudio(text) {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
   try {
     const response = await fetch("http://localhost:8000/api/synthesize_audio", {
       method: "POST",
@@ -55,14 +64,52 @@ async function synthesizeAudio(text) {
       throw new Error("Failed to synthesize audio");
     }
 
-    const audioBlob = await response.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    await audio.play();
-    return audio;
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    
+    audioQueue.push(audioBuffer);
+    if (!isPlaying) {
+      playNextAudio();
+    }
   } catch (error) {
-    console.error("Error synthesizing audio:", error);
-    return null;
+    console.error("Error streaming audio:", error);
+  }
+}
+
+async function playNextAudio() {
+  if (audioQueue.length === 0) {
+    isPlaying = false;
+    return;
+  }
+
+  isPlaying = true;
+  const audioBuffer = audioQueue.shift();
+  const source = audioContext.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(audioContext.destination);
+  source.onended = playNextAudio;
+  source.start();
+}
+
+async function displayTextWithDynamicDelay(text, element, baseDelay = 50, wordsPerChunk = 2) {
+  const words = text.split(' ');
+  let displayedText = '';
+  let chunk = [];
+
+  for (let i = 0; i < words.length; i++) {
+    chunk.push(words[i]);
+    
+    if (chunk.length === wordsPerChunk || i === words.length - 1) {
+      displayedText += chunk.join(' ') + ' ';
+      element.innerHTML = renderContent(displayedText);
+      element.scrollIntoView({ behavior: "smooth", block: "end" });
+      
+      const chunkLength = chunk.join(' ').length;
+      const delay = baseDelay + (chunkLength * 10); // Increased multiplier
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      chunk = [];
+    }
   }
 }
 
@@ -72,7 +119,6 @@ export async function sendMessage(messageText, sessionId) {
   const loadingAnimation = addLoadingAnimation();
 
   try {
-    // Pause audio recording
     pauseAudioRecording();
 
     const formData = new FormData();
@@ -86,28 +132,46 @@ export async function sendMessage(messageText, sessionId) {
     );
 
     if (response.ok) {
-      const botMessage = document.createElement("div");
-      botMessage.className = "message bot-message";
-      document.getElementById("chatMessages").appendChild(botMessage);
+      loadingAnimation.remove();
+      const botMessageElement = addMessageToChat("", "bot-message");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+      let buffer = "";
 
-      const data = await response.json();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value);
+        
+        const sentences = buffer.match(/[^.!?]+[.!?]+/g) || [];
+        
+        for (const sentence of sentences) {
+          accumulatedText += sentence;
+          await streamAudio(sentence); // Wait for audio to be queued before displaying text
+          await displayTextWithDynamicDelay(sentence, botMessageElement);
+        }
+        
+        buffer = buffer.substring(sentences.join('').length);
+      }
 
-      // Render content (Markdown + LaTeX)
-      botMessage.innerHTML = renderContent(data.response);
+      // Process any remaining text in the buffer
+      if (buffer) {
+        accumulatedText += buffer;
+        await streamAudio(buffer);
+        await displayTextWithDynamicDelay(buffer, botMessageElement);
+      }
 
-      document.getElementById("chatMessages").scrollTop =
-        document.getElementById("chatMessages").scrollHeight;
+      // Final render with MathJax
+      if (botMessageElement) {
+        botMessageElement.innerHTML = renderContent(accumulatedText);
+        MathJax.typesetPromise([botMessageElement])
+          .then(() => {
+            console.log("MathJax rendering complete");
+          })
+          .catch((err) => console.log("MathJax processing failed:", err));
+      }
 
-      // Synthesize and play audio
-      await new Promise((resolve) => {
-        synthesizeAudio(data.response).then((audio) => {
-          if (audio) {
-            audio.onended = resolve;
-          } else {
-            resolve();
-          }
-        });
-      });
     } else {
       console.error("Failed to send message");
     }
@@ -115,7 +179,6 @@ export async function sendMessage(messageText, sessionId) {
     console.error("Error:", error);
   } finally {
     loadingAnimation.remove();
-    // Resume audio recording
     resumeAudioRecording();
   }
 }
