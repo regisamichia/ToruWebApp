@@ -1,28 +1,13 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from PIL import Image
 import pytesseract
 from app.services.auth import get_current_user
-from app.schemas.user import UserCreate, UserInToken
+from app.schemas.user import  UserInToken
 from app.schemas.message import Message
 import logging
 from dotenv import load_dotenv
-import os
-import asyncio
-from deepgram import (
-    DeepgramClient,
-    DeepgramClientOptions,
-    LiveTranscriptionEvents,
-    LiveOptions,
-)
-from starlette.websockets import WebSocketState, WebSocketDisconnect
-from queue import Queue
-from threading import Thread
-import requests
-from pydub import AudioSegment
-from pydub.playback import play
-import io
-from pydantic import BaseModel
+
 
 load_dotenv()
 
