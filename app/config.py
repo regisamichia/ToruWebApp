@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     DEEPGRAM_API_KEY : str
     ELEVEN_API_KEY : str
+    ELEVEN_VOICE_ID : str
 
     class Config:
         env_file = ".env"

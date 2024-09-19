@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.routes import auth, static, chat
+from app.routes import auth, static, chat, speech_to_text, text_to_speech
 from app.config import settings
 
 app = FastAPI()
@@ -22,6 +22,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth.router)
 app.include_router(static.router)
 app.include_router(chat.router)
+app.include_router(speech_to_text.router)
+app.include_router(text_to_speech.router)
 
 if __name__ == "__main__":
     import uvicorn
