@@ -57,9 +57,10 @@ class PromptBuilder:
 
     def build_exercice_prompt(self):
 
-        prompt_template = self.select_template("exercice_resolution", "default_placeholder")
+        prompt_template = self.select_template("exercice_resolution", "lesson_placeholder")
         return prompt_template.format(
-            chat_history=self.history
+            lesson = self.state["lesson_example"],
+            chat_history=self.history,
         )
 
     def build_lesson_prompt(self):

@@ -19,8 +19,8 @@ class Chatbot(UserAnalysis):
     def __init__(self, model_name: str = "gpt-4o-mini") -> None:
         super().__init__(model_name)
         self.graph = self.build_graph()
-        self.vector_store = OpenAIChromaVectorStore(collection_name="toru_v2")
-        self.retriever = self.vector_store.as_retriever()
+        self.vector_store = OpenAIChromaVectorStore(collection_name="toru_with_school_level")
+        self.retriever = self.vector_store.as_retriever(filter_store={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
         self.multimodal_api_url = "http://localhost:8003/api/multimodal"
 
     async def process_image(self, image: UploadFile) -> str:
@@ -55,9 +55,13 @@ class Chatbot(UserAnalysis):
                 # If it's not JSON, it's a regular text message, so we don't need to do anything special
                 pass
 
+        #ici la requête du doc retriever se fait avec le premier message uniquement, à modifier
         docs = self.retriever.invoke(state["messages"][0].content)
-        doc_content = docs[0].page_content
-        state["lesson_example"] = doc_content
+
+        lesson_example = ""
+        for elt in range(len(docs)):
+            lesson_example += docs[elt].page_content
+        state["lesson_example"] = lesson_example
 
         prompt_builder = PromptBuilder(state)
         prompt = prompt_builder.build_prompt()
