@@ -193,7 +193,6 @@ async def synthesize_audio_endpoint(request: TextToSpeechRequest):
         payload = {
             "text": request.text,
             "model_id": "eleven_multilingual_v2",
-            "voice" : "Rachel",
             "voice_settings": {
                     "stability": 0.5,
                     "similarity_boost": 0.8,
@@ -202,7 +201,7 @@ async def synthesize_audio_endpoint(request: TextToSpeechRequest):
                 }
         }
 
-        voice_id = "cgSgspJ2msm6clMCkdW9" #à copier sur le site d'eleven labs'
+        voice_id = os.getenv("ELEVEN_VOICE_ID")
         response = requests.post(
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream",
             json=payload,
