@@ -2,6 +2,12 @@ import { makeApiCall } from "./api.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 import { pauseAudioRecording, resumeAudioRecording, isAudioEnabled } from "./main.js";
 
+// Define audioContext and audioQueue as global variables
+let audioContext;
+let audioQueue = [];
+let isPlaying = false;
+
+// Make sure these functions are exported
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
   const messageElement = document.createElement("div");
@@ -23,7 +29,7 @@ export function addLoadingAnimation() {
   return loadingDiv;
 }
 
-function renderContent(text) {
+export function renderContent(text) {
   // Replace LaTeX delimiters before Markdown parsing
   text = text.replace(/\\\(/g, '$');
   text = text.replace(/\\\)/g, '$');
@@ -45,11 +51,34 @@ function renderContent(text) {
   return tempDiv.innerHTML;
 }
 
-let audioContext;
-let audioQueue = [];
-let isPlaying = false;
+export async function displayTextWithDynamicDelay(
+  text,
+  element,
+  baseDelay = 100,  // Increased from 50
+  wordsPerChunk = 1  // Reduced from 2
+) {
+  const words = text.split(" ");
+  let displayedText = "";
+  let chunk = [];
 
-async function streamAudio(text) {
+  for (let i = 0; i < words.length; i++) {
+    chunk.push(words[i]);
+
+    if (chunk.length === wordsPerChunk || i === words.length - 1) {
+      displayedText += chunk.join(" ") + " ";
+      element.innerHTML = renderContent(displayedText);
+      element.scrollIntoView({ behavior: "smooth", block: "end" });
+
+      const chunkLength = chunk.join(" ").length;
+      const delay = baseDelay + chunkLength * 20; // Increased from 10
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      chunk = [];
+    }
+  }
+}
+
+export async function streamAudio(text) {
   if (!isAudioEnabled) return; // Skip audio synthesis if audio is disabled
 
   if (!audioContext) {
@@ -96,30 +125,14 @@ async function playNextAudio() {
   source.start();
 }
 
-async function displayTextWithDynamicDelay(
-  text,
-  element,
-  baseDelay = 100,  // Increased from 50
-  wordsPerChunk = 1  // Reduced from 2
-) {
-  const words = text.split(" ");
-  let displayedText = "";
-  let chunk = [];
-
-  for (let i = 0; i < words.length; i++) {
-    chunk.push(words[i]);
-
-    if (chunk.length === wordsPerChunk || i === words.length - 1) {
-      displayedText += chunk.join(" ") + " ";
-      element.innerHTML = renderContent(displayedText);
-      element.scrollIntoView({ behavior: "smooth", block: "end" });
-
-      const chunkLength = chunk.join(" ").length;
-      const delay = baseDelay + chunkLength * 20; // Increased from 10
-      await new Promise((resolve) => setTimeout(resolve, delay));
-
-      chunk = [];
-    }
+// Add this function to handle user input from the text field
+export function handleUserInput() {
+  const userInput = document.getElementById("userInput");
+  const messageText = userInput.value.trim();
+  if (messageText !== "") {
+    addMessageToChat(messageText, "user-message");
+    sendMessage(messageText, sessionId);
+    userInput.value = "";
   }
 }
 
@@ -198,16 +211,5 @@ export async function sendMessage(messageText, sessionId) {
   } finally {
     loadingAnimation.remove();
     resumeAudioRecording();
-  }
-}
-
-// Add this function to handle user input from the text field
-export function handleUserInput() {
-  const userInput = document.getElementById("userInput");
-  const messageText = userInput.value.trim();
-  if (messageText !== "") {
-    addMessageToChat(messageText, "user-message");
-    sendMessage(messageText, sessionId);
-    userInput.value = "";
   }
 }

@@ -23,10 +23,15 @@ class Chatbot(UserAnalysis):
         self.retriever = self.vector_store.as_retriever(filter_store={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
         self.multimodal_api_url = "http://localhost:8003/api/multimodal"
 
-    async def process_image(self, image: UploadFile) -> str:
+    async def process_image(self, image_data: Dict[str, Any]) -> str:
         async with aiohttp.ClientSession() as session:
             data = aiohttp.FormData()
-            data.add_field('image', await image.read(), filename=image.filename, content_type=image.content_type)
+            
+            # Use the image content directly
+            data.add_field('image', 
+                           image_data['content'],
+                           filename=image_data['filename'],
+                           content_type=image_data['content_type'])
 
             try:
                 # Disable SSL verification for localhost
@@ -69,6 +74,7 @@ class Chatbot(UserAnalysis):
         response = await self.llm.ainvoke(prompt)
 
         new_message = SystemMessage(content=response.content)
+        print(f"LLM RESPONSE : {new_message}")
         state["messages"].append(new_message)
         state["end_conversation"] = True
 
@@ -106,7 +112,7 @@ class Chatbot(UserAnalysis):
 
             # Convert the dictionary to a JSON string
             image_content = json.dumps({
-                'image': user_input['image'].filename,
+                'image': user_input['image']['filename'],
                 'extracted_text': user_input['extracted_text'],
                 'image_description': image_description
             })
