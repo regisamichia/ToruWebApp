@@ -7,7 +7,10 @@ class UserCreate(BaseModel):
     school_class: str
 
 class UserInToken(BaseModel):
+    id: int
     email: EmailStr
+    first_name: str
+    school_class: str
 
 class UserLogin(BaseModel):
     email: str
@@ -19,3 +22,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: str | None = None
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str

@@ -2,13 +2,32 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.user import UserCreate, Token
-from app.services.auth import create_user, authenticate_user, create_access_token
+from app.schemas.user import UserCreate, Token, ChangePassword
+from app.models.user import User
+from app.services.auth import create_user, authenticate_user, create_access_token, get_current_user, change_user_password
 from app.config import settings
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 router = APIRouter()
+
+# ... (other existing endpoints)
+
+
+@router.post("/api/change_password")
+async def change_password(
+    change_password_data: ChangePassword,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not authenticate_user(db, current_user.email, change_password_data.current_password):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+
+    success = change_user_password(db, current_user, change_password_data.new_password)
+    if success:
+        return {"message": "Password changed successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to change password")
 
 @router.post("/api/refresh")
 async def refresh_token(refresh_token: str):

@@ -42,6 +42,7 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
 
 @app.post("/api/argentic_chat")
 async def chat(
+    request: Request,
     session_id: str = Form(...),
     message: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
@@ -51,6 +52,10 @@ async def chat(
     print(f"Message: {message}")
     print(f"Image: {image}")
     print(f"Extracted text: {extracted_text}")
+    
+    # Log the raw form data
+    form_data = await request.form()
+    print("Raw form data:", form_data)
 
     session = get_or_create_session(session_id)
     session["end_conversation"] = False

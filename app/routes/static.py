@@ -14,3 +14,7 @@ async def read_chat():
 @router.get("/login")
 async def read_login():
     return FileResponse("static/login.html")
+
+@router.get("/settings")
+async def read_settings():
+    return FileResponse("static/settings.html")

@@ -6,7 +6,12 @@ import { initializeImageUpload } from "./imageUpload.js";
 import { handleLogout } from "./login.js";
 
 export let sessionId = null;
-export let isAudioEnabled = true;
+export let isAudioEnabled = localStorage.getItem('audioEnabled') !== 'false'; // Default to true if not set
+
+export function setAudioEnabled(enabled) {
+  isAudioEnabled = enabled;
+  localStorage.setItem('audioEnabled', enabled);
+}
 
 async function initializeChatPage() {
   sessionId = await initializeSession();
@@ -25,7 +30,7 @@ function initializeChatInterface() {
         const message = userInput.value.trim();
         if (message) {
           addMessageToChat(message, "user-message");
-          sendMessage(message, sessionId, isAudioEnabled);
+          sendMessage(message, sessionId);
           userInput.value = "";
         }
       }
@@ -33,24 +38,20 @@ function initializeChatInterface() {
   }
 
   initializeImageUpload();
-
-  const toggleAudioInput = document.getElementById('toggleAudio');
-  if (toggleAudioInput) {
-    toggleAudioInput.addEventListener('change', toggleAudio);
-    isAudioEnabled = toggleAudioInput.checked;
-  }
 }
 
-function toggleAudio() {
-  const toggleAudioInput = document.getElementById('toggleAudio');
-  isAudioEnabled = toggleAudioInput.checked;
-  console.log(`Audio ${isAudioEnabled ? 'enabled' : 'disabled'}`);
-}
+// Remove the toggleAudio function from here
 
 function initializeLogout() {
   const logoutButton = document.getElementById("logoutButton");
+  const sidebarLogoutButton = document.getElementById("sidebarLogoutButton");
+  
   if (logoutButton) {
     logoutButton.addEventListener("click", handleLogout);
+  }
+  
+  if (sidebarLogoutButton) {
+    sidebarLogoutButton.addEventListener("click", handleLogout);
   }
 }
 

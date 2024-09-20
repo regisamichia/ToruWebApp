@@ -43,12 +43,13 @@ async function sendImageMessage(imageFile) {
 
     try {
       const extractFormData = new FormData();
-      extractFormData.append("image", imageFile, imageFile.name);
+      extractFormData.append("image", imageFile);
 
       const extractResponse = await makeApiCall(
         "http://localhost:8000/api/extract_text",
         "POST",
         extractFormData,
+        "multipart/form-data"  // Add this line
       );
 
       if (!extractResponse.ok) {
@@ -63,14 +64,14 @@ async function sendImageMessage(imageFile) {
 
       const chatFormData = new FormData();
       chatFormData.append("session_id", sessionId);
-      chatFormData.append("image", imageFile, imageFile.name);
+      chatFormData.append("image", imageFile);
       chatFormData.append("extracted_text", extractedText);
 
       const chatResponse = await makeApiCall(
         "http://localhost:8001/api/argentic_chat",
         "POST",
         chatFormData,
-        "multipart/form-data",
+        "multipart/form-data"  // Add this line
       );
 
       if (chatResponse.ok) {
@@ -86,17 +87,26 @@ async function sendImageMessage(imageFile) {
           if (done) break;
           buffer += decoder.decode(value);
 
-          let newlineIndex;
-          while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-            const chunk = buffer.slice(0, newlineIndex);
-            buffer = buffer.slice(newlineIndex + 1);
+          const sentences = buffer.match(/[^.!?]+[.!?]+/g) || [];
 
-            accumulatedText += chunk;
+          for (const sentence of sentences) {
+            accumulatedText += sentence;
             if (isAudioEnabled) {
-              await streamAudio(chunk);
+              await streamAudio(sentence);
             }
-            await displayTextWithDynamicDelay(chunk, botMessageElement);
+            await displayTextWithDynamicDelay(sentence, botMessageElement);
           }
+
+          buffer = buffer.substring(sentences.join("").length);
+        }
+
+        // Process any remaining text in the buffer
+        if (buffer) {
+          accumulatedText += buffer;
+          if (isAudioEnabled) {
+            await streamAudio(buffer);
+          }
+          await displayTextWithDynamicDelay(buffer, botMessageElement);
         }
 
         // Final render with MathJax
@@ -107,7 +117,7 @@ async function sendImageMessage(imageFile) {
               console.log("MathJax rendering complete for image message");
             })
             .catch((err) =>
-              console.log("MathJax processing failed for image message:", err),
+              console.log("MathJax processing failed for image message:", err)
             );
         }
       } else {

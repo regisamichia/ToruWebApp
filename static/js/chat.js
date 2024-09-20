@@ -144,14 +144,18 @@ export async function sendMessage(messageText, sessionId) {
   try {
     pauseAudioRecording();
 
+    console.log("SessionId:", sessionId); // Log the sessionId
+
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
 
+    console.log("FormData:", formData); // Log the FormData
+
     const response = await makeApiCall(
       "http://localhost:8001/api/argentic_chat",
       "POST",
-      formData,
+      formData
     );
 
     if (response.ok) {

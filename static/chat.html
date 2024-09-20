@@ -16,16 +16,28 @@
         ></script>
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
         <script>
-          window.MathJax = {
-            tex: {
-              inlineMath: [['$', '$'], ['\\(', '\\)']],
-              displayMath: [['$$', '$$'], ['\\[', '\\]']],
-              processEscapes: true
-            },
-            options: {
-              skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
-          };
+            window.MathJax = {
+                tex: {
+                    inlineMath: [
+                        ["$", "$"],
+                        ["\\(", "\\)"],
+                    ],
+                    displayMath: [
+                        ["$$", "$$"],
+                        ["\\[", "\\]"],
+                    ],
+                    processEscapes: true,
+                },
+                options: {
+                    skipHtmlTags: [
+                        "script",
+                        "noscript",
+                        "style",
+                        "textarea",
+                        "pre",
+                    ],
+                },
+            };
         </script>
         <script
             id="MathJax-script"
@@ -53,12 +65,12 @@
                         >
                     </li>
                     <li>
-                        <a href="#settings"
+                        <a href="/settings"
                             ><i class="fas fa-cog"></i> Settings</a
                         >
                     </li>
                     <li>
-                        <a href="#" id="logoutButton"
+                        <a href="#" id="sidebarLogoutButton"
                             ><i class="fas fa-sign-out-alt"></i> Logout</a
                         >
                     </li>
@@ -88,11 +100,6 @@
                             accept="image/*"
                             style="display: none"
                         />
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggleAudio" class="toggle-input" checked>
-                            <label for="toggleAudio" class="toggle-label"></label>
-                            <span class="toggle-text">Audio</span>
-                        </div>
                     </div>
                     <div id="micStatus">Microphone: Initializing...</div>
                 </div>

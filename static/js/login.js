@@ -179,25 +179,22 @@ async function handleRegister(e) {
   }
 }
 
-// This function can be exported and used in other files if needed
+import { makeApiCall } from "./api.js";
+
 export async function handleLogout(e) {
   e.preventDefault();
   try {
-    const response = await fetch("http://localhost:8000/api/logout", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
+    const response = await makeApiCall("/api/logout", "POST");
     if (response.ok) {
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
-      window.location.href = "/";
+      window.location.href = "/login";
     } else {
       alert("Logout failed");
     }
   } catch (error) {
     console.error("Error:", error);
+    alert("An error occurred during logout");
   }
 }
 

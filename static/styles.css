@@ -8,6 +8,10 @@ body {
     font-family: "Roboto", sans-serif;
     background-color: #f0f2f5;
     color: #1c1e21;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
 }
 
 /* Login Styles */
@@ -129,6 +133,7 @@ select:focus {
 .chat-body {
     display: flex;
     height: 100vh;
+    overflow: hidden;
 }
 
 .chat-sidebar {
@@ -138,6 +143,11 @@ select:focus {
     display: flex;
     flex-direction: column;
     border-right: 1px solid #e4e6eb;
+    position: fixed;
+    top: 60px; /* Adjust based on your header height */
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
 }
 
 .chat-sidebar h1 {
@@ -180,13 +190,16 @@ select:focus {
 .chat-main {
     flex-grow: 1;
     padding: 20px;
-    max-width: 1000px; /* Increase the max-width */
-    margin: 0 auto;
+    margin-left: 250px; /* Should match the width of the sidebar */
+    margin-top: 60px; /* Should match the height of the header */
+    height: calc(100vh - 60px); /* Subtract header height */
+    display: flex;
+    justify-content: center;
 }
 
 .chat-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px; /* Increased from 800px */
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -203,6 +216,7 @@ select:focus {
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    height: calc(100% - 120px); /* Adjust based on your input area height */
 }
 
 .message {
@@ -230,6 +244,8 @@ select:focus {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    background-color: #f0f2f5;
+    border-top: 1px solid #e4e6eb;
 }
 
 .input-row {
@@ -336,14 +352,19 @@ select:focus {
 
     .chat-main {
         padding: 1rem;
+        margin-left: 0;
     }
 
     .chat-container {
-        height: calc(100vh - 150px);
+        height: calc(100vh - 120px); /* Adjust for mobile header and padding */
     }
 
     .message {
         max-width: 85%;
+    }
+
+    .chat-messages {
+        height: calc(100% - 100px); /* Adjust based on your mobile input area height */
     }
 }
 
@@ -417,4 +438,166 @@ select:focus {
     background-color: #f0f0f0;
     border-radius: 5px;
     min-height: 20px;
+}
+
+/* General layout */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+}
+
+.chat-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #1877f2;
+    color: white;
+    padding: 10px 20px;
+}
+
+.chat-sidebar {
+    position: fixed;
+    top: 60px; /* Adjust based on your header height */
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+}
+
+/* Settings page specific styles */
+.settings-main {
+    margin-left: 250px; /* Should match the width of the sidebar */
+    margin-top: 60px; /* Should match the height of the header */
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.settings-content {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.settings-content h1 {
+    border-bottom: 2px solid #1877f2;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h2 {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.setting-info {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+select, input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.setting-description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+button {
+    background-color: #1877f2;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #166fe5;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .toggle-label {
+    background-color: #1877f2;
+}
+
+.toggle-input:checked + .toggle-label:before {
+    transform: translateX(26px);
+}
+
+#saveSettingsBtn {
+    display: block;
+    margin-top: 20px;
+    width: 100%;
 }

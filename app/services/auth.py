@@ -44,7 +44,7 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -52,12 +52,44 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        logging.info(f"Decoded payload: {payload}")
         email: str = payload.get("sub")
         if email is None:
-            logging.error("Email not found in token payload")
             raise credentials_exception
-        return UserInToken(email=email)
-    except JWTError as e:
-        logging.error(f"JWTError: {str(e)}")
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise credentials_exception
+        return user  # Return the actual User model instance
+    except JWTError:
         raise credentials_exception
+
+def change_user_password(db: Session, user: User, new_password: str) -> bool:
+    hashed_password = pwd_context.hash(new_password)
+    user.hashed_password = hashed_password
+    db.commit()
+    return True
+
+def change_user_password(db: Session, user_email: str, new_password: str) -> bool:
+    user = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        return False
+    hashed_password = pwd_context.hash(new_password)
+    user.hashed_password = hashed_password
+    db.commit()
+    return True
+
+def change_user_password(db: Session, user: User, new_password: str) -> bool:
+    """
+    Change the password for a user.
+
+    Args:
+        db (Session): The database session.
+        user (User): The user whose password is being changed.
+        new_password (str): The new password.
+
+    Returns:
+        bool: True if the password was changed successfully, False otherwise.
+    """
+    hashed_password = pwd_context.hash(new_password)
+    user.hashed_password = hashed_password
+    db.commit()
+    return True

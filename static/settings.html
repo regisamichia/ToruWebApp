@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Settings - Toru Chatbot</title>
+        <link rel="stylesheet" href="/static/styles.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/your-fontawesome-kit.js"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body class="settings-body">
+        <header class="chat-header">
+            <button id="headerLogoutButton" class="sidebarLogoutButton">
+                Logout
+            </button>
+        </header>
+        <aside class="chat-sidebar">
+            <h1>Toru</h1>
+            <nav>
+                <ul>
+                    <li>
+                        <a href="/chat"
+                            ><i class="fas fa-comment-alt"></i> Chat</a
+                        >
+                    </li>
+                    <li>
+                        <a href="#about"
+                            ><i class="fas fa-info-circle"></i> About</a
+                        >
+                    </li>
+                    <li>
+                        <a href="/settings.html" class="active"
+                            ><i class="fas fa-cog"></i> Settings</a
+                        >
+                    </li>
+                    <li>
+                        <a href="#" id="sidebarLogoutButton">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="settings-main">
+            <div class="settings-content">
+                <h1>Settings</h1>
+                <section class="settings-section">
+                    <h2>Account Settings</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="language">Preferred Language:</label>
+                            <select id="language" name="language">
+                                <option value="en">English</option>
+                                <option value="fr">Français</option>
+                                <option value="es">Español</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="theme">Theme:</label>
+                            <select id="theme" name="theme">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="system">System Default</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+                <section class="settings-section">
+                    <h2>Audio Settings</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="toggleAudio"
+                                >Enable Audio Responses</label
+                            >
+                            <p class="setting-description">
+                                When enabled, Toru will provide audio responses
+                                in addition to text.
+                            </p>
+                        </div>
+                        <div class="toggle-switch">
+                            <input
+                                type="checkbox"
+                                id="toggleAudio"
+                                class="toggle-input"
+                                checked
+                            />
+                            <label
+                                for="toggleAudio"
+                                class="toggle-label"
+                            ></label>
+                        </div>
+                    </div>
+                </section>
+                <section class="settings-section">
+                    <h2>Change Password</h2>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="currentPassword"
+                                >Current Password:</label
+                            >
+                            <input
+                                type="password"
+                                id="currentPassword"
+                                name="currentPassword"
+                            />
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="newPassword">New Password:</label>
+                            <input
+                                type="password"
+                                id="newPassword"
+                                name="newPassword"
+                            />
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label for="confirmPassword"
+                                >Confirm New Password:</label
+                            >
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                            />
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <button type="submit" id="changePasswordBtn">
+                            Change Password
+                        </button>
+                    </div>
+                </section>
+                <div class="setting-item">
+                    <button type="submit" id="saveSettingsBtn">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </main>
+        <script type="module" src="/static/js/settings.js"></script>
+    </body>
+</html>
