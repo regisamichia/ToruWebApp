@@ -1,8 +1,10 @@
 import { makeApiCall } from "./api.js";
 import { handleLogout } from "./login.js";
-import { addMessageToChat, addLoadingAnimation, sendMessage } from "./chat.js";
+import { addMessageToChat, sendMessage, addLoadingAnimation } from "./chat.js";
 
-let sessionId = null;
+export let sessionId = null;
+export let isAudioEnabled = true;
+
 let socket;
 let isListening = false;
 let reconnectAttempts = 0;
@@ -68,7 +70,7 @@ function initializeChatInterface() {
         const message = userInput.value.trim();
         if (message) {
           addMessageToChat(message, "user-message");
-          sendMessage(message);
+          sendMessage(message, sessionId, isAudioEnabled);
           userInput.value = "";
         }
       }
@@ -88,6 +90,20 @@ function initializeChatInterface() {
         sendImageMessage(imageFile);
       }
     });
+  }
+
+  // Replace the existing toggleAudio function with this
+  function toggleAudio() {
+    const toggleAudioInput = document.getElementById('toggleAudio');
+    isAudioEnabled = toggleAudioInput.checked;
+    console.log(`Audio ${isAudioEnabled ? 'enabled' : 'disabled'}`);
+  }
+
+  // In the initializeChatInterface function, replace the existing toggle button code with this
+  const toggleAudioInput = document.getElementById('toggleAudio');
+  if (toggleAudioInput) {
+    toggleAudioInput.addEventListener('change', toggleAudio);
+    isAudioEnabled = toggleAudioInput.checked;
   }
 }
 

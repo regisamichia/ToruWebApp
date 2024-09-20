@@ -15,7 +15,11 @@
             crossorigin="anonymous"
         ></script>
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script
+            id="MathJax-script"
+            async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+        ></script>
         <!-- Remove KaTeX related scripts and stylesheets -->
     </head>
     <body class="chat-body">
@@ -54,7 +58,10 @@
                 <div class="chat-messages" id="chatMessages">
                     <!-- Messages will be dynamically added here -->
                 </div>
-                <div id="currentTranscription" class="current-transcription"></div>
+                <div
+                    id="currentTranscription"
+                    class="current-transcription"
+                ></div>
                 <div class="chat-input-container">
                     <div class="input-row">
                         <input
@@ -69,6 +76,11 @@
                             accept="image/*"
                             style="display: none"
                         />
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggleAudio" class="toggle-input" checked>
+                            <label for="toggleAudio" class="toggle-label"></label>
+                            <span class="toggle-text">Audio</span>
+                        </div>
                     </div>
                     <div id="micStatus">Microphone: Initializing...</div>
                 </div>

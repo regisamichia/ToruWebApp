@@ -1,6 +1,6 @@
 import { makeApiCall } from "./api.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { pauseAudioRecording, resumeAudioRecording } from "./main.js";
+import { pauseAudioRecording, resumeAudioRecording, isAudioEnabled } from "./main.js";
 
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
@@ -47,6 +47,8 @@ let audioQueue = [];
 let isPlaying = false;
 
 async function streamAudio(text) {
+  if (!isAudioEnabled) return; // Skip audio synthesis if audio is disabled
+
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
@@ -66,7 +68,7 @@ async function streamAudio(text) {
 
     const arrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    
+
     audioQueue.push(audioBuffer);
     if (!isPlaying) {
       playNextAudio();
@@ -91,23 +93,28 @@ async function playNextAudio() {
   source.start();
 }
 
-async function displayTextWithDynamicDelay(text, element, baseDelay = 50, wordsPerChunk = 2) {
-  const words = text.split(' ');
-  let displayedText = '';
+async function displayTextWithDynamicDelay(
+  text,
+  element,
+  baseDelay = 100,  // Increased from 50
+  wordsPerChunk = 1  // Reduced from 2
+) {
+  const words = text.split(" ");
+  let displayedText = "";
   let chunk = [];
 
   for (let i = 0; i < words.length; i++) {
     chunk.push(words[i]);
-    
+
     if (chunk.length === wordsPerChunk || i === words.length - 1) {
-      displayedText += chunk.join(' ') + ' ';
+      displayedText += chunk.join(" ") + " ";
       element.innerHTML = renderContent(displayedText);
       element.scrollIntoView({ behavior: "smooth", block: "end" });
-      
-      const chunkLength = chunk.join(' ').length;
-      const delay = baseDelay + (chunkLength * 10); // Increased multiplier
-      await new Promise(resolve => setTimeout(resolve, delay));
-      
+
+      const chunkLength = chunk.join(" ").length;
+      const delay = baseDelay + chunkLength * 20; // Increased from 10
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
       chunk = [];
     }
   }
@@ -143,22 +150,26 @@ export async function sendMessage(messageText, sessionId) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value);
-        
+
         const sentences = buffer.match(/[^.!?]+[.!?]+/g) || [];
-        
+
         for (const sentence of sentences) {
           accumulatedText += sentence;
-          await streamAudio(sentence); // Wait for audio to be queued before displaying text
+          if (isAudioEnabled) {
+            await streamAudio(sentence); // Wait for audio to be queued before displaying text
+          }
           await displayTextWithDynamicDelay(sentence, botMessageElement);
         }
-        
-        buffer = buffer.substring(sentences.join('').length);
+
+        buffer = buffer.substring(sentences.join("").length);
       }
 
       // Process any remaining text in the buffer
       if (buffer) {
         accumulatedText += buffer;
-        await streamAudio(buffer);
+        if (isAudioEnabled) {
+          await streamAudio(buffer);
+        }
         await displayTextWithDynamicDelay(buffer, botMessageElement);
       }
 
@@ -172,6 +183,10 @@ export async function sendMessage(messageText, sessionId) {
           .catch((err) => console.log("MathJax processing failed:", err));
       }
 
+      // Remove this block to prevent playing audio twice
+      // if (isAudioEnabled) {
+      //   await streamAudio(accumulatedText);
+      // }
     } else {
       console.error("Failed to send message");
     }

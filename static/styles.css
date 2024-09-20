@@ -179,10 +179,9 @@ select:focus {
 
 .chat-main {
     flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
+    padding: 20px;
+    max-width: 1000px; /* Increase the max-width */
+    margin: 0 auto;
 }
 
 .chat-container {
@@ -231,14 +230,12 @@ select:focus {
     display: flex;
     flex-direction: column;
     padding: 10px;
-    background-color: #f5f5f5;
-    border-top: 1px solid #e0e0e0;
 }
 
 .input-row {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 15px; /* Increase gap between elements */
 }
 
 #userInput {
@@ -250,14 +247,13 @@ select:focus {
 }
 
 #uploadButton {
-    margin-left: 10px;
     padding: 10px 15px;
     background-color: #4caf50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    white-space: nowrap;
 }
 
 #uploadButton:hover {
@@ -265,8 +261,56 @@ select:focus {
 }
 
 #micStatus {
-    font-size: 0.8em;
+    margin-top: 10px;
+    font-size: 0.9em;
     color: #666;
+}
+
+.toggle-switch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.toggle-input {
+    display: none;
+}
+
+.toggle-label {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: .4s;
+    cursor: pointer;
+}
+
+.toggle-label:before {
+    content: "";
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.toggle-input:checked + .toggle-label {
+    background-color: #2196F3;
+}
+
+.toggle-input:checked + .toggle-label:before {
+    transform: translateX(26px);
+}
+
+.toggle-text {
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -362,10 +406,9 @@ select:focus {
     }
 }
 
-#micStatus {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 5px;
+#toggleAudioButton {
+    /* Add styles to match your existing buttons */
+    margin-left: 10px;
 }
 
 .current-transcription {
