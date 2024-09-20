@@ -24,6 +24,10 @@ export function addLoadingAnimation() {
 }
 
 function renderContent(text) {
+  // Replace LaTeX delimiters before Markdown parsing
+  text = text.replace(/\\\(/g, '$');
+  text = text.replace(/\\\)/g, '$');
+
   // Parse Markdown
   const htmlContent = marked.parse(text);
 
@@ -34,7 +38,6 @@ function renderContent(text) {
   // Process LaTeX after Markdown parsing
   MathJax.typesetPromise([tempDiv])
     .then(() => {
-      // MathJax processing is complete
       console.log("MathJax rendering complete");
     })
     .catch((err) => console.log("MathJax processing failed:", err));
