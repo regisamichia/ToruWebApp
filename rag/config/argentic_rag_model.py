@@ -2,6 +2,16 @@ from langchain_core.messages import  BaseMessage
 from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import TypedDict
 
+class MathState(TypedDict):
+
+    messages: list[BaseMessage]
+    first_user_message: str
+    end_conversation: bool
+    image_description : str
+    is_geometry : bool
+    lesson_example : str
+
+
 class State(TypedDict):
     # This class encapsulate the state of the argentic rag
 

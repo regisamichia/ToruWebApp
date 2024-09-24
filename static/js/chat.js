@@ -163,10 +163,12 @@ export async function sendMessage(messageText, sessionId, userId) {
       console.log(key, value);
     }
 
-    const response = await makeApiCall(
-      "http://localhost:8001/api/argentic_chat",
-      "POST",
-      formData,
+    const response = await fetch(
+      "http://localhost:8001/api/math_chat",
+      {
+        method: "POST",
+        body: formData,
+      }
     );
 
     // Log the response status and headers
@@ -234,7 +236,7 @@ export async function sendMessage(messageText, sessionId, userId) {
 
 async function storeConversation(userId, sessionId, userMessage, botMessage) {
   const conversation = {
-    userId,
+    userId,  // Ensure userId is included
     sessionId,
     userMessage,
     botMessage,
@@ -248,7 +250,7 @@ async function storeConversation(userId, sessionId, userMessage, botMessage) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add this line
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(conversation),
       },

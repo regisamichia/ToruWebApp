@@ -1,5 +1,9 @@
 import { initializeSession } from "./session.js";
-import { initializeAudioRecording, pauseAudioRecording, resumeAudioRecording } from "./audioRecording.js";
+import {
+  initializeAudioRecording,
+  pauseAudioRecording,
+  resumeAudioRecording,
+} from "./audioRecording.js";
 import { initializeWebSocket } from "./websocket.js";
 import { addMessageToChat, sendMessage, addLoadingAnimation } from "./chat.js";
 import { initializeImageUpload } from "./imageUpload.js";
@@ -7,23 +11,23 @@ import { handleLogout } from "./login.js";
 
 export let sessionId = null;
 export let userId = null;
-export let isAudioEnabled = localStorage.getItem('audioEnabled') !== 'false'; // Default to true if not set
+export let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false"; // Default to true if not set
 
 export function setAudioEnabled(enabled) {
   isAudioEnabled = enabled;
-  localStorage.setItem('audioEnabled', enabled);
+  localStorage.setItem("audioEnabled", enabled);
 }
 
 async function initializeChatPage() {
   try {
-    const response = await fetch('http://localhost:8000/api/user_info', {
+    const response = await fetch("http://localhost:8000/api/user_info", {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch user info');
+      throw new Error("Failed to fetch user info");
     }
 
     const userData = await response.json();
@@ -42,7 +46,7 @@ async function initializeChatPage() {
   } catch (error) {
     console.error("Error initializing chat page:", error);
     // Handle error (e.g., redirect to login page)
-    window.location.href = "/login";
+    // window.location.href = "/login";
   }
 }
 
@@ -55,7 +59,7 @@ function initializeChatInterface() {
         const message = userInput.value.trim();
         if (message) {
           addMessageToChat(message, "user-message");
-          sendMessage(message, sessionId, userId);  // Pass userId here
+          sendMessage(message, sessionId, userId); // Pass userId here
           userInput.value = "";
         }
       }
@@ -68,11 +72,11 @@ function initializeChatInterface() {
 function initializeLogout() {
   const logoutButton = document.getElementById("logoutButton");
   const sidebarLogoutButton = document.getElementById("sidebarLogoutButton");
-  
+
   if (logoutButton) {
     logoutButton.addEventListener("click", handleLogout);
   }
-  
+
   if (sidebarLogoutButton) {
     sidebarLogoutButton.addEventListener("click", handleLogout);
   }

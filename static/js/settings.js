@@ -2,37 +2,65 @@ import { setAudioEnabled } from "./main.js";
 import { makeApiCall } from "./api.js";
 import { handleLogout } from "./login.js";
 
-function initializeSettings() {
-  const toggleAudioInput = document.getElementById("toggleAudio");
-  if (toggleAudioInput) {
-    toggleAudioInput.checked = localStorage.getItem('audioEnabled') !== 'false';
-    toggleAudioInput.addEventListener("change", toggleAudio);
-  }
+async function initializeSettings() {
+  console.log("Initializing settings page..."); // Debug log
+  //debugger; // Pause execution here
 
-  const changePasswordBtn = document.getElementById("changePasswordBtn");
-  if (changePasswordBtn) {
-    changePasswordBtn.addEventListener("click", changePassword);
-  }
-
-  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-  if (saveSettingsBtn) {
-    saveSettingsBtn.addEventListener("click", saveSettings);
-  }
-
-  const headerLogoutButton = document.getElementById("headerLogoutButton");
-  if (headerLogoutButton) {
-    headerLogoutButton.addEventListener("click", handleLogout);
-  }
-  
-  // Use event delegation for the sidebar logout button
-  const chatSidebar = document.querySelector(".chat-sidebar");
-  if (chatSidebar) {
-    chatSidebar.addEventListener("click", function(e) {
-      if (e.target.id === "sidebarLogoutButton" || e.target.closest("#sidebarLogoutButton")) {
-        e.preventDefault();
-        handleLogout(e);
-      }
+  try {
+    const response = await fetch("http://localhost:8000/api/user_info", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
+
+    if (!response.ok) {
+      console.error("Failed to fetch user info"); // Debug log
+      throw new Error("Failed to fetch user info");
+    }
+
+    const userData = await response.json();
+    console.log("User data fetched:", userData);
+
+    // Proceed with initializing settings page
+    const toggleAudioInput = document.getElementById("toggleAudio");
+    if (toggleAudioInput) {
+      toggleAudioInput.checked =
+        localStorage.getItem("audioEnabled") !== "false";
+      toggleAudioInput.addEventListener("change", toggleAudio);
+    }
+
+    const changePasswordBtn = document.getElementById("changePasswordBtn");
+    if (changePasswordBtn) {
+      changePasswordBtn.addEventListener("click", changePassword);
+    }
+
+    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+    if (saveSettingsBtn) {
+      saveSettingsBtn.addEventListener("click", saveSettings);
+    }
+
+    const headerLogoutButton = document.getElementById("headerLogoutButton");
+    if (headerLogoutButton) {
+      headerLogoutButton.addEventListener("click", handleLogout);
+    }
+
+    // Use event delegation for the sidebar logout button
+    const chatSidebar = document.querySelector(".chat-sidebar");
+    if (chatSidebar) {
+      chatSidebar.addEventListener("click", function (e) {
+        if (
+          e.target.id === "sidebarLogoutButton" ||
+          e.target.closest("#sidebarLogoutButton")
+        ) {
+          e.preventDefault();
+          handleLogout(e);
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error initializing settings page:", error);
+    // Comment out the redirection to the login page
+    // window.location.href = "/login";
   }
 }
 
