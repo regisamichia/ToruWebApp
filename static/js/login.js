@@ -35,35 +35,19 @@ export async function refreshToken() {
 function initializeLoginForm() {
   const loginForm = document.getElementById("login");
   const registerForm = document.getElementById("register");
-  const showRegisterLink = document.getElementById("showRegister");
-  const showLoginLink = document.getElementById("showLogin");
 
   if (loginForm) {
     loginForm.addEventListener("submit", handleLogin);
+    console.log("Login form initialized");
   } else {
     console.error("Login form not found");
   }
 
   if (registerForm) {
     registerForm.addEventListener("submit", handleRegister);
+    console.log("Register form initialized");
   } else {
-    console.error("Register form not found");
-  }
-
-  if (showRegisterLink) {
-    showRegisterLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("registerForm").style.display = "block";
-    });
-  }
-
-  if (showLoginLink) {
-    showLoginLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      document.getElementById("registerForm").style.display = "none";
-      document.getElementById("loginForm").style.display = "block";
-    });
+    console.log("Register form not found on this page");
   }
 }
 
@@ -93,9 +77,17 @@ async function handleLogin(e) {
     console.log("Login response data:", data);
 
     if (response.ok) {
-      console.log("Login successful, setting token...");
+      console.log("Login successful, setting tokens and user data...");
       localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refreshToken", data.refresh_token);
       localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user_id", data.user_id);  // Make sure this line is present
+      console.log("Data set in localStorage:", JSON.stringify({
+        token: localStorage.getItem("token"),
+        refreshToken: localStorage.getItem("refreshToken"),
+        isLoggedIn: localStorage.getItem("isLoggedIn"),
+        userId: localStorage.getItem("user_id")
+      }));
       console.log("Redirecting to chat...");
       window.location.href = "/chat";
     } else {
@@ -188,6 +180,8 @@ export async function handleLogout(e) {
     if (response.ok) {
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("refreshToken");
       window.location.href = "/login";
     } else {
       alert("Logout failed");
@@ -201,25 +195,58 @@ export async function handleLogout(e) {
 // This function can be exported and used in other files if needed
 export async function checkLoginStatus() {
   const token = getToken();
-  if (!token) {
-    window.location.href = "/";
-    return;
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  alert("Checking login status. Token exists: " + !!token + ", isLoggedIn: " + isLoggedIn);
+
+  if (!token || isLoggedIn !== "true") {
+    alert("No token or not logged in, redirecting to login page");
+    window.location.href = "/login";
+    return false;
   }
 
   try {
+    alert("Validating token with server...");
     const response = await fetch("http://localhost:8000/api/check_login", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     if (!response.ok) {
+      alert("Token validation failed, clearing login state");
       localStorage.removeItem("token");
       localStorage.removeItem("isLoggedIn");
-      window.location.href = "/";
+      window.location.href = "/login";
+      return false;
+    }
+    alert("Token validated successfully");
+    return true;
+  } catch (error) {
+    alert("Error checking login status: " + error.message);
+    window.location.href = "/login";
+    return false;
+  }
+}
+
+async function login(username, password) {
+  try {
+    const response = await fetch("http://localhost:8000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('sessionId', data.sessionId); // Store the session ID
+      console.log("Stored sessionId:", data.sessionId); // Debugging line
+      window.location.href = "/chat";
+    } else {
+      console.error("Failed to log in");
     }
   } catch (error) {
-    console.error("Error:", error);
-    window.location.href = "/";
+    console.error("Error logging in:", error);
   }
 }
 

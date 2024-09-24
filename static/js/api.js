@@ -1,22 +1,18 @@
-export async function makeApiCall(url, method, data = null) {
-  const headers = {};
-
-  const token = localStorage.getItem('token');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+export async function makeApiCall(url, method, body = null) {
   const options = {
-    method,
-    headers,
+    method: method,
     credentials: 'include',
   };
 
-  if (data) {
-    options.body = data;
+  if (body instanceof FormData) {
+    options.body = body;
+  } else if (body) {
+    options.headers = {
+      'Content-Type': 'application/json',
+    };
+    options.body = JSON.stringify(body);
   }
 
-  console.log("Request options:", options); // Log the request options
-
-  return fetch(url, options);
+  const response = await fetch(url, options);
+  return response;
 }

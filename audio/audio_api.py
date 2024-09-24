@@ -6,6 +6,7 @@ import io
 import tempfile
 from pydub import AudioSegment
 import logging
+from app.config import settings
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -16,10 +17,10 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8000"],  # Allow requests from your main application
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.post("/transcribe")

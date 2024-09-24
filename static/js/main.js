@@ -6,6 +6,7 @@ import { initializeImageUpload } from "./imageUpload.js";
 import { handleLogout } from "./login.js";
 
 export let sessionId = null;
+export let userId = null;
 export let isAudioEnabled = localStorage.getItem('audioEnabled') !== 'false'; // Default to true if not set
 
 export function setAudioEnabled(enabled) {
@@ -14,11 +15,35 @@ export function setAudioEnabled(enabled) {
 }
 
 async function initializeChatPage() {
-  sessionId = await initializeSession();
-  initializeChatInterface();
-  await initializeAudioRecording();
-  initializeWebSocket();
-  initializeLogout();
+  try {
+    const response = await fetch('http://localhost:8000/api/user_info', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user info');
+    }
+
+    const userData = await response.json();
+    console.log("User data fetched:", userData);
+
+    userId = userData.user_id;
+    sessionId = await initializeSession();
+
+    console.log("Initialized sessionId:", sessionId);
+    console.log("Initialized userId:", userId);
+
+    initializeChatInterface();
+    await initializeAudioRecording();
+    initializeWebSocket();
+    initializeLogout();
+  } catch (error) {
+    console.error("Error initializing chat page:", error);
+    // Handle error (e.g., redirect to login page)
+    window.location.href = "/login";
+  }
 }
 
 function initializeChatInterface() {
@@ -30,7 +55,7 @@ function initializeChatInterface() {
         const message = userInput.value.trim();
         if (message) {
           addMessageToChat(message, "user-message");
-          sendMessage(message, sessionId);
+          sendMessage(message, sessionId, userId);  // Pass userId here
           userInput.value = "";
         }
       }
@@ -39,8 +64,6 @@ function initializeChatInterface() {
 
   initializeImageUpload();
 }
-
-// Remove the toggleAudio function from here
 
 function initializeLogout() {
   const logoutButton = document.getElementById("logoutButton");

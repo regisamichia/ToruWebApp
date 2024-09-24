@@ -11,7 +11,7 @@ app = FastAPI()
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,6 +45,10 @@ async def read_settings(request: Request):
 @app.get("/login", response_class=HTMLResponse)
 async def read_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/chatHistory", response_class=HTMLResponse)
+async def read_chat_history(request: Request):
+    return templates.TemplateResponse("chatHistory.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

@@ -4,7 +4,7 @@ export async function initializeSession() {
   try {
     const response = await makeApiCall(
       "http://localhost:8001/new_session",
-      "POST",
+      "POST"
     );
     if (response.ok) {
       const data = await response.json();

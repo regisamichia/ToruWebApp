@@ -1,6 +1,10 @@
 import { makeApiCall } from "./api.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
-import { pauseAudioRecording, resumeAudioRecording, isAudioEnabled } from "./main.js";
+import {
+  pauseAudioRecording,
+  resumeAudioRecording,
+  isAudioEnabled,
+} from "./main.js"; // Import userId
 
 // Define audioContext and audioQueue as global variables
 let audioContext;
@@ -31,8 +35,8 @@ export function addLoadingAnimation() {
 
 export function renderContent(text) {
   // Replace LaTeX delimiters before Markdown parsing
-  text = text.replace(/\\\(/g, '$');
-  text = text.replace(/\\\)/g, '$');
+  text = text.replace(/\\\(/g, "$");
+  text = text.replace(/\\\)/g, "$");
 
   // Parse Markdown
   const htmlContent = marked.parse(text);
@@ -54,8 +58,8 @@ export function renderContent(text) {
 export async function displayTextWithDynamicDelay(
   text,
   element,
-  baseDelay = 100,  // Increased from 50
-  wordsPerChunk = 1  // Reduced from 2
+  baseDelay = 100, // Increased from 50
+  wordsPerChunk = 1, // Reduced from 2
 ) {
   const words = text.split(" ");
   let displayedText = "";
@@ -131,12 +135,12 @@ export function handleUserInput() {
   const messageText = userInput.value.trim();
   if (messageText !== "") {
     addMessageToChat(messageText, "user-message");
-    sendMessage(messageText, sessionId);
+    sendMessage(messageText, sessionId, userId); // Pass userId here
     userInput.value = "";
   }
 }
 
-export async function sendMessage(messageText, sessionId) {
+export async function sendMessage(messageText, sessionId, userId) {
   if (messageText.trim() === "") return;
 
   const loadingAnimation = addLoadingAnimation();
@@ -144,19 +148,30 @@ export async function sendMessage(messageText, sessionId) {
   try {
     pauseAudioRecording();
 
-    console.log("SessionId:", sessionId); // Log the sessionId
+    console.log("SessionId:", sessionId);
+    console.log("UserId:", userId);  // Log the userId
 
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
+    formData.append("user_id", userId);  // Add userId to formData
 
-    console.log("FormData:", formData); // Log the FormData
+    console.log("FormData:", formData);
+
+    // Log the actual content of the FormData
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
 
     const response = await makeApiCall(
       "http://localhost:8001/api/argentic_chat",
       "POST",
-      formData
+      formData,
     );
+
+    // Log the response status and headers
+    console.log("Response status:", response.status);
+    console.log("Response headers:", response.headers);
 
     if (response.ok) {
       loadingAnimation.remove();
@@ -203,17 +218,48 @@ export async function sendMessage(messageText, sessionId) {
           .catch((err) => console.log("MathJax processing failed:", err));
       }
 
-      // Remove this block to prevent playing audio twice
-      // if (isAudioEnabled) {
-      //   await streamAudio(accumulatedText);
-      // }
+      // Store the conversation in local storage
+      console.log("Storing conversation in sendMessage"); // Debugging line
+      storeConversation(userId, sessionId, messageText, accumulatedText);
     } else {
-      console.error("Failed to send message");
+      console.error("Failed to send message:", await response.text());
     }
   } catch (error) {
     console.error("Error:", error);
   } finally {
     loadingAnimation.remove();
     resumeAudioRecording();
+  }
+}
+
+async function storeConversation(userId, sessionId, userMessage, botMessage) {
+  const conversation = {
+    userId,
+    sessionId,
+    userMessage,
+    botMessage,
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+    const response = await fetch(
+      "http://localhost:8000/api/save_chat_history",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add this line
+        },
+        body: JSON.stringify(conversation),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to save chat history");
+    }
+
+    console.log("Chat history saved successfully");
+  } catch (error) {
+    console.error("Error saving chat history:", error);
   }
 }

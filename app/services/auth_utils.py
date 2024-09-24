@@ -1,4 +1,5 @@
 import logging
+import uuid
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -20,10 +21,12 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def create_user(db: Session, user: UserCreate):
+    hashed_password = get_password_hash(user.password)
     db_user = User(
-        first_name=user.first_name,
+        user_id=str(uuid.uuid4()),  # Generate a new UUID for user_id
         email=user.email,
-        hashed_password=get_password_hash(user.password),
+        hashed_password=hashed_password,
+        first_name=user.first_name,
         school_class=user.school_class
     )
     db.add(db_user)
@@ -37,10 +40,16 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     return user
 
-def create_access_token(data: dict):
+def create_access_token(data: dict, db: Session):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
+    user = db.query(User).filter(User.email == data["sub"]).first()
+    if user:
+        to_encode.update({
+            "user_id": str(user.user_id),
+            "email": user.email
+        })
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
@@ -53,12 +62,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
-        if email is None:
+        user_id: str = payload.get("user_id")
+        if email is None or user_id is None:
             raise credentials_exception
-        user = db.query(User).filter(User.email == email).first()
-        if user is None:
-            raise credentials_exception
-        return user  # Return the actual User model instance
+        token_data = UserInToken(email=email, user_id=user_id)
+        return token_data
     except JWTError:
         raise credentials_exception
 
@@ -93,3 +101,6 @@ def change_user_password(db: Session, user: User, new_password: str) -> bool:
     user.hashed_password = hashed_password
     db.commit()
     return True
+
+def get_user_by_email(email: str, db: Session):
+    return db.query(User).filter(User.email == email).first()

@@ -49,7 +49,7 @@ async function sendImageMessage(imageFile) {
         "http://localhost:8000/api/extract_text",
         "POST",
         extractFormData,
-        "multipart/form-data"  // Add this line
+        "multipart/form-data"
       );
 
       if (!extractResponse.ok) {
@@ -71,7 +71,7 @@ async function sendImageMessage(imageFile) {
         "http://localhost:8001/api/argentic_chat",
         "POST",
         chatFormData,
-        "multipart/form-data"  // Add this line
+        "multipart/form-data"
       );
 
       if (chatResponse.ok) {
@@ -120,6 +120,10 @@ async function sendImageMessage(imageFile) {
               console.log("MathJax processing failed for image message:", err)
             );
         }
+
+        // Store the conversation in local storage
+        storeConversation(sessionId, extractedText, accumulatedText);
+
       } else {
         console.error("Failed to process image and text in chat");
         const errorText = await chatResponse.text();

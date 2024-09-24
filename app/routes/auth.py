@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.user import UserCreate, Token, ChangePassword
+from app.schemas.user import UserCreate, Token, ChangePassword, UserInToken
 from app.models.user import User
-from app.services.auth import create_user, authenticate_user, create_access_token, get_current_user, change_user_password
+from app.services.auth_utils import create_user, authenticate_user, create_access_token, get_current_user, change_user_password
 from app.config import settings
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -30,20 +30,7 @@ async def change_password(
         raise HTTPException(status_code=500, detail="Failed to change password")
 
 @router.post("/api/refresh")
-async def refresh_token(refresh_token: str):
-
-    """
-    Refresh the access token using a valid refresh token.
-
-    Args:
-        refresh_token (str): The refresh token to validate and use for creating a new access token.
-
-    Returns:
-        dict: A dictionary containing the new access token and its type.
-
-    Raises:
-        HTTPException: If the refresh token is invalid or expired.
-    """
+async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
@@ -51,10 +38,7 @@ async def refresh_token(refresh_token: str):
             raise HTTPException(status_code=401, detail="Invalid refresh token")
 
         # Create a new access token
-        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": email}, expires_delta=access_token_expires
-        )
+        access_token = create_access_token(data={"sub": email}, db=db)
         return {"access_token": access_token, "token_type": "bearer"}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -78,25 +62,18 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/api/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """
-        Authenticate a user and provide access and refresh tokens.
-
-        Args:
-            form_data (OAuth2PasswordRequestForm): The login credentials.
-            db (Session): The database session.
-
-        Returns:
-            dict: A dictionary containing access token, refresh token, and token type.
-
-        Raises:
-            HTTPException: If the login credentials are incorrect.
-        """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password")
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email}, db=db)
     refresh_token = create_refresh_token(data={"sub": user.email})
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    print(f"User logged in: {user.email}, user_id: {user.user_id}")  # Debug print
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user_id": str(user.user_id)  # Ensure this is being returned
+    }
 
 def create_refresh_token(data: dict):
     """
@@ -123,3 +100,10 @@ async def logout():
             dict: A message indicating successful logout.
         """
     return {"message": "Logged out successfully"}
+
+@router.get("/api/user_info")
+async def get_user_info(current_user: UserInToken = Depends(get_current_user)):
+    return {
+        "user_id": current_user.user_id,
+        "email": current_user.email
+    }

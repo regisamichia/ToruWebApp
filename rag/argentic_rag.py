@@ -7,12 +7,23 @@ from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import time
 import asyncio
+from fastapi import Response
+from uuid import uuid4
+
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.config import settings
+
+
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,9 +108,15 @@ async def chat(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/new_session")
-async def new_session():
+async def new_session(response: Response, request: Request):
     session_id = str(uuid4())
     sessions[session_id] = {"messages": [], "first_user_message": ""}
+    
+    origin = request.headers.get("Origin")
+    
+    if origin in settings.allowed_origins_list:
+        response.headers["Access-Control-Allow-Origin"] = origin
+    
     return {"session_id": session_id}
 
 if __name__ == "__main__":
