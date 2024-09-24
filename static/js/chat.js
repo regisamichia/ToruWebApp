@@ -4,6 +4,7 @@ import {
   pauseAudioRecording,
   resumeAudioRecording,
   isAudioEnabled,
+  getTtsProvider,
 } from "./main.js"; // Import userId
 
 // Define audioContext and audioQueue as global variables
@@ -83,14 +84,29 @@ export async function displayTextWithDynamicDelay(
 }
 
 export async function streamAudio(text) {
-  if (!isAudioEnabled) return; // Skip audio synthesis if audio is disabled
+  if (!isAudioEnabled) return;
 
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
 
   try {
-    const response = await fetch("http://localhost:8000/api/synthesize_audio", {
+    const currentProvider = getTtsProvider();
+    let endpoint;
+    
+    if (currentProvider === "openai") {
+      endpoint = "http://localhost:8000/api/synthesize_audio_openai";
+    } else if (currentProvider === "elevenlabs") {
+      endpoint = "http://localhost:8000/api/synthesize_audio";
+    } else {
+      console.error(`Unknown TTS provider: ${currentProvider}`);
+      return;
+    }
+
+    console.log(`Using TTS provider: ${currentProvider}`); // Debug log
+    console.log(`Endpoint: ${endpoint}`); // Debug log
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

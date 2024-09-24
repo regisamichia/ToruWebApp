@@ -1,4 +1,4 @@
-import { setAudioEnabled } from "./main.js";
+import { setAudioEnabled, setTtsProvider, getTtsProvider } from "./main.js";
 import { makeApiCall } from "./api.js";
 import { handleLogout } from "./login.js";
 
@@ -27,6 +27,19 @@ async function initializeSettings() {
       toggleAudioInput.checked =
         localStorage.getItem("audioEnabled") !== "false";
       toggleAudioInput.addEventListener("change", toggleAudio);
+    }
+
+    // Initialize TTS provider radio buttons
+    const ttsProviderRadios = document.querySelectorAll('input[name="ttsProvider"]');
+    if (ttsProviderRadios) {
+      const savedProvider = getTtsProvider();
+      const radioToCheck = document.getElementById(`ttsProvider${savedProvider.charAt(0).toUpperCase() + savedProvider.slice(1)}`);
+      if (radioToCheck) {
+        radioToCheck.checked = true;
+      }
+      ttsProviderRadios.forEach(radio => {
+        radio.addEventListener('change', toggleTtsProvider);
+      });
     }
 
     const changePasswordBtn = document.getElementById("changePasswordBtn");
@@ -117,6 +130,14 @@ function saveSettings() {
   // makeApiCall("/api/save_settings", "POST", { language, theme });
 
   alert("Settings saved successfully.");
+}
+
+function toggleTtsProvider(event) {
+  const provider = event.target.value;
+  console.log(`TTS Provider set to ${provider}`);
+  setTtsProvider(provider);
+  // Add this line to immediately see the effect
+  console.log(`Current TTS Provider: ${getTtsProvider()}`);
 }
 
 document.addEventListener("DOMContentLoaded", initializeSettings);

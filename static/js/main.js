@@ -18,6 +18,14 @@ export function setAudioEnabled(enabled) {
   localStorage.setItem("audioEnabled", enabled);
 }
 
+export function getTtsProvider() {
+  return localStorage.getItem("ttsProvider") || "elevenlabs";
+}
+
+export function setTtsProvider(provider) {
+  localStorage.setItem("ttsProvider", provider);
+}
+
 async function initializeChatPage() {
   try {
     const response = await fetch("http://localhost:8000/api/user_info", {
@@ -88,4 +96,8 @@ window.addEventListener("beforeunload", () => {
   // Cleanup code here
 });
 
-export { pauseAudioRecording, resumeAudioRecording };
+// Export everything at once at the end of the file
+export { 
+  pauseAudioRecording, 
+  resumeAudioRecording
+};
