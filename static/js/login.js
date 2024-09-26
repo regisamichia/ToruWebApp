@@ -209,7 +209,7 @@ async function login(username, password) {
       const data = await response.json();
       localStorage.setItem("sessionId", data.sessionId); // Store the session ID
       console.log("Stored sessionId:", data.sessionId); // Debugging line
-      window.location.href = "/chat";
+      window.location.href = "/homepage";
     } else {
       console.error("Failed to log in");
     }

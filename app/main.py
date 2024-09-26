@@ -33,23 +33,27 @@ app.include_router(text_to_speech_openai.router)
 # Serve HTML pages
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("html/login.html", {"request": request})
 
 @app.get("/chat", response_class=HTMLResponse)
 async def read_chat(request: Request):
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return templates.TemplateResponse("html/chat.html", {"request": request})
 
 @app.get("/settings", response_class=HTMLResponse)
 async def read_settings(request: Request):
-    return templates.TemplateResponse("settings.html", {"request": request})
+    return templates.TemplateResponse("html/settings.html", {"request": request})
 
 @app.get("/login", response_class=HTMLResponse)
 async def read_login(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("html/login.html", {"request": request})
 
 @app.get("/chatHistory", response_class=HTMLResponse)
 async def read_chat_history(request: Request):
-    return templates.TemplateResponse("chatHistory.html", {"request": request})
+    return templates.TemplateResponse("html/chatHistory.html", {"request": request})
+
+@app.get("/homepage", response_class=HTMLResponse)
+async def read_homepage(request: Request):
+    return templates.TemplateResponse("html/homepage.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

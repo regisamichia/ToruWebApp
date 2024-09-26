@@ -4,7 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Settings - Toru Chatbot</title>
-        <link rel="stylesheet" href="/static/styles.css" />
+        <link rel="stylesheet" href="/static/css/styles.css" />
+        <link rel="stylesheet" href="/static/css/settings.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
@@ -77,30 +78,55 @@
                     <h2>Audio Settings</h2>
                     <div class="setting-item">
                         <div class="setting-info">
-                            <label for="toggleAudio">Enable Audio Responses</label>
+                            <label for="toggleAudio"
+                                >Enable Audio Responses</label
+                            >
                             <p class="setting-description">
-                                When enabled, Toru will provide audio responses in addition to text.
+                                When enabled, Toru will provide audio responses
+                                in addition to text.
                             </p>
                         </div>
                         <div class="toggle-switch">
-                            <input type="checkbox" id="toggleAudio" class="toggle-input" checked />
-                            <label for="toggleAudio" class="toggle-label"></label>
+                            <input
+                                type="checkbox"
+                                id="toggleAudio"
+                                class="toggle-input"
+                                checked
+                            />
+                            <label
+                                for="toggleAudio"
+                                class="toggle-label"
+                            ></label>
                         </div>
                     </div>
                     <div class="setting-item">
                         <div class="setting-info">
                             <label>Text-to-Speech Provider</label>
                             <p class="setting-description">
-                                Choose between OpenAI and Eleven Labs for text-to-speech synthesis.
+                                Choose between OpenAI and Eleven Labs for
+                                text-to-speech synthesis.
                             </p>
                         </div>
                         <div class="radio-group">
                             <div class="radio-option">
-                                <input type="radio" id="ttsProviderElevenLabs" name="ttsProvider" value="elevenlabs" checked>
-                                <label for="ttsProviderElevenLabs">Eleven Labs</label>
+                                <input
+                                    type="radio"
+                                    id="ttsProviderElevenLabs"
+                                    name="ttsProvider"
+                                    value="elevenlabs"
+                                    checked
+                                />
+                                <label for="ttsProviderElevenLabs"
+                                    >Eleven Labs</label
+                                >
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="ttsProviderOpenAI" name="ttsProvider" value="openai">
+                                <input
+                                    type="radio"
+                                    id="ttsProviderOpenAI"
+                                    name="ttsProvider"
+                                    value="openai"
+                                />
                                 <label for="ttsProviderOpenAI">OpenAI</label>
                             </div>
                         </div>
@@ -110,7 +136,9 @@
                     <h2>Change Password</h2>
                     <div class="setting-item">
                         <div class="setting-info">
-                            <label for="currentPassword">Current Password:</label>
+                            <label for="currentPassword"
+                                >Current Password:</label
+                            >
                             <input
                                 type="password"
                                 id="currentPassword"
@@ -130,7 +158,9 @@
                     </div>
                     <div class="setting-item">
                         <div class="setting-info">
-                            <label for="confirmPassword">Confirm New Password:</label>
+                            <label for="confirmPassword"
+                                >Confirm New Password:</label
+                            >
                             <input
                                 type="password"
                                 id="confirmPassword"

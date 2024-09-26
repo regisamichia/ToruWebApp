@@ -1,0 +1,80 @@
+/* chat.css */
+
+@import url('styles.css');
+
+.chat-body {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.chat-header {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.logout-button {
+    background-color: var(--white);
+    color: var(--primary-color);
+}
+
+.logout-button:hover {
+    background-color: var(--light-gray);
+}
+
+.chat-sidebar {
+    background-color: var(--white);
+    border-right: 1px solid var(--light-gray);
+}
+
+.chat-sidebar h1 {
+    color: var(--primary-color);
+}
+
+.chat-sidebar nav ul li a {
+    color: var(--text-color);
+}
+
+.chat-sidebar nav ul li a:hover,
+.chat-sidebar nav ul li a.active {
+    background-color: var(--light-gray);
+}
+
+.chat-container {
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.user-message {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.bot-message {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+}
+
+.chat-input-container {
+    background-color: var(--background-color);
+    border-top: 1px solid var(--light-gray);
+}
+
+#uploadButton {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+#uploadButton:hover {
+    background-color: #ff5252;
+}
+
+#micStatus {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .chat-sidebar {
+        width: 100%;
