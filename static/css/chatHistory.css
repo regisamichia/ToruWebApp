@@ -6,12 +6,70 @@
 }
 
 .chat-history-header {
+    background-color: var(--white);
+    color: var(--text-color);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.chat-history-header h2 {
+    margin: 0;
+    font-size: 1.2em;
+    color: var(--primary-color);
+}
+
+.chat-history-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#filterDate {
+    padding: 8px 12px;
+    border: 1px solid var(--light-gray);
+    border-radius: 20px;
+    font-size: 0.9em;
+}
+
+#filterButton,
+#deleteHistoryButton {
     background-color: var(--primary-color);
     color: var(--white);
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 20px;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#filterButton:hover,
+#deleteHistoryButton:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+#filterButton:active,
+#deleteHistoryButton:active {
+    transform: translateY(1px);
+}
+
+#deleteHistoryButton {
+    background-color: var(--secondary-color);
+}
+
+#deleteHistoryButton:hover {
+    background-color: #ff5252;
 }
 
 .chat-history-item {
     border-bottom: 1px solid var(--light-gray);
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .chat-history-item:hover {
@@ -20,8 +78,20 @@
 
 .chat-history-item-title {
     color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .chat-history-item-date {
     color: var(--dark-gray);
+    font-size: 0.9em;
+}
+
+.chat-history-item-preview {
+    color: var(--text-color);
+    margin-top: 5px;
+    font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

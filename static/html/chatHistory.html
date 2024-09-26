@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Chat History - Toru Chatbot</title>
         <link rel="stylesheet" href="/static/css/styles.css" />
+        <link rel="stylesheet" href="/static/css/chat.css" />
         <link rel="stylesheet" href="/static/css/chatHistory.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
@@ -15,53 +16,62 @@
             crossorigin="anonymous"
         ></script>
     </head>
-    <body class="chat-body">
+    <body>
         <header class="chat-header">
             <button id="logoutButton" class="logout-button">Logout</button>
         </header>
-        <aside class="chat-sidebar">
-            <h1>Toru</h1>
-            <nav>
-                <ul>
-                    <li>
-                        <a href="/chat"
-                            ><i class="fas fa-comment-alt"></i> Chat</a
-                        >
-                    </li>
-                    <li>
-                        <a href="#" class="active"
-                            ><i class="fas fa-info-circle"></i> Chat History</a
-                        >
-                    </li>
-                    <li>
-                        <a href="/settings"
-                            ><i class="fas fa-cog"></i> Settings</a
-                        >
-                    </li>
-                    <li>
-                        <a href="#" id="sidebarLogoutButton"
-                            ><i class="fas fa-sign-out-alt"></i> Logout</a
-                        >
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        <main class="chat-main">
-            <div class="chat-container">
-                <div class="chat-header">
-                    <h1>Chat History</h1>
-                    <div class="date-filter">
-                        <input type="date" id="filterDate" />
-                        <button id="filterButton">Filter</button>
-                    </div>
-                    <button id="deleteHistoryButton">
-                        Delete Chat History
-                    </button>
-                    <!-- Add this line -->
+        <div class="chat-body">
+            <aside class="chat-sidebar">
+                <h1>Toru</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="/chat">
+                                <i class="fas fa-comment-alt"></i>
+                                Chat
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/settings">
+                                <i class="fas fa-cog"></i>
+                                Paramètres
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/homepage">
+                                <i class="fas fa-home"></i>
+                                Accueil
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    <a href="#" id="sidebarLogoutButton">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Déconnexion
+                    </a>
                 </div>
-                <div id="chatHistory" class="chat-messages"></div>
-            </div>
-        </main>
+            </aside>
+            <main class="chat-main">
+                <div class="chat-container">
+                    <div class="chat-history-header">
+                        <h2>Historique des conversations</h2>
+                        <div class="chat-history-controls">
+                            <input type="date" id="filterDate" aria-label="Filter by date" />
+                            <button id="filterButton">
+                                <i class="fas fa-filter"></i> Filtrer
+                            </button>
+                            <button id="deleteHistoryButton">
+                                <i class="fas fa-trash-alt"></i> Supprimer l'historique
+                            </button>
+                        </div>
+                    </div>
+                    <div id="chatHistory" class="chat-messages">
+                        <!-- Chat history will be dynamically added here -->
+                    </div>
+                </div>
+            </main>
+        </div>
         <script type="module" src="/static/js/chatHistory.js"></script>
     </body>
 </html>

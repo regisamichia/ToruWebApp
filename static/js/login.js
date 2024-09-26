@@ -222,3 +222,26 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM content loaded"); // Debug log
   initializeLoginForm();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const showRegisterBtn = document.getElementById('showRegisterBtn');
+
+    showLoginBtn.addEventListener('click', function() {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        showLoginBtn.classList.add('active');
+        showRegisterBtn.classList.remove('active');
+    });
+
+    showRegisterBtn.addEventListener('click', function() {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        showLoginBtn.classList.remove('active');
+        showRegisterBtn.classList.add('active');
+    });
+
+    // ... rest of your login.js code ...
+});

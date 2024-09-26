@@ -10,11 +10,23 @@
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
         />
+        <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
     </head>
     <body>
         <div class="container">
-            <div class="form-container" id="loginForm">
+            <div class="login-header">
                 <h2>Welcome to Toru</h2>
+                <div class="login-controls">
+                    <button id="showLoginBtn" class="active">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button id="showRegisterBtn">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-container" id="loginForm">
                 <form id="login">
                     <input
                         type="email"
@@ -30,14 +42,9 @@
                     />
                     <button type="submit">Login</button>
                 </form>
-                <p>
-                    Don't have an account?
-                    <a href="#" id="showRegister">Register</a>
-                </p>
             </div>
 
             <div class="form-container" id="registerForm" style="display: none">
-                <h2>Create Account</h2>
                 <form id="register">
                     <input
                         type="text"
@@ -66,10 +73,6 @@
                     </select>
                     <button type="submit">Register</button>
                 </form>
-                <p>
-                    Already have an account?
-                    <a href="#" id="showLogin">Login</a>
-                </p>
             </div>
         </div>
         <script type="module" src="/static/js/login.js"></script>
