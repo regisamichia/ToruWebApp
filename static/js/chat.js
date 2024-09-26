@@ -1,11 +1,13 @@
-import { makeApiCall } from "./api.js";
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 import {
   pauseAudioRecording,
   resumeAudioRecording,
   isAudioEnabled,
   getTtsProvider,
-} from "./main.js"; // Import userId
+  sessionId,
+  userId
+} from "./main.js";
+import { checkAuthAndRedirect } from "./auth.js";
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
 
 // Define audioContext and audioQueue as global variables
 let audioContext;
@@ -93,7 +95,7 @@ export async function streamAudio(text) {
   try {
     const currentProvider = getTtsProvider();
     let endpoint;
-    
+
     if (currentProvider === "openai") {
       endpoint = "http://localhost:8000/api/synthesize_audio_openai";
     } else if (currentProvider === "elevenlabs") {
@@ -103,8 +105,8 @@ export async function streamAudio(text) {
       return;
     }
 
-    console.log(`Using TTS provider: ${currentProvider}`); // Debug log
-    console.log(`Endpoint: ${endpoint}`); // Debug log
+    console.log(`Using TTS provider: ${currentProvider}`);
+    console.log(`Endpoint: ${endpoint}`);
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -156,7 +158,9 @@ export function handleUserInput() {
   }
 }
 
-export async function sendMessage(messageText, sessionId, userId) {
+export async function sendMessage(messageText) {
+  if (!checkAuthAndRedirect()) return;
+
   if (messageText.trim() === "") return;
 
   const loadingAnimation = addLoadingAnimation();
@@ -165,29 +169,18 @@ export async function sendMessage(messageText, sessionId, userId) {
     pauseAudioRecording();
 
     console.log("SessionId:", sessionId);
-    console.log("UserId:", userId);  // Log the userId
+    console.log("UserId:", userId);
 
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
-    formData.append("user_id", userId);  // Add userId to formData
+    formData.append("user_id", userId);
 
-    console.log("FormData:", formData);
+    const response = await fetch("http://localhost:8001/api/math_chat", {
+      method: "POST",
+      body: formData,
+    });
 
-    // Log the actual content of the FormData
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
-    const response = await fetch(
-      "http://localhost:8001/api/math_chat",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    // Log the response status and headers
     console.log("Response status:", response.status);
     console.log("Response headers:", response.headers);
 
@@ -209,7 +202,7 @@ export async function sendMessage(messageText, sessionId, userId) {
         for (const sentence of sentences) {
           accumulatedText += sentence;
           if (isAudioEnabled) {
-            await streamAudio(sentence); // Wait for audio to be queued before displaying text
+            await streamAudio(sentence);
           }
           await displayTextWithDynamicDelay(sentence, botMessageElement);
         }
@@ -237,9 +230,13 @@ export async function sendMessage(messageText, sessionId, userId) {
       }
 
       // Store the conversation in local storage
-      console.log("Storing conversation in sendMessage"); // Debugging line
+      console.log("Storing conversation in sendMessage");
       storeConversation(userId, sessionId, messageText, accumulatedText);
     } else {
+      if (response.status === 401) {
+        redirectToLogin();
+        return;
+      }
       console.error("Failed to send message:", await response.text());
     }
   } catch (error) {
@@ -252,7 +249,7 @@ export async function sendMessage(messageText, sessionId, userId) {
 
 async function storeConversation(userId, sessionId, userMessage, botMessage) {
   const conversation = {
-    userId,  // Ensure userId is included
+    userId, // Ensure userId is included
     sessionId,
     userMessage,
     botMessage,
@@ -281,3 +278,6 @@ async function storeConversation(userId, sessionId, userMessage, botMessage) {
     console.error("Error saving chat history:", error);
   }
 }
+
+// At the end of the file, add this export
+export { storeConversation };

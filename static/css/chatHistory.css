@@ -1,0 +1,27 @@
+.chat-history-container {
+    background-color: var(--white);
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.chat-history-header {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.chat-history-item {
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.chat-history-item:hover {
+    background-color: var(--background-color);
+}
+
+.chat-history-item-title {
+    color: var(--primary-color);
+}
+
+.chat-history-item-date {
+    color: var(--dark-gray);
+}

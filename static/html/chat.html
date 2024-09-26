@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Chat - Toru Chatbot</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/opus-recorder/8.0.5/recorder.min.js"></script>
+        <link rel="stylesheet" href="/static/css/styles.css" />
         <link rel="stylesheet" href="/static/css/chat.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
@@ -45,66 +46,71 @@
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
         ></script>
     </head>
-    <body class="chat-body">
+    <body>
         <header class="chat-header">
             <button id="logoutButton" class="logout-button">Logout</button>
         </header>
-        <aside class="chat-sidebar">
-            <h1>Toru</h1>
-            <nav>
-                <ul>
-                    <li>
-                        <a href="/chatHistory"
-                            ><i class="fas fa-info-circle"></i>Historique des
-                            conversations</a
-                        >
-                    </li>
-                    <li>
-                        <a href="/settings"
-                            ><i class="fas fa-cog"></i> Paramètres</a
-                        >
-                    </li>
-                    <li>
-                        <a href="/homepage"
-                            ><i class="fas fa-cog"></i> Accueil</a
-                        >
-                    </li>
-                    <li>
-                        <a href="#" id="sidebarLogoutButton"
-                            ><i class="fas fa-sign-out-alt"></i> Logout</a
-                        >
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        <main class="chat-main">
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages">
-                    <!-- Messages will be dynamically added here -->
+        <div class="chat-body">
+            <aside class="chat-sidebar">
+                <h1>Toru</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="/chatHistory">
+                                <i class="fas fa-history"></i>
+                                Historique des conversations
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/settings">
+                                <i class="fas fa-cog"></i>
+                                Paramètres
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/homepage">
+                                <i class="fas fa-home"></i>
+                                Accueil
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    <a href="#" id="sidebarLogoutButton">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Déconnexion
+                    </a>
                 </div>
-                <div
-                    id="currentTranscription"
-                    class="current-transcription"
-                ></div>
-                <div class="chat-input-container">
-                    <div class="input-row">
-                        <input
-                            type="text"
-                            id="userInput"
-                            placeholder="Type your message..."
-                        />
-                        <button id="uploadButton">Upload Image</button>
-                        <input
-                            type="file"
-                            id="imageInput"
-                            accept="image/*"
-                            style="display: none"
-                        />
+            </aside>
+            <main class="chat-main">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be dynamically added here -->
                     </div>
-                    <div id="micStatus">Microphone: Initializing...</div>
+                    <div
+                        id="currentTranscription"
+                        class="current-transcription"
+                    ></div>
+                    <div class="chat-input-container">
+                        <div class="input-row">
+                            <input
+                                type="text"
+                                id="userInput"
+                                placeholder="Type your message..."
+                            />
+                            <button id="uploadButton">Envoie une photo de ton exercice</button>
+                            <input
+                                type="file"
+                                id="imageInput"
+                                accept="image/*"
+                                style="display: none"
+                            />
+                        </div>
+                        <div id="micStatus">Microphone: Initializing...</div>
+                    </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
         <script type="module" src="/static/js/main.js"></script>
     </body>
 </html>

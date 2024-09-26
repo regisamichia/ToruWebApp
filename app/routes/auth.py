@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 
 router = APIRouter()
 
-# ... (other existing endpoints)
-
 
 @router.post("/api/change_password")
 async def change_password(

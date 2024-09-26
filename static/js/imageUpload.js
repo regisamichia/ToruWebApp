@@ -1,6 +1,6 @@
 import { makeApiCall } from "./api.js";
-import { addMessageToChat, addLoadingAnimation, renderContent, displayTextWithDynamicDelay, streamAudio } from "./chat.js";
-import { sessionId, isAudioEnabled } from "./main.js";
+import { addMessageToChat, addLoadingAnimation, renderContent, displayTextWithDynamicDelay, streamAudio, storeConversation } from "./chat.js";
+import { sessionId, isAudioEnabled, userId } from "./main.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
 export function initializeImageUpload() {
@@ -45,17 +45,25 @@ async function sendImageMessage(imageFile) {
       const extractFormData = new FormData();
       extractFormData.append("image", imageFile);
 
+      // Add authentication token to the request
+      const token = localStorage.getItem("token");
+      const headers = new Headers();
+      headers.append("Authorization", `Bearer ${token}`);
+
       const extractResponse = await makeApiCall(
         "http://localhost:8000/api/extract_text",
         "POST",
         extractFormData,
-        "multipart/form-data"
+        "multipart/form-data",
+        headers  // Add headers to the makeApiCall function
       );
 
       if (!extractResponse.ok) {
         console.error("Failed to extract text from image");
         const errorText = await extractResponse.text();
         console.error("Error details:", errorText);
+        loadingAnimation.remove();
+        addMessageToChat("Failed to process the image. Please try again.", "error-message");
         return;
       }
 
@@ -64,14 +72,16 @@ async function sendImageMessage(imageFile) {
 
       const chatFormData = new FormData();
       chatFormData.append("session_id", sessionId);
+      chatFormData.append("user_id", userId);
       chatFormData.append("image", imageFile);
       chatFormData.append("extracted_text", extractedText);
 
       const chatResponse = await makeApiCall(
-        "http://localhost:8001/api/argentic_chat",
+        "http://localhost:8001/api/math_chat",
         "POST",
         chatFormData,
-        "multipart/form-data"
+        "multipart/form-data",
+        headers  // Add headers to this request as well
       );
 
       if (chatResponse.ok) {
@@ -122,7 +132,7 @@ async function sendImageMessage(imageFile) {
         }
 
         // Store the conversation in local storage
-        storeConversation(sessionId, extractedText, accumulatedText);
+        storeConversation(userId, sessionId, extractedText, accumulatedText);
 
       } else {
         console.error("Failed to process image and text in chat");
@@ -131,10 +141,11 @@ async function sendImageMessage(imageFile) {
       }
     } catch (error) {
       console.error("Error in sendImageMessage:", error);
-    } finally {
       loadingAnimation.remove();
+      addMessageToChat("An error occurred while processing the image. Please try again.", "error-message");
     }
   } catch (error) {
     console.error("Error in sendImageMessage:", error);
+    addMessageToChat("Failed to upload the image. Please try again.", "error-message");
   }
 }

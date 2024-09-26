@@ -8,10 +8,16 @@ import { initializeWebSocket } from "./websocket.js";
 import { addMessageToChat, sendMessage, addLoadingAnimation } from "./chat.js";
 import { initializeImageUpload } from "./imageUpload.js";
 import { handleLogout } from "./login.js";
+import { isAuthenticated, redirectToLogin, checkAuthAndRedirect } from "./auth.js";
 
 export let sessionId = null;
 export let userId = null;
 export let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false"; // Default to true if not set
+
+// Remove these duplicate function declarations
+// export function isAuthenticated() { ... }
+// export function redirectToLogin() { ... }
+// export function checkAuthAndRedirect() { ... }
 
 export function setAudioEnabled(enabled) {
   isAudioEnabled = enabled;
@@ -27,6 +33,12 @@ export function setTtsProvider(provider) {
 }
 
 async function initializeChatPage() {
+  if (!isAuthenticated()) {
+    console.log("User not authenticated. Redirecting to login.");
+    redirectToLogin();
+    return;
+  }
+
   try {
     const response = await fetch("http://localhost:8000/api/user_info", {
       headers: {
@@ -35,6 +47,11 @@ async function initializeChatPage() {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        console.log("Token expired or invalid. Redirecting to login.");
+        redirectToLogin();
+        return;
+      }
       throw new Error("Failed to fetch user info");
     }
 
@@ -48,13 +65,35 @@ async function initializeChatPage() {
     console.log("Initialized userId:", userId);
 
     initializeChatInterface();
-    await initializeAudioRecording();
+    
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        await initializeAudioRecording();
+        console.log("Audio recording initialized successfully");
+        break; // Exit the loop if successful
+      } catch (audioError) {
+        console.error("Failed to initialize audio recording:", audioError);
+        retries--;
+        if (retries > 0) {
+          console.log(`Retrying audio initialization. Attempts left: ${retries}`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+        } else {
+          // Update the UI to inform the user about the audio issue
+          const micStatus = document.getElementById("micStatus");
+          if (micStatus) {
+            micStatus.textContent = "Microphone: Unavailable - " + audioError.message;
+          }
+          // Optionally, you can disable audio-related features here
+        }
+      }
+    }
+    
     initializeWebSocket();
     initializeLogout();
   } catch (error) {
     console.error("Error initializing chat page:", error);
-    // Handle error (e.g., redirect to login page)
-    // window.location.href = "/login";
+    alert("An error occurred while loading the chat page. Please try again later.");
   }
 }
 
@@ -67,7 +106,7 @@ function initializeChatInterface() {
         const message = userInput.value.trim();
         if (message) {
           addMessageToChat(message, "user-message");
-          sendMessage(message, sessionId, userId); // Pass userId here
+          sendMessage(message); // Remove sessionId and userId from here
           userInput.value = "";
         }
       }
@@ -96,8 +135,8 @@ window.addEventListener("beforeunload", () => {
   // Cleanup code here
 });
 
-// Export everything at once at the end of the file
+// Update the exports at the end of the file
 export { 
   pauseAudioRecording, 
-  resumeAudioRecording
+  resumeAudioRecording,
 };

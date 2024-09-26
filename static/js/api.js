@@ -1,18 +1,18 @@
-export async function makeApiCall(url, method, body = null) {
+export async function makeApiCall(url, method, data, contentType, headers = new Headers()) {
   const options = {
     method: method,
-    credentials: 'include',
+    headers: headers,
   };
 
-  if (body instanceof FormData) {
-    options.body = body;
-  } else if (body) {
-    options.headers = {
-      'Content-Type': 'application/json',
-    };
-    options.body = JSON.stringify(body);
+  if (data) {
+    if (contentType === "application/json") {
+      options.body = JSON.stringify(data);
+      headers.append("Content-Type", "application/json");
+    } else if (contentType === "multipart/form-data") {
+      options.body = data;
+      // Don't set Content-Type for multipart/form-data, let the browser set it
+    }
   }
 
-  const response = await fetch(url, options);
-  return response;
+  return fetch(url, options);
 }
