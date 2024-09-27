@@ -8,6 +8,10 @@
         <link rel="stylesheet" href="/static/css/styles.css" />
         <link rel="stylesheet" href="/static/css/chat.css" />
         <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
+        <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
         />
@@ -98,7 +102,12 @@
                                 id="userInput"
                                 placeholder="Type your message..."
                             />
-                            <button id="uploadButton">Envoie une photo de ton exercice</button>
+                            <button id="microphoneButton" class="icon-button">
+                                <span class="material-icons">mic</span>
+                            </button>
+                            <button id="uploadButton">
+                                Envoie une photo de ton exercice
+                            </button>
                             <input
                                 type="file"
                                 id="imageInput"

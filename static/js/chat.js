@@ -1,13 +1,14 @@
+import { isAudioEnabled, getTtsProvider, sessionId, userId } from "./main.js";
+import { checkAuthAndRedirect } from "./auth.js";
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+import { getAudioMode } from "./main.js";
 import {
+  startRecording,
+  stopRecording,
   pauseAudioRecording,
   resumeAudioRecording,
-  isAudioEnabled,
-  getTtsProvider,
-  sessionId,
-  userId
-} from "./main.js";
-import { checkAuthAndRedirect } from "./auth.js";
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
+} from "./audioRecording.js";
+import { initializeWebSocket, closeWebSocket } from "./websocket.js"; // Import WebSocket functions
 
 // Define audioContext and audioQueue as global variables
 let audioContext;
@@ -147,35 +148,69 @@ async function playNextAudio() {
   source.start();
 }
 
-// Add this function to handle user input from the text field
+// Add this function to handle the microphone button click
+async function handleMicrophoneClick() {
+  const micButton = document.getElementById("microphoneButton");
+  const micIcon = micButton.querySelector(".material-icons");
+  const currentMode = getAudioMode();
+
+  console.log("Microphone button clicked. Current mode:", currentMode);
+
+  if (currentMode === "manual") {
+    if (micButton.classList.contains("recording")) {
+      console.log("Stopping recording");
+      const audioBlob = await stopRecording();
+      micButton.classList.remove("recording");
+      micIcon.textContent = "mic";
+      await sendAudioMessage(audioBlob);
+    } else {
+      console.log("Starting recording");
+      startRecording();
+      micButton.classList.add("recording");
+      micIcon.textContent = "stop";
+    }
+  } else {
+    console.log("Continuous mode is active. Manual recording is disabled.");
+  }
+}
+
+// Modify the existing handleUserInput function
 export function handleUserInput() {
   const userInput = document.getElementById("userInput");
   const messageText = userInput.value.trim();
   if (messageText !== "") {
     addMessageToChat(messageText, "user-message");
-    sendMessage(messageText, sessionId, userId); // Pass userId here
+    sendMessage(messageText, sessionId, userId);
     userInput.value = "";
+  } else if (getAudioMode() === "manual") {
+    handleMicrophoneClick();
   }
 }
 
-export async function sendMessage(messageText) {
-  if (!checkAuthAndRedirect()) return;
+export async function sendMessage(messageText, sessionId, userId) {
+  console.log("sendMessage called with:", { messageText, sessionId, userId });
+  if (!checkAuthAndRedirect()) {
+    console.log("Auth check failed, returning");
+    return;
+  }
 
-  if (messageText.trim() === "") return;
+  if (messageText.trim() === "") {
+    console.log("Empty message, returning");
+    return;
+  }
 
   const loadingAnimation = addLoadingAnimation();
 
   try {
     pauseAudioRecording();
 
-    console.log("SessionId:", sessionId);
-    console.log("UserId:", userId);
-
+    console.log("Preparing to send message to math_chat");
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
     formData.append("user_id", userId);
 
+    console.log("Sending request to math_chat");
     const response = await fetch("http://localhost:8001/api/math_chat", {
       method: "POST",
       body: formData,
@@ -185,6 +220,7 @@ export async function sendMessage(messageText) {
     console.log("Response headers:", response.headers);
 
     if (response.ok) {
+      console.log("Received OK response from math_chat");
       loadingAnimation.remove();
       const botMessageElement = addMessageToChat("", "bot-message");
       const reader = response.body.getReader();
@@ -229,18 +265,18 @@ export async function sendMessage(messageText) {
           .catch((err) => console.log("MathJax processing failed:", err));
       }
 
-      // Store the conversation in local storage
-      console.log("Storing conversation in sendMessage");
-      storeConversation(userId, sessionId, messageText, accumulatedText);
+      console.log("Storing conversation");
+      await storeConversation(userId, sessionId, messageText, accumulatedText);
     } else {
       if (response.status === 401) {
+        console.log("Unauthorized, redirecting to login");
         redirectToLogin();
         return;
       }
       console.error("Failed to send message:", await response.text());
     }
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error in sendMessage:", error);
   } finally {
     loadingAnimation.remove();
     resumeAudioRecording();
@@ -249,12 +285,14 @@ export async function sendMessage(messageText) {
 
 async function storeConversation(userId, sessionId, userMessage, botMessage) {
   const conversation = {
-    userId, // Ensure userId is included
+    userId,
     sessionId,
     userMessage,
     botMessage,
     timestamp: new Date().toISOString(),
   };
+
+  console.log("Attempting to save conversation:", conversation);
 
   try {
     const response = await fetch(
@@ -270,14 +308,94 @@ async function storeConversation(userId, sessionId, userMessage, botMessage) {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to save chat history");
+      const errorText = await response.text();
+      console.error("Server response:", errorText);
+      console.error("Response status:", response.status);
+      console.error("Response headers:", response.headers);
+      throw new Error(
+        `Failed to save chat history: ${response.status} ${response.statusText}`,
+      );
     }
 
-    console.log("Chat history saved successfully");
+    const responseData = await response.json();
+    console.log("Chat history saved successfully:", responseData);
   } catch (error) {
     console.error("Error saving chat history:", error);
+    console.error("Conversation data:", conversation);
   }
 }
 
 // At the end of the file, add this export
 export { storeConversation };
+
+document.addEventListener("DOMContentLoaded", function () {
+  const micButton = document.getElementById("microphoneButton");
+  if (micButton) {
+    micButton.addEventListener("click", handleMicrophoneClick);
+  } else {
+    console.error("Microphone button not found");
+  }
+});
+
+function updateMicrophoneButtonState() {
+  const micButton = document.getElementById("microphoneButton");
+  const currentMode = getAudioMode();
+
+  if (currentMode === "manual") {
+    micButton.style.display = "inline-block";
+  } else {
+    micButton.style.display = "none";
+  }
+}
+
+// Call this when the page loads and whenever the audio mode changes
+document.addEventListener("DOMContentLoaded", updateMicrophoneButtonState);
+
+console.log("Chat page script loaded");
+
+document.addEventListener("DOMContentLoaded", function () {
+  const userInput = document.getElementById("userInput");
+  if (userInput) {
+    userInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        handleUserInput();
+      }
+    });
+  } else {
+    console.error("User input field not found");
+  }
+});
+
+async function sendAudioMessage(audioBlob) {
+  try {
+    const formData = new FormData();
+    formData.append("audio", audioBlob, "audio.webm");
+
+    const response = await fetch(
+      "http://localhost:8000/ws/manual_audio",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      const transcription = data.transcription;
+
+      // Add the transcription to the chat as a user message
+      addMessageToChat(transcription, "user-message");
+
+      // Send the transcription to the chat route
+      await sendMessage(transcription, sessionId, userId);
+    } else {
+      console.error("Failed to transcribe audio");
+      const errorText = await response.text();
+      console.error("Error details:", errorText);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+export { sendAudioMessage };

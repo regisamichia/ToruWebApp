@@ -1,23 +1,46 @@
-import { initializeSession } from "./session.js";
-import {
-  initializeAudioRecording,
-  pauseAudioRecording,
-  resumeAudioRecording,
-} from "./audioRecording.js";
+import { initializeAudioRecording } from "./audioRecording.js";
 import { initializeWebSocket } from "./websocket.js";
 import { addMessageToChat, sendMessage, addLoadingAnimation } from "./chat.js";
-import { initializeImageUpload } from "./imageUpload.js";
-import { handleLogout } from "./login.js";
-import { isAuthenticated, redirectToLogin, checkAuthAndRedirect } from "./auth.js";
+import { initializeImageUpload } from "./imageUpload.js"; // Add this import
+// Remove any imports related to login or registration
 
 export let sessionId = null;
 export let userId = null;
-export let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false"; // Default to true if not set
+export let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false";
+export let audioMode = localStorage.getItem("audioMode") || "continuous"; // Add this line
 
-// Remove these duplicate function declarations
-// export function isAuthenticated() { ... }
-// export function redirectToLogin() { ... }
-// export function checkAuthAndRedirect() { ... }
+// Function to generate a session ID
+function generateSessionId() {
+  return "session_" + Math.random().toString(36).substr(2, 9);
+}
+
+// Function to get or set user ID
+function getUserId() {
+  let id = localStorage.getItem("userId");
+  if (!id) {
+    id = "user_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("userId", id);
+  }
+  return id;
+}
+
+// Initialize session and user ID
+export function initializeSession() {
+  sessionId = generateSessionId();
+  userId = getUserId();
+  console.log(
+    "Session initialized with sessionId:",
+    sessionId,
+    "and userId:",
+    userId,
+  );
+}
+
+// Call this function when your app starts, perhaps in your main init function or DOMContentLoaded event
+document.addEventListener("DOMContentLoaded", () => {
+  initializeSession();
+  // ... other initialization code ...
+});
 
 export function setAudioEnabled(enabled) {
   isAudioEnabled = enabled;
@@ -32,111 +55,54 @@ export function setTtsProvider(provider) {
   localStorage.setItem("ttsProvider", provider);
 }
 
+export function setAudioMode(mode) {
+  audioMode = mode;
+  localStorage.setItem("audioMode", mode); // Save to localStorage when set
+}
+
+export function getAudioMode() {
+  return audioMode;
+}
+
 async function initializeChatPage() {
-  if (!isAuthenticated()) {
-    console.log("User not authenticated. Redirecting to login.");
-    redirectToLogin();
-    return;
-  }
+  console.log("Initializing chat page...");
 
   try {
-    const response = await fetch("http://localhost:8000/api/user_info", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    console.log("About to initialize audio recording...");
+    await initializeAudioRecording();
+    console.log("Audio recording initialized successfully");
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        console.log("Token expired or invalid. Redirecting to login.");
-        redirectToLogin();
-        return;
-      }
-      throw new Error("Failed to fetch user info");
-    }
+    console.log("Initializing WebSocket...");
+    initializeWebSocket(); // Add this line
+    console.log("WebSocket initialized successfully");
 
-    const userData = await response.json();
-    console.log("User data fetched:", userData);
-
-    userId = userData.user_id;
-    sessionId = await initializeSession();
-
-    console.log("Initialized sessionId:", sessionId);
-    console.log("Initialized userId:", userId);
-
-    initializeChatInterface();
-    
-    let retries = 3;
-    while (retries > 0) {
-      try {
-        await initializeAudioRecording();
-        console.log("Audio recording initialized successfully");
-        break; // Exit the loop if successful
-      } catch (audioError) {
-        console.error("Failed to initialize audio recording:", audioError);
-        retries--;
-        if (retries > 0) {
-          console.log(`Retrying audio initialization. Attempts left: ${retries}`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
-        } else {
-          // Update the UI to inform the user about the audio issue
-          const micStatus = document.getElementById("micStatus");
-          if (micStatus) {
-            micStatus.textContent = "Microphone: Unavailable - " + audioError.message;
-          }
-          // Optionally, you can disable audio-related features here
-        }
-      }
-    }
-    
-    initializeWebSocket();
-    initializeLogout();
+    console.log("Initializing image upload..."); // Add this line
+    initializeImageUpload(); // Add this line
+    console.log("Image upload initialized successfully"); // Add this line
   } catch (error) {
-    console.error("Error initializing chat page:", error);
-    alert("An error occurred while loading the chat page. Please try again later.");
+    console.error("Failed to initialize:", error);
   }
+
+  // Other initialization code...
+  console.log("Chat page initialization complete");
 }
 
-function initializeChatInterface() {
-  const userInput = document.getElementById("userInput");
-  if (userInput) {
-    userInput.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const message = userInput.value.trim();
-        if (message) {
-          addMessageToChat(message, "user-message");
-          sendMessage(message); // Remove sessionId and userId from here
-          userInput.value = "";
-        }
-      }
-    });
-  }
-
-  initializeImageUpload();
-}
-
-function initializeLogout() {
-  const logoutButton = document.getElementById("logoutButton");
-  const sidebarLogoutButton = document.getElementById("sidebarLogoutButton");
-
-  if (logoutButton) {
-    logoutButton.addEventListener("click", handleLogout);
-  }
-
-  if (sidebarLogoutButton) {
-    sidebarLogoutButton.addEventListener("click", handleLogout);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", initializeChatPage);
-
-window.addEventListener("beforeunload", () => {
-  // Cleanup code here
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM content loaded, initializing chat page...");
+  initializeChatPage();
 });
 
-// Update the exports at the end of the file
-export { 
-  pauseAudioRecording, 
-  resumeAudioRecording,
-};
+console.log("Script is running");
+
+try {
+  // Your main initialization code here
+  // For example:
+  document.addEventListener('DOMContentLoaded', async function() {
+    console.log("DOM content loaded");
+    await initializeAudioRecording();
+    console.log("Audio recording initialized");
+    // ... other initialization code
+  });
+} catch (error) {
+  console.error("Error in main script:", error);
+}

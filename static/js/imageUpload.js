@@ -4,23 +4,35 @@ import { sessionId, isAudioEnabled, userId } from "./main.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
 export function initializeImageUpload() {
+  console.log("Initializing image upload...");
   const imageInput = document.getElementById("imageInput");
   const uploadButton = document.getElementById("uploadButton");
 
-  if (uploadButton) {
-    uploadButton.addEventListener("click", function () {
+  if (uploadButton && imageInput) {
+    console.log("Upload button and image input found, adding click event listener");
+    uploadButton.addEventListener("click", function(event) {
+      event.preventDefault();
+      console.log("Upload button clicked");
+      console.log("Image input element:", imageInput);
       imageInput.click();
+      console.log("Image input clicked");
     });
-  }
 
-  if (imageInput) {
-    imageInput.addEventListener("change", function () {
+    imageInput.addEventListener("change", function() {
+      console.log("Image input changed");
       const imageFile = imageInput.files[0];
       if (imageFile) {
+        console.log("Image file selected:", imageFile.name);
         sendImageMessage(imageFile);
+      } else {
+        console.log("No image file selected");
       }
     });
+  } else {
+    console.error("Upload button or image input not found");
   }
+
+  console.log("Image upload initialization complete");
 }
 
 async function sendImageMessage(imageFile) {

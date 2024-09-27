@@ -107,14 +107,14 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 20px;  /* Add padding around the chat window */
-    background-color: #f0f2f5;  /* Light background color for the area around the chat window */
+    padding: 20px; /* Add padding around the chat window */
+    background-color: #f0f2f5; /* Light background color for the area around the chat window */
 }
 
 .chat-container {
-    max-width: 800px;  /* Set a maximum width for the chat container */
-    width: 100%;  /* Take full width up to the max-width */
-    margin: 0 auto;  /* Center the chat container */
+    max-width: 800px; /* Set a maximum width for the chat container */
+    width: 100%; /* Take full width up to the max-width */
+    margin: 0 auto; /* Center the chat container */
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -122,8 +122,8 @@ body {
     box-shadow:
         0 2px 4px rgba(0, 0, 0, 0.1),
         0 8px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;  /* Add rounded corners to the chat container */
-    overflow: hidden;  /* Ensure content doesn't overflow the rounded corners */
+    border-radius: 10px; /* Add rounded corners to the chat container */
+    overflow: hidden; /* Ensure content doesn't overflow the rounded corners */
 }
 
 .chat-messages {
@@ -154,7 +154,7 @@ body {
 }
 
 .chat-input-container {
-    background-color: var(--white);  /* Change to white background */
+    background-color: var(--white); /* Change to white background */
     border-top: 1px solid var(--light-gray);
     padding: 20px;
 }
@@ -200,6 +200,22 @@ body {
 
 .logout-button:hover {
     background-color: var(--light-gray);
+}
+
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.icon-button .material-icons {
+    font-size: 24px; /* Adjust size as needed */
+    vertical-align: middle;
+}
+
+.icon-button.recording .material-icons {
+    color: red;
 }
 
 @media (max-width: 768px) {

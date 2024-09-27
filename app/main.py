@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai
+from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai, speech_to_text_manual
 from app.config import settings
 
 app = FastAPI()
@@ -27,13 +27,14 @@ templates = Jinja2Templates(directory="static")
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(speech_to_text.router)
+app.include_router(speech_to_text_manual.router)
 app.include_router(text_to_speech.router)
 app.include_router(text_to_speech_openai.router)
 
 # Serve HTML pages
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("html/login.html", {"request": request})
+    return templates.TemplateResponse("html/homepage.html", {"request": request})
 
 @app.get("/chat", response_class=HTMLResponse)
 async def read_chat(request: Request):

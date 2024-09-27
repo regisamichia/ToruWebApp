@@ -35,6 +35,7 @@ async def synthesize_audio_endpoint(request: TextToSpeechRequest):
         }
 
         voice_id = os.getenv("ELEVEN_VOICE_ID")
+
         response = requests.post(
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream",
             json=payload,

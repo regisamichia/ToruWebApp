@@ -1,10 +1,13 @@
 import { sendAudioData } from "./websocket.js";
+import { getAudioMode } from "./main.js";
 
 let audioContext;
 let sourceNode;
 let processorNode;
 let analyser;
 let isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
 
 const SILENCE_THRESHOLD = 0.01;
 const SILENCE_DURATION = 3000; // 3 seconds
@@ -39,14 +42,45 @@ export async function initializeAudioRecording() {
     sourceNode.connect(processorNode);
     processorNode.connect(audioContext.destination);
 
-    processorNode.onaudioprocess = processAudio;
+    if (getAudioMode() === "continuous") {
+      processorNode.onaudioprocess = processAudioContinuous;
+      isRecording = true; // Start recording immediately in continuous mode
+      console.log("Continuous mode: Started recording");
+    } else {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+    }
 
-    isRecording = true;
     console.log("Audio recording initialized successfully");
   } catch (error) {
     console.error("Error initializing audio:", error);
     micStatus.textContent = "Microphone: Error - " + error.message;
-    throw error; // Re-throw the error so it can be caught in the calling function
+    throw error;
+  }
+}
+
+export function startRecording() {
+  if (getAudioMode() === "manual" && mediaRecorder) {
+    audioChunks = [];
+    mediaRecorder.start();
+    isRecording = true;
+    console.log("Manual recording started");
+  }
+}
+
+export function stopRecording() {
+  if (getAudioMode() === "manual" && mediaRecorder) {
+    return new Promise((resolve) => {
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        resolve(audioBlob);
+      };
+      mediaRecorder.stop();
+      isRecording = false;
+      console.log("Manual recording stopped");
+    });
   }
 }
 
@@ -60,8 +94,8 @@ export function resumeAudioRecording() {
   console.log("Audio recording resumed");
 }
 
-function processAudio(audioProcessingEvent) {
-  if (!isRecording) return;
+function processAudioContinuous(audioProcessingEvent) {
+  if (!isRecording || getAudioMode() !== "continuous") return;
 
   const inputBuffer = audioProcessingEvent.inputBuffer;
   const inputData = inputBuffer.getChannelData(0);

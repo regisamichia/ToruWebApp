@@ -229,19 +229,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const showLoginBtn = document.getElementById('showLoginBtn');
     const showRegisterBtn = document.getElementById('showRegisterBtn');
 
-    showLoginBtn.addEventListener('click', function() {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-        showLoginBtn.classList.add('active');
-        showRegisterBtn.classList.remove('active');
-    });
+    if (showLoginBtn && showRegisterBtn) {
+        showLoginBtn.addEventListener('click', function() {
+            if (loginForm) loginForm.style.display = 'block';
+            if (registerForm) registerForm.style.display = 'none';
+            showLoginBtn.classList.add('active');
+            showRegisterBtn.classList.remove('active');
+        });
 
-    showRegisterBtn.addEventListener('click', function() {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-        showLoginBtn.classList.remove('active');
-        showRegisterBtn.classList.add('active');
-    });
+        showRegisterBtn.addEventListener('click', function() {
+            if (loginForm) loginForm.style.display = 'none';
+            if (registerForm) registerForm.style.display = 'block';
+            showLoginBtn.classList.remove('active');
+            showRegisterBtn.classList.add('active');
+        });
+    }
 
     // ... rest of your login.js code ...
 });

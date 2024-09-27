@@ -1,80 +1,128 @@
 import { setAudioEnabled, setTtsProvider, getTtsProvider } from "./main.js";
 import { makeApiCall } from "./api.js";
 import { handleLogout } from "./login.js";
+import { setAudioMode, getAudioMode } from "./main.js";
+import { isAuthenticated, redirectToLogin, checkAuthAndRedirect } from "./auth.js";
 
 async function initializeSettings() {
-  console.log("Initializing settings page..."); // Debug log
-  //debugger; // Pause execution here
+  console.log("Initializing settings page...");
+
+  if (!checkAuthAndRedirect()) {
+    return; // This will redirect to login if not authenticated
+  }
 
   try {
+    const token = localStorage.getItem("token");
+    console.log("Token retrieved from localStorage:", token ? "Token exists" : "Token is missing");
+
     const response = await fetch("http://localhost:8000/api/user_info", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
+    console.log("Fetch response status:", response.status);
+
+    if (response.status === 401) {
+      console.error("Unauthorized: Token may be invalid or expired");
+      redirectToLogin();
+      return;
+    }
+
     if (!response.ok) {
-      console.error("Failed to fetch user info"); // Debug log
-      throw new Error("Failed to fetch user info");
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch user info: ${response.status} ${errorText}`);
     }
 
     const userData = await response.json();
     console.log("User data fetched:", userData);
 
     // Proceed with initializing settings page
-    const toggleAudioInput = document.getElementById("toggleAudio");
-    if (toggleAudioInput) {
-      toggleAudioInput.checked =
-        localStorage.getItem("audioEnabled") !== "false";
-      toggleAudioInput.addEventListener("change", toggleAudio);
-    }
+    initializeSettingsUI();
 
-    // Initialize TTS provider radio buttons
-    const ttsProviderRadios = document.querySelectorAll('input[name="ttsProvider"]');
-    if (ttsProviderRadios) {
-      const savedProvider = getTtsProvider();
-      const radioToCheck = document.getElementById(`ttsProvider${savedProvider.charAt(0).toUpperCase() + savedProvider.slice(1)}`);
-      if (radioToCheck) {
-        radioToCheck.checked = true;
-      }
-      ttsProviderRadios.forEach(radio => {
-        radio.addEventListener('change', toggleTtsProvider);
-      });
-    }
-
-    const changePasswordBtn = document.getElementById("changePasswordBtn");
-    if (changePasswordBtn) {
-      changePasswordBtn.addEventListener("click", changePassword);
-    }
-
-    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
-    if (saveSettingsBtn) {
-      saveSettingsBtn.addEventListener("click", saveSettings);
-    }
-
-    const headerLogoutButton = document.getElementById("headerLogoutButton");
-    if (headerLogoutButton) {
-      headerLogoutButton.addEventListener("click", handleLogout);
-    }
-
-    // Use event delegation for the sidebar logout button
-    const chatSidebar = document.querySelector(".chat-sidebar");
-    if (chatSidebar) {
-      chatSidebar.addEventListener("click", function (e) {
-        if (
-          e.target.id === "sidebarLogoutButton" ||
-          e.target.closest("#sidebarLogoutButton")
-        ) {
-          e.preventDefault();
-          handleLogout(e);
-        }
-      });
-    }
   } catch (error) {
     console.error("Error initializing settings page:", error);
-    // Comment out the redirection to the login page
-    // window.location.href = "/login";
+    displayErrorMessage("Failed to load settings. Please try logging in again.");
   }
+}
+
+function initializeSettingsUI() {
+  // Move all the UI initialization code here
+  const toggleAudioInput = document.getElementById("toggleAudio");
+  if (toggleAudioInput) {
+    toggleAudioInput.checked = localStorage.getItem("audioEnabled") !== "false";
+    toggleAudioInput.addEventListener("change", toggleAudio);
+  }
+
+  // Initialize TTS provider radio buttons
+  const ttsProviderRadios = document.querySelectorAll('input[name="ttsProvider"]');
+  if (ttsProviderRadios) {
+    const savedProvider = getTtsProvider();
+    const radioToCheck = document.getElementById(`ttsProvider${savedProvider.charAt(0).toUpperCase() + savedProvider.slice(1)}`);
+    if (radioToCheck) {
+      radioToCheck.checked = true;
+    }
+    ttsProviderRadios.forEach(radio => {
+      radio.addEventListener('change', toggleTtsProvider);
+    });
+  }
+
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener("click", changePassword);
+  }
+
+  const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+  if (saveSettingsBtn) {
+    saveSettingsBtn.addEventListener("click", saveSettings);
+  }
+
+  const headerLogoutButton = document.getElementById("headerLogoutButton");
+  if (headerLogoutButton) {
+    headerLogoutButton.addEventListener("click", handleLogout);
+  }
+
+  // Use event delegation for the sidebar logout button
+  const chatSidebar = document.querySelector(".chat-sidebar");
+  if (chatSidebar) {
+    chatSidebar.addEventListener("click", function (e) {
+      if (
+        e.target.id === "sidebarLogoutButton" ||
+        e.target.closest("#sidebarLogoutButton")
+      ) {
+        e.preventDefault();
+        handleLogout(e);
+      }
+    });
+  }
+
+  // Initialize audio mode radio buttons
+  const audioModeRadios = document.querySelectorAll('input[name="audioMode"]');
+  if (audioModeRadios) {
+    const savedMode = localStorage.getItem('audioMode') || 'continuous'; // Get from localStorage
+    const radioToCheck = document.getElementById(`audioMode${savedMode.charAt(0).toUpperCase() + savedMode.slice(1)}`);
+    if (radioToCheck) {
+      radioToCheck.checked = true;
+    }
+    audioModeRadios.forEach(radio => {
+      radio.addEventListener('change', toggleAudioMode);
+    });
+  }
+}
+
+function displayErrorMessage(message) {
+  const errorElement = document.getElementById("errorMessage");
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.style.display = "block";
+  }
+}
+
+async function handleUnauthorized() {
+  // Implement token refresh logic here if your backend supports it
+  // If refresh fails or is not implemented, redirect to login
+  console.log("Redirecting to login due to unauthorized access");
+  window.location.href = "/login";
 }
 
 function toggleAudio() {
@@ -138,6 +186,15 @@ function toggleTtsProvider(event) {
   setTtsProvider(provider);
   // Add this line to immediately see the effect
   console.log(`Current TTS Provider: ${getTtsProvider()}`);
+}
+
+function toggleAudioMode(event) {
+  const mode = event.target.value;
+  console.log(`Audio Mode set to ${mode}`);
+  localStorage.setItem('audioMode', mode); // Save to localStorage
+  setAudioMode(mode);
+  // Add this line to immediately see the effect
+  console.log(`Current Audio Mode: ${getAudioMode()}`);
 }
 
 document.addEventListener("DOMContentLoaded", initializeSettings);

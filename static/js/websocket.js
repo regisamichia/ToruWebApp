@@ -1,4 +1,5 @@
 import { handleTranscription } from "./transcription.js";
+import { getAudioMode } from "./main.js";
 
 let socket;
 let isListening = false;
@@ -6,6 +7,11 @@ let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
 
 export function initializeWebSocket() {
+  if (getAudioMode() !== "continuous") {
+    console.log("WebSocket not initialized: not in continuous mode");
+    return;
+  }
+
   console.log("Initializing WebSocket connection to backend");
   socket = new WebSocket("ws://localhost:8000/ws/audio");
 
@@ -50,15 +56,24 @@ export function initializeWebSocket() {
 }
 
 export function sendAudioData(audioData) {
-  if (isListening && socket && socket.readyState === WebSocket.OPEN) {
+  if (getAudioMode() === "continuous" && isListening && socket && socket.readyState === WebSocket.OPEN) {
     socket.send(audioData);
     console.log("Sent audio data, size:", audioData.byteLength, "bytes");
   } else {
     console.log(
-      "Not sending audio. isListening:",
+      "Not sending audio. Mode:",
+      getAudioMode(),
+      "isListening:",
       isListening,
       "socket state:",
-      socket ? socket.readyState : "no socket",
+      socket ? socket.readyState : "no socket"
     );
+  }
+}
+
+export function closeWebSocket() {
+  if (socket) {
+    socket.close();
+    console.log("WebSocket connection closed");
   }
 }

@@ -121,8 +121,8 @@ h1 {
 }
 
 footer {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--background-color);
+    color: var(--primary-color);
     text-align: center;
     padding: 1rem;
 }
@@ -148,7 +148,7 @@ footer {
 }
 
 .accordion-header::after {
-    content: '+';
+    content: "+";
     font-size: 1.5rem;
 }
 
@@ -157,7 +157,7 @@ footer {
 }
 
 .accordion-header.active::after {
-    content: '-';
+    content: "-";
 }
 
 .accordion-content {

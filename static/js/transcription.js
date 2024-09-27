@@ -55,7 +55,7 @@ function finalizeTranscription() {
   if (fullTranscription.trim() !== "") {
     console.log("Final Transcription:", fullTranscription);
     addMessageToChat(fullTranscription.trim(), "user-message");
-    sendMessage(fullTranscription.trim());
+    sendMessage(fullTranscription.trim(), sessionId, userId);  // Include sessionId and userId here
 
     fullTranscription = "";
     currentTranscription = "";
