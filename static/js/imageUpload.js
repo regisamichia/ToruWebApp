@@ -1,5 +1,12 @@
 import { makeApiCall } from "./api.js";
-import { addMessageToChat, addLoadingAnimation, renderContent, displayTextWithDynamicDelay, streamAudio, storeConversation } from "./chat.js";
+import { 
+  addMessageToChat, 
+  addLoadingAnimation, 
+  renderContent, 
+  displayTextWithDynamicDelay, 
+  streamAudio, 
+  storeConversation 
+} from "./chat.js";
 import { sessionId, isAudioEnabled, userId } from "./main.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
