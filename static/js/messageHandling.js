@@ -51,7 +51,8 @@ export async function sendMessage(messageText, sessionId, userId) {
 
     if (response.ok) {
       console.log("Received OK response from math_chat");
-      loadingAnimation.remove();
+      loadingAnimation.remove(); // Remove loading animation here
+
       const botMessageElement = addMessageToChat("", "bot-message");
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -98,17 +99,20 @@ export async function sendMessage(messageText, sessionId, userId) {
       console.log("Storing conversation");
       await storeConversation(userId, sessionId, messageText, accumulatedText);
     } else {
+      loadingAnimation.remove(); // Remove loading animation in case of error
       if (response.status === 401) {
         console.log("Unauthorized, redirecting to login");
         redirectToLogin();
         return;
       }
       console.error("Failed to send message:", await response.text());
+      addMessageToChat("An error occurred. Please try again.", "error-message");
     }
   } catch (error) {
+    loadingAnimation.remove(); // Remove loading animation in case of error
     console.error("Error in sendMessage:", error);
+    addMessageToChat("An error occurred. Please try again.", "error-message");
   } finally {
-    loadingAnimation.remove();
     resumeAudioRecording();
   }
 }

@@ -21,7 +21,7 @@ export function addMessageToChat(message, className) {
   messageElement.textContent = message;
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
-  return messageElement; // Make sure to return the created element
+  return messageElement;
 }
 
 export function addLoadingAnimation() {
