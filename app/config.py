@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     DEEPGRAM_API_KEY: str
     ELEVEN_API_KEY: str
     ELEVEN_VOICE_ID: str
+    CHROMA_DB_URL: str
+    CHROMA_COLLECTION_ID: str
+    CHROMA_API_KEY: str
 
     class Config:
         env_file = ".env"

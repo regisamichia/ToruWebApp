@@ -1,21 +1,23 @@
 import aiohttp
 import json
 import yaml
-from typing import Dict, Any, Union
-from vector_store import OpenAIChromaVectorStore
+from typing import Dict, Any, Union, AsyncGenerator
+from hosted_vector_store import ChromaAPI
 from prompt_builder import PromptBuilder
 from langchain_core.messages import SystemMessage, HumanMessage
 from open_ai_client import OpenAILLMModel
 from config.argentic_rag_model import MathState as State
 from langchain_core.prompts import PromptTemplate
 
+
 class Chatbot(OpenAILLMModel):
 
     def __init__(self, model_name: str = "gpt-4o-mini") -> None:
         super().__init__(model_name)
 
-        self.vector_store = OpenAIChromaVectorStore(collection_name="toru_with_school_level")
-        self.retriever = self.vector_store.as_retriever(filter_store={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
+        #self.vector_store = OpenAIChromaVectorStore(collection_name="toru_with_school_level")
+        self.vector_store = ChromaAPI()
+        self.retriever = self.vector_store.as_retriever(filter={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
         self.multimodal_api_url = "http://localhost:8003/api/multimodal"
         with open('rag/config/contextualize_prompts.yaml', 'r') as file:
             self.prompts = yaml.safe_load(file)
@@ -60,7 +62,7 @@ class Chatbot(OpenAILLMModel):
             except Exception as e:
                 raise
 
-    async def generate_response(self, state: Dict[str, Any]) -> None:
+    async def generate_response(self, state: Dict[str, Any]) -> AsyncGenerator[str, None]:
         last_message = state["messages"][-1]
         if isinstance(last_message.content, str):
             try:
@@ -76,10 +78,7 @@ class Chatbot(OpenAILLMModel):
         #ici la requête du doc retriever se fait avec le premier message uniquement, à modifier
         docs = self.retriever.invoke(state["messages"][0].content)
 
-        lesson_example = ""
-        for elt in range(len(docs)):
-            lesson_example += docs[elt].page_content
-        state["lesson_example"] = lesson_example
+        state["lesson_example"] = docs
 
         prompt = self.build_exercice_prompt(state)
         #print(f"PROMPT : {prompt}")
