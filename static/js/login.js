@@ -1,3 +1,5 @@
+import { apiBaseUrl } from "./config.js";
+
 export function getToken() {
   return localStorage.getItem("token");
 }
@@ -7,7 +9,7 @@ export async function refreshToken() {
   if (!refreshToken) return null;
 
   try {
-    const response = await fetch("http://localhost:8000/api/refresh", {
+    const response = await fetch(`${apiBaseUrl}/api/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,7 +66,7 @@ async function handleLogin(e) {
 
   try {
     console.log("Sending login request...");
-    const response = await fetch("http://localhost:8000/api/login", {
+    const response = await fetch(`${apiBaseUrl}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -117,7 +119,7 @@ async function handleRegister(e) {
 
   try {
     console.log("Sending registration request...");
-    const response = await fetch("http://localhost:8000/api/register", {
+    const response = await fetch(`${apiBaseUrl}/api/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -139,7 +141,7 @@ async function handleRegister(e) {
       loginFormData.append("password", password);
 
       console.log("Sending login request...");
-      const loginResponse = await fetch("http://localhost:8000/api/login", {
+      const loginResponse = await fetch(`${apiBaseUrl}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -197,7 +199,7 @@ export async function handleLogout(e) {
 
 async function login(username, password) {
   try {
-    const response = await fetch("http://localhost:8000/api/login", {
+    const response = await fetch(`${apiBaseUrl}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -223,27 +225,25 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeLoginForm();
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const showLoginBtn = document.getElementById('showLoginBtn');
-    const showRegisterBtn = document.getElementById('showRegisterBtn');
+document.addEventListener("DOMContentLoaded", function () {
+  const loginForm = document.getElementById("loginForm");
+  const registerForm = document.getElementById("registerForm");
+  const showLoginBtn = document.getElementById("showLoginBtn");
+  const showRegisterBtn = document.getElementById("showRegisterBtn");
 
-    if (showLoginBtn && showRegisterBtn) {
-        showLoginBtn.addEventListener('click', function() {
-            if (loginForm) loginForm.style.display = 'block';
-            if (registerForm) registerForm.style.display = 'none';
-            showLoginBtn.classList.add('active');
-            showRegisterBtn.classList.remove('active');
-        });
+  if (showLoginBtn && showRegisterBtn) {
+    showLoginBtn.addEventListener("click", function () {
+      if (loginForm) loginForm.style.display = "block";
+      if (registerForm) registerForm.style.display = "none";
+      showLoginBtn.classList.add("active");
+      showRegisterBtn.classList.remove("active");
+    });
 
-        showRegisterBtn.addEventListener('click', function() {
-            if (loginForm) loginForm.style.display = 'none';
-            if (registerForm) registerForm.style.display = 'block';
-            showLoginBtn.classList.remove('active');
-            showRegisterBtn.classList.add('active');
-        });
-    }
-
-    // ... rest of your login.js code ...
+    showRegisterBtn.addEventListener("click", function () {
+      if (loginForm) loginForm.style.display = "none";
+      if (registerForm) registerForm.style.display = "block";
+      showLoginBtn.classList.remove("active");
+      showRegisterBtn.classList.add("active");
+    });
+  }
 });
