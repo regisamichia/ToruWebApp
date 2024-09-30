@@ -65,7 +65,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         raise HTTPException(status_code=401, detail="Incorrect username or password")
     access_token = create_access_token(data={"sub": user.email}, db=db)
     refresh_token = create_refresh_token(data={"sub": user.email})
-    print(f"User logged in: {user.email}, user_id: {user.user_id}")  # Debug print
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,

@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai, speech_to_text_manual
 from app.config import settings
+from app.database import create_tables
 
 app = FastAPI()
 
@@ -22,6 +23,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Set up Jinja2 templates
 templates = Jinja2Templates(directory="static")
+
+#create users db
+@app.on_event("startup")
+async def startup_event():
+    create_tables()
 
 # Include routers
 app.include_router(auth.router)

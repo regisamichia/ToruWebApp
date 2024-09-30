@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from typing import List
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite:///./users.db"
-    SECRET_KEY: str = "your-secret-key"
+    POSTGRES_URL: str
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 240
     ALLOWED_ORIGINS: str = "http://localhost:8000"  # Change this to str
