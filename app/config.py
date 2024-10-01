@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     MULTIMODAL_URL: str
 
     class Config:
-        env_file = ".env"
+        env_file = "/etc/secrets/.env"
 
     @property
     def allowed_origins_list(self) -> List[str]:
