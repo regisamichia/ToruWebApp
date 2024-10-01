@@ -20,7 +20,7 @@ class MultimodalOpenAI:
 
         headers = {
           "Content-Type": "application/json",
-          "Authorization": f"Bearer {os.environ["OPENAI_API_KEY"]}"
+          "Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"
         }
 
         payload = {
