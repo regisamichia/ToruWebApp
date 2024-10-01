@@ -32,7 +32,7 @@ async function getUrls() {
       const data = await response.json();
       return {
         apiBaseUrl: data.API_BASE_URL || config.development.apiBaseUrl,
-        chatUrl: data.CHAT_URL || config.development.chatUrl,
+        chatUrl: data.MATH_CHATBOT_URL || config.development.chatUrl,
         multiModalUrl: data.MULTIMODAL_URL || config.development.multiModalUrl,
       };
     } catch (error) {

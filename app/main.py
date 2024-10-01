@@ -58,7 +58,7 @@ async def get_environment():
 async def get_config():
     return {
         "API_BASE_URL": os.getenv("API_BASE_URL", ""),
-        "CHAT_URL": os.getenv("CHAT_URL", ""),
+        "MATH_CHATBOT_URL": os.getenv("MATH_CHATBOT_URL", ""),
         "MULTIMODAL_URL": os.getenv("MULTIMODAL_URL", ""),
     }
 
