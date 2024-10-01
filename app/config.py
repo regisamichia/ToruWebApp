@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     CHROMA_DB_URL: str
     CHROMA_COLLECTION_ID: str
     CHROMA_API_KEY: str
+    MATH_CHATBOT_URL: str
+    MULTIMODAL_URL: str
 
     class Config:
         env_file = ".env"

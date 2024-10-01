@@ -1,23 +1,34 @@
 import { makeApiCall } from "./api.js";
-import { 
-  addMessageToChat, 
-  addLoadingAnimation, 
-  renderContent, 
-  displayTextWithDynamicDelay, 
-  streamAudio, 
-  storeConversation 
+import {
+  addMessageToChat,
+  addLoadingAnimation,
+  renderContent,
+  displayTextWithDynamicDelay,
+  streamAudio,
+  storeConversation,
 } from "./chat.js";
 import { sessionId, isAudioEnabled, userId } from "./main.js";
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+import getUrls from "./config.js";
 
-export function initializeImageUpload() {
+let apiBaseUrl, chatUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+  chatUrl = urls.chatUrl;
+}
+
+export async function initializeImageUpload() {
+  await initializeUrls();
   console.log("Initializing image upload...");
   const imageInput = document.getElementById("imageInput");
   const uploadButton = document.getElementById("uploadButton");
 
   if (uploadButton && imageInput) {
-    console.log("Upload button and image input found, adding click event listener");
-    uploadButton.addEventListener("click", function(event) {
+    console.log(
+      "Upload button and image input found, adding click event listener",
+    );
+    uploadButton.addEventListener("click", function (event) {
       event.preventDefault();
       console.log("Upload button clicked");
       console.log("Image input element:", imageInput);
@@ -25,7 +36,7 @@ export function initializeImageUpload() {
       console.log("Image input clicked");
     });
 
-    imageInput.addEventListener("change", function() {
+    imageInput.addEventListener("change", function () {
       console.log("Image input changed");
       const imageFile = imageInput.files[0];
       if (imageFile) {
@@ -70,11 +81,11 @@ async function sendImageMessage(imageFile) {
       headers.append("Authorization", `Bearer ${token}`);
 
       const extractResponse = await makeApiCall(
-        "http://localhost:8000/api/extract_text",
+        `${apiBaseUrl}/api/extract_text`,
         "POST",
         extractFormData,
         "multipart/form-data",
-        headers  // Add headers to the makeApiCall function
+        headers, // Add headers to the makeApiCall function
       );
 
       if (!extractResponse.ok) {
@@ -82,7 +93,10 @@ async function sendImageMessage(imageFile) {
         const errorText = await extractResponse.text();
         console.error("Error details:", errorText);
         loadingAnimation.remove();
-        addMessageToChat("Failed to process the image. Please try again.", "error-message");
+        addMessageToChat(
+          "Failed to process the image. Please try again.",
+          "error-message",
+        );
         return;
       }
 
@@ -96,11 +110,11 @@ async function sendImageMessage(imageFile) {
       chatFormData.append("extracted_text", extractedText);
 
       const chatResponse = await makeApiCall(
-        "http://localhost:8001/api/math_chat",
+        `${chatUrl}/api/math_chat`,
         "POST",
         chatFormData,
         "multipart/form-data",
-        headers  // Add headers to this request as well
+        headers, // Add headers to this request as well
       );
 
       if (chatResponse.ok) {
@@ -146,13 +160,12 @@ async function sendImageMessage(imageFile) {
               console.log("MathJax rendering complete for image message");
             })
             .catch((err) =>
-              console.log("MathJax processing failed for image message:", err)
+              console.log("MathJax processing failed for image message:", err),
             );
         }
 
         // Store the conversation in local storage
         storeConversation(userId, sessionId, extractedText, accumulatedText);
-
       } else {
         console.error("Failed to process image and text in chat");
         const errorText = await chatResponse.text();
@@ -161,10 +174,16 @@ async function sendImageMessage(imageFile) {
     } catch (error) {
       console.error("Error in sendImageMessage:", error);
       loadingAnimation.remove();
-      addMessageToChat("An error occurred while processing the image. Please try again.", "error-message");
+      addMessageToChat(
+        "An error occurred while processing the image. Please try again.",
+        "error-message",
+      );
     }
   } catch (error) {
     console.error("Error in sendImageMessage:", error);
-    addMessageToChat("Failed to upload the image. Please try again.", "error-message");
+    addMessageToChat(
+      "Failed to upload the image. Please try again.",
+      "error-message",
+    );
   }
 }

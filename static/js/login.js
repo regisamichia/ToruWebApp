@@ -1,4 +1,21 @@
-import { apiBaseUrl } from "./config.js";
+import getUrls from './config.js';
+
+let apiBaseUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+}
+
+// Rest of the code remains the same, but wrap the initialization in an async function:
+
+async function initializeLogin() {
+  await initializeUrls();
+  initializeLoginForm();
+  // Other initialization code...
+}
+
+document.addEventListener("DOMContentLoaded", initializeLogin);
 
 export function getToken() {
   return localStorage.getItem("token");

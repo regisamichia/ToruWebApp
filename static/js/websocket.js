@@ -1,19 +1,31 @@
 import { handleTranscription } from "./transcription.js";
 import { getAudioMode } from "./main.js";
+import getUrls from "./config.js";
 
 let socket;
 let isListening = false;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
+let apiBaseUrl, chatUrl;
 
-export function initializeWebSocket() {
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+  chatUrl = urls.chatUrl;
+}
+
+export async function initializeWebSocket() {
+  await initializeUrls();
+
   if (getAudioMode() !== "continuous") {
     console.log("WebSocket not initialized: not in continuous mode");
     return;
   }
 
   console.log("Initializing WebSocket connection to backend");
-  socket = new WebSocket("ws://localhost:8000/ws/audio");
+  const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${wsProtocol}//${chatUrl.replace(/^https?:\/\//, '')}/ws`;
+  socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
     console.log("WebSocket connection opened");
@@ -56,7 +68,12 @@ export function initializeWebSocket() {
 }
 
 export function sendAudioData(audioData) {
-  if (getAudioMode() === "continuous" && isListening && socket && socket.readyState === WebSocket.OPEN) {
+  if (
+    getAudioMode() === "continuous" &&
+    isListening &&
+    socket &&
+    socket.readyState === WebSocket.OPEN
+  ) {
     socket.send(audioData);
     console.log("Sent audio data, size:", audioData.byteLength, "bytes");
   } else {
@@ -66,7 +83,7 @@ export function sendAudioData(audioData) {
       "isListening:",
       isListening,
       "socket state:",
-      socket ? socket.readyState : "no socket"
+      socket ? socket.readyState : "no socket",
     );
   }
 }

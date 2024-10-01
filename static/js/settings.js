@@ -2,20 +2,35 @@ import { setAudioEnabled, setTtsProvider, getTtsProvider } from "./main.js";
 import { makeApiCall } from "./api.js";
 import { handleLogout } from "./login.js";
 import { setAudioMode, getAudioMode } from "./main.js";
-import { isAuthenticated, redirectToLogin, checkAuthAndRedirect } from "./auth.js";
+import {
+  isAuthenticated,
+  redirectToLogin,
+  checkAuthAndRedirect,
+} from "./auth.js";
+import getUrls from "./config.js";
+
+let apiBaseUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+}
 
 async function initializeSettings() {
   console.log("Initializing settings page...");
-
+  await initializeUrls();
   if (!checkAuthAndRedirect()) {
     return; // This will redirect to login if not authenticated
   }
 
   try {
     const token = localStorage.getItem("token");
-    console.log("Token retrieved from localStorage:", token ? "Token exists" : "Token is missing");
+    console.log(
+      "Token retrieved from localStorage:",
+      token ? "Token exists" : "Token is missing",
+    );
 
-    const response = await fetch("http://localhost:8000/api/user_info", {
+    const response = await fetch(`${apiBaseUrl}/api/user_info`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -31,7 +46,9 @@ async function initializeSettings() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to fetch user info: ${response.status} ${errorText}`);
+      throw new Error(
+        `Failed to fetch user info: ${response.status} ${errorText}`,
+      );
     }
 
     const userData = await response.json();
@@ -39,10 +56,11 @@ async function initializeSettings() {
 
     // Proceed with initializing settings page
     initializeSettingsUI();
-
   } catch (error) {
     console.error("Error initializing settings page:", error);
-    displayErrorMessage("Failed to load settings. Please try logging in again.");
+    displayErrorMessage(
+      "Failed to load settings. Please try logging in again.",
+    );
   }
 }
 
@@ -55,15 +73,19 @@ function initializeSettingsUI() {
   }
 
   // Initialize TTS provider radio buttons
-  const ttsProviderRadios = document.querySelectorAll('input[name="ttsProvider"]');
+  const ttsProviderRadios = document.querySelectorAll(
+    'input[name="ttsProvider"]',
+  );
   if (ttsProviderRadios) {
     const savedProvider = getTtsProvider();
-    const radioToCheck = document.getElementById(`ttsProvider${savedProvider.charAt(0).toUpperCase() + savedProvider.slice(1)}`);
+    const radioToCheck = document.getElementById(
+      `ttsProvider${savedProvider.charAt(0).toUpperCase() + savedProvider.slice(1)}`,
+    );
     if (radioToCheck) {
       radioToCheck.checked = true;
     }
-    ttsProviderRadios.forEach(radio => {
-      radio.addEventListener('change', toggleTtsProvider);
+    ttsProviderRadios.forEach((radio) => {
+      radio.addEventListener("change", toggleTtsProvider);
     });
   }
 
@@ -99,13 +121,15 @@ function initializeSettingsUI() {
   // Initialize audio mode radio buttons
   const audioModeRadios = document.querySelectorAll('input[name="audioMode"]');
   if (audioModeRadios) {
-    const savedMode = localStorage.getItem('audioMode') || 'continuous'; // Get from localStorage
-    const radioToCheck = document.getElementById(`audioMode${savedMode.charAt(0).toUpperCase() + savedMode.slice(1)}`);
+    const savedMode = localStorage.getItem("audioMode") || "continuous"; // Get from localStorage
+    const radioToCheck = document.getElementById(
+      `audioMode${savedMode.charAt(0).toUpperCase() + savedMode.slice(1)}`,
+    );
     if (radioToCheck) {
       radioToCheck.checked = true;
     }
-    audioModeRadios.forEach(radio => {
-      radio.addEventListener('change', toggleAudioMode);
+    audioModeRadios.forEach((radio) => {
+      radio.addEventListener("change", toggleAudioMode);
     });
   }
 }
@@ -191,7 +215,7 @@ function toggleTtsProvider(event) {
 function toggleAudioMode(event) {
   const mode = event.target.value;
   console.log(`Audio Mode set to ${mode}`);
-  localStorage.setItem('audioMode', mode); // Save to localStorage
+  localStorage.setItem("audioMode", mode); // Save to localStorage
   setAudioMode(mode);
   // Add this line to immediately see the effect
   console.log(`Current Audio Mode: ${getAudioMode()}`);

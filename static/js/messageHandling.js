@@ -8,6 +8,41 @@ import {
 import { streamAudio } from "./audioHandling.js";
 import { storeConversation } from "./conversationStorage.js";
 import { pauseAudioRecording, resumeAudioRecording } from "./audioRecording.js";
+import getUrls from "./config.js";
+
+let chatUrl, apiBaseUrl;
+
+async function initializeUrls() {
+  try {
+    const urls = await getUrls();
+    if (!urls) {
+      throw new Error("getUrls() returned undefined");
+    }
+    console.log("Received URLs:", urls);
+    return urls;
+  } catch (error) {
+    console.error("Error in initializeUrls:", error);
+    throw error;
+  }
+}
+
+export async function initializeMessageHandling() {
+  try {
+    const urls = await initializeUrls();
+    if (!urls || typeof urls !== 'object') {
+      throw new Error("Invalid URLs object received");
+    }
+    chatUrl = urls.chatUrl;
+    apiBaseUrl = urls.apiBaseUrl;
+    if (!chatUrl || !apiBaseUrl) {
+      throw new Error("chatUrl or apiBaseUrl is undefined");
+    }
+    console.log("MessageHandling initialized with URLs:", { chatUrl, apiBaseUrl });
+  } catch (error) {
+    console.error("Failed to initialize MessageHandling:", error);
+    throw error;
+  }
+}
 
 export function handleUserInput() {
   const userInput = document.getElementById("userInput");
@@ -41,7 +76,8 @@ export async function sendMessage(messageText, sessionId, userId) {
     formData.append("user_id", userId);
 
     console.log("Sending request to math_chat");
-    const response = await fetch("http://localhost:8001/api/math_chat", {
+    console.log("Sending request to:", chatUrl);
+    const response = await fetch(`${chatUrl}/api/math_chat`, {
       method: "POST",
       body: formData,
     });
@@ -122,7 +158,7 @@ export async function sendAudioMessage(audioBlob) {
     const formData = new FormData();
     formData.append("audio", audioBlob, "audio.webm");
 
-    const response = await fetch("http://localhost:8000/ws/manual_audio", {
+    const response = await fetch(`${apiBaseUrl}/ws/manual_audio`, {
       method: "POST",
       body: formData,
     });

@@ -1,9 +1,19 @@
+import getUrls from "./config.js";
+
+let apiBaseUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+}
+
 export async function storeConversation(
   userId,
   sessionId,
   userMessage,
   botMessage,
 ) {
+  await initializeUrls();
   const conversation = {
     userId,
     sessionId,
@@ -15,17 +25,14 @@ export async function storeConversation(
   console.log("Attempting to save conversation:", conversation);
 
   try {
-    const response = await fetch(
-      "http://localhost:8000/api/save_chat_history",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(conversation),
+    const response = await fetch(`${apiBaseUrl}/api/save_chat_history`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    );
+      body: JSON.stringify(conversation),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

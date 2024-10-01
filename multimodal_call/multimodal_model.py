@@ -16,9 +16,7 @@ class MultimodalOpenAI:
 
     def extract_explanation(self, image_bytes: bytes):
 
-        print("multimodal 1")
         base64_image = self.encode_image(image_bytes)
-        print("multimodal 2")
 
         headers = {
           "Content-Type": "application/json",

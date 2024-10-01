@@ -6,8 +6,21 @@ from fastapi.templating import Jinja2Templates
 from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai, speech_to_text_manual
 from app.config import settings
 from app.database import create_tables
+import uvicorn
+import logging
+import os
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Received request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"Returning response: {response.status_code}")
+    return response
 
 # CORS setup
 app.add_middleware(
@@ -37,6 +50,18 @@ app.include_router(speech_to_text_manual.router)
 app.include_router(text_to_speech.router)
 app.include_router(text_to_speech_openai.router)
 
+@app.get("/api/environment")
+async def get_environment():
+    return {"environment": os.getenv("ENVIRONMENT", "development")}
+
+@app.get("/api/config")
+async def get_config():
+    return {
+        "API_BASE_URL": os.getenv("API_BASE_URL", ""),
+        "CHAT_URL": os.getenv("CHAT_URL", ""),
+        "MULTIMODAL_URL": os.getenv("MULTIMODAL_URL", ""),
+    }
+
 # Serve HTML pages
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -62,6 +87,11 @@ async def read_chat_history(request: Request):
 async def read_homepage(request: Request):
     return templates.TemplateResponse("html/homepage.html", {"request": request})
 
+@app.get("/health")
+async def health_check():
+    logger.info("Health check endpoint accessed")
+    return {"status": "ok"}
+
 if __name__ == "__main__":
-    import uvicorn
+    logger.info("Starting application")
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,7 +1,7 @@
 import { initializeAudioRecording } from "./audioRecording.js";
 import { initializeWebSocket } from "./websocket.js";
-import { addMessageToChat, sendMessage, addLoadingAnimation } from "./chat.js";
 import { initializeImageUpload } from "./imageUpload.js"; // Add this import
+import { initializeMessageHandling } from "./messageHandling.js";
 // Remove any imports related to login or registration
 
 export let sessionId = null;
@@ -72,24 +72,31 @@ async function initializeChatPage() {
     await initializeAudioRecording();
     console.log("Audio recording initialized successfully");
 
+    console.log("About to initialize message handling...");
+    await initializeMessageHandling();
+    console.log("Message handling initialized successfully");
+
     console.log("Initializing WebSocket...");
-    initializeWebSocket(); // Add this line
+    await initializeWebSocket(); // Make this async if it's not already
     console.log("WebSocket initialized successfully");
 
-    console.log("Initializing image upload..."); // Add this line
-    initializeImageUpload(); // Add this line
-    console.log("Image upload initialized successfully"); // Add this line
+    console.log("Initializing image upload...");
+    await initializeImageUpload(); // Make this async if it's not already
+    console.log("Image upload initialized successfully");
   } catch (error) {
     console.error("Failed to initialize:", error);
+    // You might want to add some user-facing error handling here
   }
 
-  // Other initialization code...
   console.log("Chat page initialization complete");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM content loaded, initializing chat page...");
-  initializeChatPage();
+  initializeChatPage().catch(error => {
+    console.error("Error during chat page initialization:", error);
+    // Add some user-facing error handling here
+  });
 });
 
 console.log("Script is running");
@@ -97,7 +104,7 @@ console.log("Script is running");
 try {
   // Your main initialization code here
   // For example:
-  document.addEventListener('DOMContentLoaded', async function() {
+  document.addEventListener("DOMContentLoaded", async function () {
     console.log("DOM content loaded");
     await initializeAudioRecording();
     console.log("Audio recording initialized");

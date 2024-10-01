@@ -2,12 +2,21 @@ import { isAudioEnabled, getTtsProvider } from "./main.js";
 import { startRecording, stopRecording } from "./audioRecording.js";
 import { sendAudioMessage } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
+import getUrls from "./config.js";
+
+let apiBaseUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+}
 
 let audioContext;
 let audioQueue = [];
 let isPlaying = false;
 
-export function initializeAudioHandling() {
+export async function initializeAudioHandling() {
+  await initializeUrls();
   const micButton = document.getElementById("microphoneButton");
   if (micButton) {
     micButton.addEventListener("click", handleMicrophoneClick);
@@ -58,9 +67,9 @@ export async function streamAudio(text) {
     let endpoint;
 
     if (currentProvider === "openai") {
-      endpoint = "http://localhost:8000/api/synthesize_audio_openai";
+      endpoint = `${apiBaseUrl}/api/synthesize_audio_openai`;
     } else if (currentProvider === "elevenlabs") {
-      endpoint = "http://localhost:8000/api/synthesize_audio";
+      endpoint = `${apiBaseUrl}/api/synthesize_audio`;
     } else {
       console.error(`Unknown TTS provider: ${currentProvider}`);
       return;
