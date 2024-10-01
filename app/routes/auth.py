@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.user import UserCreate, Token, ChangePassword, UserInToken
@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.post("/api/change_password")
@@ -89,14 +90,23 @@ def create_refresh_token(data: dict):
     return encoded_jwt
 
 @router.post("/api/logout")
-async def logout():
-    """
-        Log out the user.
-
-        Returns:
-            dict: A message indicating successful logout.
-        """
-    return {"message": "Logged out successfully"}
+async def logout(response: Response, token: str = Depends(oauth2_scheme)):
+    try:
+        # Decode the token to get the user's information
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        
+        # Here you could add the token to a blacklist if you want to invalidate it server-side
+        # For example: await add_token_to_blacklist(token)
+        
+        # Clear the cookie if you're using cookie-based authentication
+        response.delete_cookie(key="access_token")
+        
+        return {"message": "Logged out successfully"}
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.get("/api/user_info")
 async def get_user_info(current_user: UserInToken = Depends(get_current_user)):

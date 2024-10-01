@@ -2,6 +2,8 @@ import { initializeAudioRecording } from "./audioRecording.js";
 import { initializeWebSocket } from "./websocket.js";
 import { initializeImageUpload } from "./imageUpload.js"; // Add this import
 import { initializeMessageHandling } from "./messageHandling.js";
+import { initializeChat } from "./chat.js";
+
 // Remove any imports related to login or registration
 
 export let sessionId = null;
@@ -68,6 +70,10 @@ async function initializeChatPage() {
   console.log("Initializing chat page...");
 
   try {
+    console.log("Initializing chat...");
+    await initializeChat();
+    console.log("Chat initialized successfully");
+
     console.log("About to initialize audio recording...");
     await initializeAudioRecording();
     console.log("Audio recording initialized successfully");
@@ -93,7 +99,7 @@ async function initializeChatPage() {
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM content loaded, initializing chat page...");
-  initializeChatPage().catch(error => {
+  initializeChatPage().catch((error) => {
     console.error("Error during chat page initialization:", error);
     // Add some user-facing error handling here
   });

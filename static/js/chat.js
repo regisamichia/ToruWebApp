@@ -12,7 +12,7 @@ import {
 } from "./audioHandling.js";
 import { sendMessage, handleUserInput } from "./messageHandling.js";
 import { storeConversation } from "./conversationStorage.js";
-import { checkAuthAndRedirect } from "./auth.js";
+import { checkAuthAndRedirect, logout } from "./auth.js";
 import { getAudioMode } from "./main.js";
 
 export function initializeChat() {
@@ -23,6 +23,20 @@ export function initializeChat() {
 
   initializeChatUI();
   initializeAudioHandling();
+  initializeLogoutButtons();
+}
+
+function initializeLogoutButtons() {
+  const logoutButton = document.getElementById("logoutButton");
+  const sidebarLogoutButton = document.getElementById("sidebarLogoutButton");
+
+  if (logoutButton) {
+    logoutButton.addEventListener("click", logout);
+  }
+
+  if (sidebarLogoutButton) {
+    sidebarLogoutButton.addEventListener("click", logout);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initializeChat);
@@ -37,5 +51,5 @@ export {
   getAudioMode,
   displayTextWithDynamicDelay,
   renderContent,
-  streamAudio,  // Add this line
+  streamAudio, // Add this line
 };
