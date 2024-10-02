@@ -1,62 +1,22 @@
 import { setAudioEnabled, setTtsProvider, getTtsProvider } from "./main.js";
 import { makeApiCall } from "./api.js";
 import { setAudioMode, getAudioMode } from "./main.js";
-import { redirectToLogin, checkAuthAndRedirect, logout } from "./auth.js";
-import getUrls from "./config.js";
-
-let apiBaseUrl;
-
-async function initializeUrls() {
-  const urls = await getUrls();
-  apiBaseUrl = urls.apiBaseUrl;
-}
+import { checkAuthAndFetchUserInfo, logout } from "./auth.js";
 
 async function initializeSettings() {
   console.log("Initializing settings page...");
-  await initializeUrls();
-  if (!checkAuthAndRedirect()) {
-    return; // This will redirect to login if not authenticated
+  const userData = await checkAuthAndFetchUserInfo();
+  if (!userData) {
+    console.log("Authentication check failed, redirecting...");
+    return;
   }
 
-  try {
-    const token = localStorage.getItem("token");
-    console.log(
-      "Token retrieved from localStorage:",
-      token ? "Token exists" : "Token is missing",
-    );
+  // Authentication successful, show the main content
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
 
-    const response = await fetch(`${apiBaseUrl}/api/user_info`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("Fetch response status:", response.status);
-
-    if (response.status === 401) {
-      console.error("Unauthorized: Token may be invalid or expired");
-      redirectToLogin();
-      return;
-    }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Failed to fetch user info: ${response.status} ${errorText}`,
-      );
-    }
-
-    const userData = await response.json();
-    console.log("User data fetched:", userData);
-
-    // Proceed with initializing settings page
-    initializeSettingsUI();
-  } catch (error) {
-    console.error("Error initializing settings page:", error);
-    displayErrorMessage(
-      "Failed to load settings. Please try logging in again.",
-    );
-  }
+  // Proceed with initializing settings page
+  initializeSettingsUI();
 }
 
 function initializeSettingsUI() {

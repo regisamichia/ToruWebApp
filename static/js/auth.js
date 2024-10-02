@@ -1,3 +1,12 @@
+import getUrls from "./config.js";
+
+let apiBaseUrl;
+
+async function initializeUrls() {
+  const urls = await getUrls();
+  apiBaseUrl = urls.apiBaseUrl;
+}
+
 export function isAuthenticated() {
   return !!localStorage.getItem("token");
 }
@@ -6,13 +15,50 @@ export function redirectToLogin() {
   window.location.href = "/login";
 }
 
-export function checkAuthAndRedirect() {
+export async function checkAuthAndFetchUserInfo() {
+  await initializeUrls();
   if (!isAuthenticated()) {
     console.log("User not authenticated. Redirecting to login.");
     redirectToLogin();
     return false;
   }
-  return true;
+
+  try {
+    const token = localStorage.getItem("token");
+    console.log(
+      "Token retrieved from localStorage:",
+      token ? "Token exists" : "Token is missing"
+    );
+
+    const response = await fetch(`${apiBaseUrl}/api/user_info`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Fetch response status:", response.status);
+
+    if (response.status === 401) {
+      console.error("Unauthorized: Token may be invalid or expired");
+      redirectToLogin();
+      return false;
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to fetch user info: ${response.status} ${errorText}`
+      );
+    }
+
+    const userData = await response.json();
+    console.log("User data fetched:", userData);
+    return userData;
+  } catch (error) {
+    console.error("Error checking authentication:", error);
+    redirectToLogin();
+    return false;
+  }
 }
 
 export function logout() {

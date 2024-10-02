@@ -12,14 +12,19 @@ import {
 } from "./audioHandling.js";
 import { sendMessage, handleUserInput } from "./messageHandling.js";
 import { storeConversation } from "./conversationStorage.js";
-import { checkAuthAndRedirect, logout } from "./auth.js";
+import { checkAuthAndFetchUserInfo, logout } from "./auth.js";
 import { getAudioMode } from "./main.js";
 
 export async function initializeChat() {
-  if (!checkAuthAndRedirect()) {
+  const userData = await checkAuthAndFetchUserInfo();
+  if (!userData) {
     console.log("Authentication check failed, redirecting...");
     return;
   }
+
+  // Authentication successful, show the main content
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
 
   initializeChatUI();
   initializeAudioHandling();
