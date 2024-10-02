@@ -134,8 +134,9 @@ async function sendImageMessage(imageFile) {
 
           for (const sentence of sentences) {
             accumulatedText += sentence;
+            const { html, text } = renderContent(sentence);
             if (isAudioEnabled) {
-              await streamAudio(sentence);
+              await streamAudio(text);
             }
             await displayTextWithDynamicDelay(sentence, botMessageElement);
           }
@@ -146,17 +147,19 @@ async function sendImageMessage(imageFile) {
         // Process any remaining text in the buffer
         if (buffer) {
           accumulatedText += buffer;
+          const { html, text } = renderContent(buffer);
           if (isAudioEnabled) {
-            await streamAudio(buffer);
+            await streamAudio(text);
           }
           await displayTextWithDynamicDelay(buffer, botMessageElement);
         }
 
-        // Final render with MathJax
+        // Final render
         if (botMessageElement) {
-          botMessageElement.innerHTML = renderContent(accumulatedText);
-          // KaTeX doesn't require a separate typesetting step like MathJax did
-          console.log("KaTeX rendering complete for image message");
+          const { html, text } = renderContent(accumulatedText);
+          botMessageElement.innerHTML = html;
+          botMessageElement.dataset.plainText = text;
+          console.log("Final rendering complete for image message");
         }
 
         // Store the conversation in local storage

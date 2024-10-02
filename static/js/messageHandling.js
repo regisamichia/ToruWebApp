@@ -4,6 +4,7 @@ import {
   addLoadingAnimation,
   renderContent,
   displayTextWithDynamicDelay,
+  latexToReadableText,
 } from "./chatUI.js";
 import { streamAudio } from "./audioHandling.js";
 import { storeConversation } from "./conversationStorage.js";
@@ -107,8 +108,11 @@ export async function sendMessage(messageText, sessionId, userId) {
 
         for (const sentence of sentences) {
           accumulatedText += sentence;
+          const { html, text } = renderContent(sentence);
           if (isAudioEnabled) {
-            await streamAudio(sentence);
+            console.log("text send to speech");
+            console.log(text);
+            await streamAudio(text);
           }
           await displayTextWithDynamicDelay(sentence, botMessageElement);
         }
@@ -119,15 +123,19 @@ export async function sendMessage(messageText, sessionId, userId) {
       // Process any remaining text in the buffer
       if (buffer) {
         accumulatedText += buffer;
+        const { html, text } = renderContent(buffer);
         if (isAudioEnabled) {
-          await streamAudio(buffer);
+          const readableText = latexToReadableText(text);
+          await streamAudio(readableText);
         }
         await displayTextWithDynamicDelay(buffer, botMessageElement);
       }
 
-      // Final render with KaTeX
+      // Final render
       if (botMessageElement) {
-        botMessageElement.innerHTML = renderContent(accumulatedText);
+        const { html, text } = renderContent(accumulatedText);
+        botMessageElement.innerHTML = html;
+        botMessageElement.dataset.plainText = text;
       }
 
       console.log("Storing conversation");
