@@ -1,4 +1,4 @@
-import getUrls from './config.js';
+import getUrls from "./config.js";
 
 let apiBaseUrl;
 
@@ -190,27 +190,6 @@ async function handleRegister(e) {
   } catch (error) {
     console.error("Error:", error);
     alert("An error occurred. Please try again.");
-  }
-}
-
-import { makeApiCall } from "./api.js";
-
-export async function handleLogout(e) {
-  e.preventDefault();
-  try {
-    const response = await makeApiCall("/api/logout", "POST");
-    if (response.ok) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
-    } else {
-      alert("Logout failed");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("An error occurred during logout");
   }
 }
 

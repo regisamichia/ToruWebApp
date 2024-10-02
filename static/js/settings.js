@@ -1,12 +1,7 @@
 import { setAudioEnabled, setTtsProvider, getTtsProvider } from "./main.js";
 import { makeApiCall } from "./api.js";
-import { handleLogout } from "./login.js";
 import { setAudioMode, getAudioMode } from "./main.js";
-import {
-  isAuthenticated,
-  redirectToLogin,
-  checkAuthAndRedirect,
-} from "./auth.js";
+import { redirectToLogin, checkAuthAndRedirect, logout } from "./auth.js";
 import getUrls from "./config.js";
 
 let apiBaseUrl;
@@ -101,7 +96,7 @@ function initializeSettingsUI() {
 
   const headerLogoutButton = document.getElementById("headerLogoutButton");
   if (headerLogoutButton) {
-    headerLogoutButton.addEventListener("click", handleLogout);
+    headerLogoutButton.addEventListener("click", logout);
   }
 
   // Use event delegation for the sidebar logout button
@@ -113,7 +108,7 @@ function initializeSettingsUI() {
         e.target.closest("#sidebarLogoutButton")
       ) {
         e.preventDefault();
-        handleLogout(e);
+        logout(e);
       }
     });
   }
