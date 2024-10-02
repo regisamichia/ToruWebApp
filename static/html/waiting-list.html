@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Join Waiting List - Toru Chatbot</title>
+        <link rel="stylesheet" href="/static/css/styles.css" />
+        <link rel="stylesheet" href="/static/css/waiting-list.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            src="https://kit.fontawesome.com/your-fontawesome-kit.js"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Coming soon ...</h1>
+            </header>
+            <main>
+                <p>
+                    Si vous souhaitez être parmi les premiers à la découvrir et
+                    à nous aider à l'améliorer, inscrivez-vous dès maintenant
+                    sur notre liste d'attente !
+                </p>
+                <form id="waitingListForm">
+                    <input
+                        type="text"
+                        id="firstName"
+                        placeholder="Prénom"
+                        required
+                    />
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Email"
+                        required
+                    />
+                    <select id="schoolClass" required>
+                        <option value="">Dans quel classe es-tu ?</option>
+                        <option value="6e">6e</option>
+                        <option value="5e">5e</option>
+                        <option value="4e">4e</option>
+                        <option value="3e">3e</option>
+                    </select>
+                    <select id="sourcing" required>
+                        <option value="">
+                            Comment as-tu entendu parlé de nous ?
+                        </option>
+                        <option value="bouche à oreille">Word of mouth</option>
+                        <option value="media">Press</option>
+                        <option value="google">Google</option>
+                    </select>
+                    <button type="submit">Rejoins notre liste d'attente</button>
+                </form>
+            </main>
+            <footer>
+                <a href="/">Retour à l'accueil</a>
+            </footer>
+        </div>
+        <script type="module" src="/static/js/waiting-list.js"></script>
+    </body>
+</html>

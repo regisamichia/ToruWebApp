@@ -29,7 +29,7 @@ async function initializeUrls() {
 export async function initializeMessageHandling() {
   try {
     const urls = await initializeUrls();
-    if (!urls || typeof urls !== 'object') {
+    if (!urls || typeof urls !== "object") {
       throw new Error("Invalid URLs object received");
     }
     chatUrl = urls.chatUrl;
@@ -37,7 +37,10 @@ export async function initializeMessageHandling() {
     if (!chatUrl || !apiBaseUrl) {
       throw new Error("chatUrl or apiBaseUrl is undefined");
     }
-    console.log("MessageHandling initialized with URLs:", { chatUrl, apiBaseUrl });
+    console.log("MessageHandling initialized with URLs:", {
+      chatUrl,
+      apiBaseUrl,
+    });
   } catch (error) {
     console.error("Failed to initialize MessageHandling:", error);
     throw error;
@@ -122,14 +125,9 @@ export async function sendMessage(messageText, sessionId, userId) {
         await displayTextWithDynamicDelay(buffer, botMessageElement);
       }
 
-      // Final render with MathJax
+      // Final render with KaTeX
       if (botMessageElement) {
         botMessageElement.innerHTML = renderContent(accumulatedText);
-        MathJax.typesetPromise([botMessageElement])
-          .then(() => {
-            console.log("MathJax rendering complete");
-          })
-          .catch((err) => console.log("MathJax processing failed:", err));
       }
 
       console.log("Storing conversation");

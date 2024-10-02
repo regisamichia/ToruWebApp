@@ -155,13 +155,8 @@ async function sendImageMessage(imageFile) {
         // Final render with MathJax
         if (botMessageElement) {
           botMessageElement.innerHTML = renderContent(accumulatedText);
-          MathJax.typesetPromise([botMessageElement])
-            .then(() => {
-              console.log("MathJax rendering complete for image message");
-            })
-            .catch((err) =>
-              console.log("MathJax processing failed for image message:", err),
-            );
+          // KaTeX doesn't require a separate typesetting step like MathJax did
+          console.log("KaTeX rendering complete for image message");
         }
 
         // Store the conversation in local storage

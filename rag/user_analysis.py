@@ -55,13 +55,10 @@ class UserAnalysis(OpenAILLMModel):
         """
 
         if state["response_count"] == 0:
-            print("START USER ANALYSIS INTRO")
             return self.user_analysis_intro(state)
         elif not state["introduction"] and ("concept_understood" not in state or state["concept_understood"] == False):
-            print("START USER ANALYSIS CONCEPT")
             return self.user_analysis_concept(state)
         elif state["concept_understood"] and ("lesson_understood" not in state or not state["lesson_understood"]):
-            print("START USER ANALYSIS LESSON")
             return self.user_analysis_lesson(state)
         else:
             return state
@@ -74,12 +71,10 @@ class UserAnalysis(OpenAILLMModel):
 
     def user_analysis_intro(self, state: State) -> State:
 
-        #print("START USER ANALYSIS INTRO")
         prompt = self.build_prompt("user_analysis_introduction")
         llm_analysis = self.llm.with_structured_output(StudentStateIntroduction)
         chain = prompt | llm_analysis
         student_analysis = chain.invoke({"content": state["first_user_message"], "chat_history" : self.build_message_history(state)})
-
         state["math_concepts"] = student_analysis.math_concepts
         state["is_geometry"] = student_analysis.is_geometry
         state["is_math_question"] = student_analysis.is_math_question

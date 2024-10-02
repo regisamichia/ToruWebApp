@@ -88,3 +88,24 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: var(--secondary-color);
 }
+
+.waiting-list-info {
+    text-align: center;
+    padding: 1rem;
+    background-color: #f0f0f0;
+}
+
+.waiting-list-button {
+    display: inline-block;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    transition: background-color 0.3s;
+}
+
+.waiting-list-button:hover {
+    background-color: #ff5252;
+}

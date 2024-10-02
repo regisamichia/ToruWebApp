@@ -20,35 +20,21 @@
             crossorigin="anonymous"
         ></script>
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script>
-            window.MathJax = {
-                tex: {
-                    inlineMath: [
-                        ["$", "$"],
-                        ["\\(", "\\)"],
-                    ],
-                    displayMath: [
-                        ["$$", "$$"],
-                        ["\\[", "\\]"],
-                    ],
-                    processEscapes: true,
-                },
-                options: {
-                    skipHtmlTags: [
-                        "script",
-                        "noscript",
-                        "style",
-                        "textarea",
-                        "pre",
-                    ],
-                },
-            };
-        </script>
+
+        <!-- KaTeX -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+            integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+"
+            crossorigin="anonymous"
+        />
         <script
-            id="MathJax-script"
-            async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+            integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
+            crossorigin="anonymous"
         ></script>
+
         <style>
             #loadingState {
                 display: flex;
@@ -74,15 +60,15 @@
                     <nav>
                         <ul>
                             <li>
-                                <a href="/chatHistory">
-                                    <i class="fas fa-history"></i>
-                                    Historique des conversations
+                                <a href="/settings">
+                                    <i class="fas fa-comment-alt"></i>
+                                    Paramètres
                                 </a>
                             </li>
                             <li>
-                                <a href="/settings">
-                                    <i class="fas fa-cog"></i>
-                                    Paramètres
+                                <a href="/chatHistory">
+                                    <i class="fas fa-history"></i>
+                                    Historique des conversations
                                 </a>
                             </li>
                             <li>
@@ -116,7 +102,10 @@
                                     id="userInput"
                                     placeholder="Type your message..."
                                 />
-                                <button id="microphoneButton" class="icon-button">
+                                <button
+                                    id="microphoneButton"
+                                    class="icon-button"
+                                >
                                     <span class="material-icons">mic</span>
                                 </button>
                                 <button id="uploadButton">
@@ -129,7 +118,9 @@
                                     style="display: none"
                                 />
                             </div>
-                            <div id="micStatus">Microphone: Initializing...</div>
+                            <div id="micStatus">
+                                Microphone: Initializing...
+                            </div>
                         </div>
                     </div>
                 </main>

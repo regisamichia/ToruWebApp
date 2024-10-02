@@ -87,6 +87,10 @@ async def read_chat_history(request: Request):
 async def read_homepage(request: Request):
     return templates.TemplateResponse("html/homepage.html", {"request": request})
 
+@app.get("/waiting-list", response_class=HTMLResponse)
+async def read_waiting_list(request: Request):
+    return templates.TemplateResponse("html/waiting-list.html", {"request": request})
+
 @app.get("/health")
 async def health_check():
     logger.info("Health check endpoint accessed")

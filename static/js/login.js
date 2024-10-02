@@ -1,18 +1,17 @@
 import getUrls from "./config.js";
 
 let apiBaseUrl;
+let releaseMode;
 
 async function initializeUrls() {
   const urls = await getUrls();
   apiBaseUrl = urls.apiBaseUrl;
+  releaseMode = urls.release_mode;
 }
-
-// Rest of the code remains the same, but wrap the initialization in an async function:
 
 async function initializeLogin() {
   await initializeUrls();
   initializeLoginForm();
-  // Other initialization code...
 }
 
 document.addEventListener("DOMContentLoaded", initializeLogin);
@@ -54,6 +53,7 @@ export async function refreshToken() {
 function initializeLoginForm() {
   const loginForm = document.getElementById("login");
   const registerForm = document.getElementById("register");
+  const registerButton = document.getElementById("registerButton");
 
   if (loginForm) {
     loginForm.addEventListener("submit", handleLogin);
@@ -62,12 +62,26 @@ function initializeLoginForm() {
     console.error("Login form not found");
   }
 
-  if (registerForm) {
-    registerForm.addEventListener("submit", handleRegister);
-    console.log("Register form initialized");
+  if (releaseMode === "beta") {
+    if (registerButton) {
+      registerButton.addEventListener("click", handleRegisterRedirect);
+      console.log("Register button initialized for beta mode");
+    } else {
+      console.log("Register button not found on this page");
+    }
   } else {
-    console.log("Register form not found on this page");
+    if (registerForm) {
+      registerForm.addEventListener("submit", handleRegister);
+      console.log("Register form initialized for public mode");
+    } else {
+      console.log("Register form not found on this page");
+    }
   }
+}
+
+function handleRegisterRedirect(e) {
+  e.preventDefault();
+  window.location.href = "/waiting-list";
 }
 
 async function handleLogin(e) {
@@ -216,12 +230,11 @@ async function login(username, password) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async function () {
+  await initializeUrls();
   console.log("DOM content loaded"); // Debug log
   initializeLoginForm();
-});
 
-document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
   const showLoginBtn = document.getElementById("showLoginBtn");
@@ -229,17 +242,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (showLoginBtn && showRegisterBtn) {
     showLoginBtn.addEventListener("click", function () {
-      if (loginForm) loginForm.style.display = "block";
-      if (registerForm) registerForm.style.display = "none";
+      loginForm.style.display = "block";
+      registerForm.style.display = "none";
       showLoginBtn.classList.add("active");
       showRegisterBtn.classList.remove("active");
     });
 
     showRegisterBtn.addEventListener("click", function () {
-      if (loginForm) loginForm.style.display = "none";
-      if (registerForm) registerForm.style.display = "block";
-      showLoginBtn.classList.remove("active");
-      showRegisterBtn.classList.add("active");
+      if (releaseMode === "beta") {
+        window.location.href = "/waiting-list";
+      } else {
+        loginForm.style.display = "none";
+        registerForm.style.display = "block";
+        showLoginBtn.classList.remove("active");
+        showRegisterBtn.classList.add("active");
+      }
     });
   }
 });

@@ -18,8 +18,9 @@ export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
   const messageElement = document.createElement("div");
   messageElement.className = `message ${className}`;
-  messageElement.textContent = message;
+  messageElement.innerHTML = renderContent(message);
   chatMessages.appendChild(messageElement);
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return messageElement;
 }
@@ -36,50 +37,95 @@ export function addLoadingAnimation() {
 }
 
 export function renderContent(text) {
-  // Replace LaTeX delimiters before Markdown parsing
-  text = text.replace(/\\\(/g, "$");
-  text = text.replace(/\\\)/g, "$");
+  // Regex to identify LaTeX parts (both inline and display), including newlines
+  const latexPattern = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/g;
 
-  // Parse Markdown
-  const htmlContent = marked.parse(text);
+  // Split response into LaTeX and non-LaTeX parts
+  const parts = text.split(latexPattern);
 
-  // Create a temporary div to hold the content
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = htmlContent;
+  let renderedHtml = "";
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 3 === 0) {
+      // Non-LaTeX part
+      const markdownHtml = marked.parse(escapeSpecialChars(parts[i]));
+      renderedHtml += markdownHtml;
+    } else {
+      // LaTeX part
+      const isDisplayMode = i % 3 === 1;
+      const latexContent = parts[i];
+      if (latexContent) {
+        try {
+          const latexHtml = katex.renderToString(latexContent.trim(), {
+            displayMode: isDisplayMode,
+            throwOnError: false,
+            strict: false,
+          });
+          renderedHtml += latexHtml;
+        } catch (e) {
+          console.error("KaTeX rendering error:", e);
+          renderedHtml += `<span class="katex-error" title="KaTeX error: ${e.message}">${isDisplayMode ? "\\[" : "\\("}${latexContent}${isDisplayMode ? "\\]" : "\\)"}</span>`;
+        }
+      }
+    }
+  }
 
-  // Process LaTeX after Markdown parsing
-  MathJax.typesetPromise([tempDiv])
-    .then(() => {
-      console.log("MathJax rendering complete");
-    })
-    .catch((err) => console.log("MathJax processing failed:", err));
+  return renderedHtml;
+}
 
-  return tempDiv.innerHTML;
+// Escape special characters in regular text
+function escapeSpecialChars(text) {
+  return text
+    .replace(/\\/g, "\\\\") // Escape backslashes
+    .replace(/%/g, "\\%") // Escape percentages
+    .replace(/_/g, "\\_"); // Escape underscores
 }
 
 export async function displayTextWithDynamicDelay(
   text,
   element,
-  baseDelay = 100, // Increased from 50
-  wordsPerChunk = 1, // Reduced from 2
+  baseDelay = 100,
+  wordsPerChunk = 1,
 ) {
-  const words = text.split(" ");
+  // Regex to identify LaTeX parts (both inline and display), including newlines
+  const latexPattern = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/g;
+
+  // Split text into LaTeX and non-LaTeX parts
+  const parts = text.split(latexPattern);
+
   let displayedText = "";
-  let chunk = [];
 
-  for (let i = 0; i < words.length; i++) {
-    chunk.push(words[i]);
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 3 === 0) {
+      // Non-LaTeX part
+      const words = parts[i].split(" ");
+      let chunk = [];
 
-    if (chunk.length === wordsPerChunk || i === words.length - 1) {
-      displayedText += chunk.join(" ") + " ";
+      for (let j = 0; j < words.length; j++) {
+        chunk.push(words[j]);
+
+        if (chunk.length === wordsPerChunk || j === words.length - 1) {
+          displayedText += chunk.join(" ") + " ";
+          element.innerHTML = renderContent(displayedText);
+          element.scrollIntoView({ behavior: "smooth", block: "end" });
+
+          const chunkLength = chunk.join(" ").length;
+          const delay = baseDelay + chunkLength * 20;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+
+          chunk = [];
+        }
+      }
+    } else {
+      // LaTeX part
+      displayedText +=
+        (i % 3 === 1 ? "\\[" : "\\(") +
+        parts[i] +
+        (i % 3 === 1 ? "\\]" : "\\)");
       element.innerHTML = renderContent(displayedText);
       element.scrollIntoView({ behavior: "smooth", block: "end" });
 
-      const chunkLength = chunk.join(" ").length;
-      const delay = baseDelay + chunkLength * 20; // Increased from 10
-      await new Promise((resolve) => setTimeout(resolve, delay));
-
-      chunk = [];
+      // Add a delay for LaTeX rendering
+      await new Promise((resolve) => setTimeout(resolve, baseDelay * 5));
     }
   }
 }

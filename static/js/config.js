@@ -3,11 +3,13 @@ const config = {
     apiBaseUrl: "http://localhost:8000",
     chatUrl: "http://localhost:8001",
     multiModalUrl: "http://localhost:8003",
+    release_mode: "beta",
   },
   production: {
     apiBaseUrl: "",
     chatUrl: "",
     multiModalUrl: "",
+    release_mode: "beta",
   },
 };
 

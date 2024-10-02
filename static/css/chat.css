@@ -1,18 +1,22 @@
 body {
-    font-family: "Roboto", sans-serif;
+    height: 100vh;
     margin: 0;
     padding: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+#mainContent {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* This ensures it takes up all available space */
 }
 
 .chat-body {
     display: flex;
     flex: 1;
     overflow: hidden;
+    height: calc(100vh - 60px); /* Adjust 60px to match your header height */
 }
 
 .chat-header {
@@ -32,7 +36,6 @@ body {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
     height: 100%; /* Ensure full height */
 }
 
@@ -43,8 +46,7 @@ body {
 }
 
 .chat-sidebar nav {
-    width: 100%;
-    flex-grow: 1; /* Allow nav to grow and push footer to bottom */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
@@ -53,19 +55,12 @@ body {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+    flex-grow: 1; /* Allow the list to grow and push the footer down */
 }
 
 .chat-sidebar ul li {
     margin-bottom: 15px;
     width: 100%;
-}
-
-.chat-sidebar ul li:last-child {
-    margin-top: auto;
 }
 
 .chat-sidebar ul li a,
@@ -96,10 +91,10 @@ body {
 }
 
 .sidebar-footer {
+    margin-top: auto;
     width: 100%;
-    margin-top: auto; /* Push to bottom */
-    padding-top: 80px; /* Add some space above the logout button */
-    padding-bottom: 80px; /* Add some space below the logout button */
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .chat-main {
@@ -107,14 +102,15 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding: 20px; /* Add padding around the chat window */
-    background-color: #f0f2f5; /* Light background color for the area around the chat window */
+    padding: 20px;
+    background-color: #f0f2f5;
+    height: calc(100vh - 60px);
 }
 
 .chat-container {
-    max-width: 800px; /* Set a maximum width for the chat container */
-    width: 100%; /* Take full width up to the max-width */
-    margin: 0 auto; /* Center the chat container */
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -122,14 +118,16 @@ body {
     box-shadow:
         0 2px 4px rgba(0, 0, 0, 0.1),
         0 8px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 10px; /* Add rounded corners to the chat container */
-    overflow: hidden; /* Ensure content doesn't overflow the rounded corners */
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: calc(100vh - 100px);
 }
 
 .chat-messages {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
+    max-height: calc(100vh - 200px);
 }
 
 .user-message,
@@ -154,7 +152,7 @@ body {
 }
 
 .chat-input-container {
-    background-color: var(--white); /* Change to white background */
+    background-color: var(--white);
     border-top: 1px solid var(--light-gray);
     padding: 20px;
 }
@@ -171,7 +169,8 @@ body {
     border-radius: 5px;
 }
 
-#uploadButton {
+#uploadButton,
+.logout-button {
     background-color: var(--secondary-color);
     color: var(--white);
     border: none;
@@ -180,7 +179,8 @@ body {
     border-radius: 5px;
 }
 
-#uploadButton:hover {
+#uploadButton:hover,
+.logout-button:hover {
     background-color: #ff5252;
 }
 
@@ -188,18 +188,6 @@ body {
     margin-top: 10px;
     font-size: 0.9em;
     color: #666;
-}
-
-.logout-button {
-    background-color: var(--white);
-    color: var(--primary-color);
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-.logout-button:hover {
-    background-color: var(--light-gray);
 }
 
 .icon-button {
@@ -210,7 +198,7 @@ body {
 }
 
 .icon-button .material-icons {
-    font-size: 24px; /* Adjust size as needed */
+    font-size: 24px;
     vertical-align: middle;
 }
 
@@ -254,6 +242,13 @@ body {
     }
 }
 
+.katex-error {
+    color: #cc0000;
+    border-bottom: 1px dotted #cc0000;
+    cursor: help;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
     .chat-body {
         flex-direction: column;
@@ -261,7 +256,40 @@ body {
 
     .chat-sidebar {
         width: 100%;
+        height: auto;
         border-right: none;
         border-bottom: 1px solid var(--light-gray);
+    }
+
+    .chat-main {
+        height: auto;
+        padding: 10px;
+    }
+
+    .chat-container {
+        max-width: 100%;
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+
+    #uploadButton {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-header,
+    .chat-sidebar,
+    .chat-messages,
+    .chat-input-container {
+        padding: 10px;
+    }
+
+    #userInput,
+    #uploadButton {
+        font-size: 14px;
     }
 }

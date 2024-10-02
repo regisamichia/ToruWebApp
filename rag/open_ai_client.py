@@ -2,12 +2,12 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv("etc/secrets/.env")
 
 class OpenAILLMModel:
     """Wrapper for the language model."""
 
-    def __init__(self, model_name: str = "gpt-4o-mini"):
+    def __init__(self, model_name: str = "gpt-4o"):
         """
         Initialize the LLM model.
 

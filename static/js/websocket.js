@@ -24,7 +24,7 @@ export async function initializeWebSocket() {
 
   console.log("Initializing WebSocket connection to backend");
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  const wsUrl = `${wsProtocol}//${chatUrl.replace(/^https?:\/\//, '')}/ws`;
+  const wsUrl = `${wsProtocol}//${apiBaseUrl.replace(/^https?:\/\//, "")}/ws/audio`;
   socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
