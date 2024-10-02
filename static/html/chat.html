@@ -49,76 +49,91 @@
             async
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
         ></script>
+        <style>
+            #loadingState {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                font-size: 1.5em;
+            }
+            #mainContent {
+                display: none;
+            }
+        </style>
     </head>
     <body>
-        <header class="chat-header">
-            <button id="logoutButton" class="logout-button">Logout</button>
-        </header>
-        <div class="chat-body">
-            <aside class="chat-sidebar">
-                <h1>Toru</h1>
-                <nav>
-                    <ul>
-                        <li>
-                            <a href="/chatHistory">
-                                <i class="fas fa-history"></i>
-                                Historique des conversations
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/settings">
-                                <i class="fas fa-cog"></i>
-                                Paramètres
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/homepage">
-                                <i class="fas fa-home"></i>
-                                Accueil
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="sidebar-footer">
-                    <a href="#" id="sidebarLogoutButton">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Déconnexion
-                    </a>
-                </div>
-            </aside>
-            <main class="chat-main">
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages">
-                        <!-- Messages will be dynamically added here -->
+        <div id="loadingState">Loading...</div>
+        <div id="mainContent">
+            <header class="chat-header">
+                <button id="logoutButton" class="logout-button">Logout</button>
+            </header>
+            <div class="chat-body">
+                <aside class="chat-sidebar">
+                    <h1>Toru</h1>
+                    <nav>
+                        <ul>
+                            <li>
+                                <a href="/chatHistory">
+                                    <i class="fas fa-history"></i>
+                                    Historique des conversations
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/settings">
+                                    <i class="fas fa-cog"></i>
+                                    Paramètres
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/homepage">
+                                    <i class="fas fa-home"></i>
+                                    Accueil
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="sidebar-footer">
+                        <a href="#" id="sidebarLogoutButton">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Déconnexion
+                        </a>
                     </div>
-                    <div
-                        id="currentTranscription"
-                        class="current-transcription"
-                    ></div>
-                    <div class="chat-input-container">
-                        <div class="input-row">
-                            <input
-                                type="text"
-                                id="userInput"
-                                placeholder="Type your message..."
-                            />
-                            <button id="microphoneButton" class="icon-button">
-                                <span class="material-icons">mic</span>
-                            </button>
-                            <button id="uploadButton">
-                                Envoie une photo de ton exercice
-                            </button>
-                            <input
-                                type="file"
-                                id="imageInput"
-                                accept="image/*"
-                                style="display: none"
-                            />
+                </aside>
+                <main class="chat-main">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Messages will be dynamically added here -->
                         </div>
-                        <div id="micStatus">Microphone: Initializing...</div>
+                        <div
+                            id="currentTranscription"
+                            class="current-transcription"
+                        ></div>
+                        <div class="chat-input-container">
+                            <div class="input-row">
+                                <input
+                                    type="text"
+                                    id="userInput"
+                                    placeholder="Type your message..."
+                                />
+                                <button id="microphoneButton" class="icon-button">
+                                    <span class="material-icons">mic</span>
+                                </button>
+                                <button id="uploadButton">
+                                    Envoie une photo de ton exercice
+                                </button>
+                                <input
+                                    type="file"
+                                    id="imageInput"
+                                    accept="image/*"
+                                    style="display: none"
+                                />
+                            </div>
+                            <div id="micStatus">Microphone: Initializing...</div>
+                        </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
         <script type="module" src="/static/js/main.js"></script>
     </body>

@@ -15,7 +15,7 @@ import { storeConversation } from "./conversationStorage.js";
 import { checkAuthAndRedirect, logout } from "./auth.js";
 import { getAudioMode } from "./main.js";
 
-export function initializeChat() {
+export async function initializeChat() {
   if (!checkAuthAndRedirect()) {
     console.log("Authentication check failed, redirecting...");
     return;
@@ -39,7 +39,7 @@ function initializeLogoutButtons() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", initializeChat);
+// document.addEventListener("DOMContentLoaded", initializeChat);
 
 export {
   addMessageToChat,
