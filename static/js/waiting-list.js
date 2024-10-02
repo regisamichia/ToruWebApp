@@ -17,9 +17,10 @@ async function initializeWaitingList() {
 
 async function handleWaitingListSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById("name").value;
+  const name = document.getElementById("firstName").value;
   const email = document.getElementById("email").value;
   const schoolClass = document.getElementById("schoolClass").value;
+  const sourcing = document.getElementById("sourcing").value;
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/waiting-list`, {
@@ -27,14 +28,19 @@ async function handleWaitingListSubmit(e) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, email, school_class: schoolClass }),
+      body: JSON.stringify({
+        name,
+        email,
+        school_class: schoolClass,
+        sourcing,
+      }),
     });
 
     if (response.ok) {
       alert(
-        "Thank you for joining our waiting list! We will notify you when registration opens.",
+        "Merci d'avoir rejoint notre liste d'attente. Nous vous tiendrons informé dès que les inscriptions seront ouvertes.",
       );
-      // Optionally, redirect to homepage or clear the form
+      window.location.href = "/homepage";
     } else {
       const data = await response.json();
       alert(data.detail || "An error occurred. Please try again.");
