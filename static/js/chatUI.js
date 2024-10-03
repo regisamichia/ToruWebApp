@@ -52,8 +52,19 @@ export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) 
   playButton.className = "replay-button";
   playButton.onclick = () => replayAudioBuffers(audioBuffers);
 
-  // Insert the button as the first child of the message element
-  messageElement.insertBefore(playButton, messageElement.firstChild);
+  // Create a wrapper div for the message and play button
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper";
+
+  // Move the message content into the wrapper
+  wrapper.appendChild(messageElement.querySelector('.message-content'));
+  
+  // Add the play button to the wrapper
+  wrapper.appendChild(playButton);
+
+  // Replace the message content with the wrapper
+  messageElement.innerHTML = '';
+  messageElement.appendChild(wrapper);
 }
 
 function replayAudioBuffers(audioBuffers) {

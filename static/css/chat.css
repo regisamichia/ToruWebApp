@@ -212,6 +212,7 @@ body {
     justify-content: flex-start;
     height: 30px;
     padding: 10px;
+    flex-direction: row; /* Ensure horizontal layout */
 }
 
 .loading-animation .dot {
@@ -221,15 +222,10 @@ body {
     height: 8px;
     margin: 0 4px;
     animation: bounce 1.4s infinite ease-in-out both;
+    display: inline-block; /* Ensure inline layout */
 }
 
-.loading-animation .dot:nth-child(1) {
-    animation-delay: -0.32s;
-}
-
-.loading-animation .dot:nth-child(2) {
-    animation-delay: -0.16s;
-}
+/* Rest of the .loading-animation styles remain the same */
 
 @keyframes bounce {
     0%,
@@ -296,24 +292,39 @@ body {
 
 .message-content {
     flex-grow: 1;
+    margin-right: 10px; /* Add some space between the message and the play button */
 }
 
 .message {
-    position: relative;
-    padding-left: 30px; /* Make room for the play button */
+    display: flex;
+    flex-direction: row; /* Change to row to allow horizontal alignment */
+    align-items: center; /* Center align items vertically */
+    max-width: 70%;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 20px;
 }
 
 .replay-button {
-    position: absolute;
-    left: 5px;
-    top: 50%;
-    transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1.2em;
+    padding: 5px;
+    margin-left: 10px; /* Add some space between the message and the play button */
 }
 
 .bot-message.playing {
     background-color: #e6f3ff;
+}
+
+.message-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align to the start for bot messages */
+    width: 100%;
+}
+
+.user-message .message-wrapper {
+    justify-content: flex-end; /* Align to the end for user messages */
 }
