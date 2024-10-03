@@ -56,7 +56,7 @@ export async function handleMicrophoneClick() {
 }
 
 export async function streamAudio(text, messageId) {
-  if (!isAudioEnabled) return;
+  if (!isAudioEnabled) return null;
 
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -64,9 +64,10 @@ export async function streamAudio(text, messageId) {
 
   try {
     const currentProvider = getTtsProvider();
-    let endpoint = currentProvider === "openai" ? 
-      `${apiBaseUrl}/api/synthesize_audio_openai` : 
-      `${apiBaseUrl}/api/synthesize_audio`;
+    let endpoint =
+      currentProvider === "openai"
+        ? `${apiBaseUrl}/api/synthesize_audio_openai`
+        : `${apiBaseUrl}/api/synthesize_audio`;
 
     console.log(`Using TTS provider: ${currentProvider}`);
     console.log(`Endpoint: ${endpoint}`);
@@ -86,8 +87,11 @@ export async function streamAudio(text, messageId) {
     if (!isPlaying) {
       playNextAudio();
     }
+
+    return audioBuffer;
   } catch (error) {
     console.error("Error streaming audio:", error);
+    return null;
   }
 }
 
@@ -104,4 +108,37 @@ async function playNextAudio() {
   source.connect(audioContext.destination);
   source.onended = playNextAudio;
   source.start();
+}
+
+export async function replayAudioFromS3(messageId) {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/get_audio_urls`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        message_id: messageId,
+        region: "eu-west-3",
+      }),
+    });
+
+    if (!response.ok) throw new Error("Failed to get audio URLs");
+
+    const { audioUrls } = await response.json();
+
+    const audioBuffers = await Promise.all(audioUrls.map(async (url) => {
+      const audioResponse = await fetch(url);
+      if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
+      const arrayBuffer = await audioResponse.arrayBuffer();
+      return await audioContext.decodeAudioData(arrayBuffer);
+    }));
+
+    replayAudioBuffers(audioBuffers);
+  } catch (error) {
+    console.error("Error replaying audio:", error);
+  }
 }

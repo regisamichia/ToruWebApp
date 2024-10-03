@@ -293,3 +293,27 @@ body {
         font-size: 14px;
     }
 }
+
+.message-content {
+    flex-grow: 1;
+}
+
+.message {
+    position: relative;
+    padding-left: 30px; /* Make room for the play button */
+}
+
+.replay-button {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.bot-message.playing {
+    background-color: #e6f3ff;
+}

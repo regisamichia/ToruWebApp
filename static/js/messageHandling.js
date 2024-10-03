@@ -10,6 +10,7 @@ import { streamAudio } from "./audioHandling.js";
 import { storeConversation } from "./conversationStorage.js";
 import { pauseAudioRecording, resumeAudioRecording } from "./audioRecording.js";
 import getUrls from "./config.js";
+import { addPlayButtonToMessage } from "./chatUI.js";
 
 let chatUrl, apiBaseUrl;
 
@@ -61,87 +62,73 @@ export function handleUserInput() {
 }
 
 export async function sendMessage(messageText, sessionId, userId) {
-  console.log("sendMessage called with:", { messageText, sessionId, userId });
-
-  if (messageText.trim() === "") {
-    console.log("Empty message, returning");
-    return;
-  }
+  if (messageText.trim() === "") return;
 
   const loadingAnimation = addLoadingAnimation();
 
   try {
     pauseAudioRecording();
 
-    console.log("Preparing to send message to math_chat");
     const formData = new FormData();
     formData.append("session_id", sessionId);
     formData.append("message", messageText);
     formData.append("user_id", userId);
 
-    console.log("Sending request to math_chat");
-    console.log("Sending request to:", chatUrl);
     const response = await fetch(`${chatUrl}/api/math_chat`, {
       method: "POST",
       body: formData,
     });
 
-    console.log("Response status:", response.status);
-    console.log("Response headers:", response.headers);
-
     if (response.ok) {
-      console.log("Received OK response from math_chat");
       loadingAnimation.remove();
 
       const { element: botMessageElement, id: messageId } = addMessageToChat("", "bot-message");
+      const messageContent = botMessageElement.querySelector('.message-content');
+
+      if (!messageContent) {
+        console.error("Message content element not found");
+        return;
+      }
+
+      let accumulatedText = "";
+      let audioBuffers = [];
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let accumulatedText = "";
       let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value);
+        buffer += decoder.decode(value, { stream: true });
 
         const sentences = buffer.match(/[^.!?]+[.!?]+/g) || [];
 
         for (const sentence of sentences) {
           accumulatedText += sentence;
-          const { html, text } = renderContent(sentence);
+          
           if (isAudioEnabled) {
-            console.log("text send to speech");
-            console.log(text);
-            await streamAudio(text, messageId);
+            console.log("text sent to speech:", sentence);
+            const audioBuffer = await streamAudio(sentence, messageId);
+            if (audioBuffer) {
+              audioBuffers.push(audioBuffer);
+            }
           }
-          await displayTextWithDynamicDelay(sentence, botMessageElement);
+
+          await displayTextWithDynamicDelay(sentence, messageContent, 50, 1);
         }
 
         buffer = buffer.substring(sentences.join("").length);
       }
 
-      // Process any remaining text in the buffer
-      if (buffer) {
-        accumulatedText += buffer;
-        const { html, text } = renderContent(buffer);
-        if (isAudioEnabled) {
-          const readableText = latexToReadableText(text);
-          await streamAudio(readableText);
-        }
-        await displayTextWithDynamicDelay(buffer, botMessageElement);
-      }
+      // Display full message and add play button
+      const { html } = renderContent(accumulatedText);
+      messageContent.innerHTML = html;
+      botMessageElement.dataset.plainText = accumulatedText;
+      addPlayButtonToMessage(botMessageElement, messageId, audioBuffers);
 
-      // Final render
-      if (botMessageElement) {
-        const { html, text } = renderContent(accumulatedText);
-        botMessageElement.innerHTML = html;
-        botMessageElement.dataset.plainText = text;
-      }
-
-      console.log("Storing conversation");
       await storeConversation(userId, sessionId, messageText, accumulatedText);
     } else {
-      loadingAnimation.remove(); // Remove loading animation in case of error
+      loadingAnimation.remove();
       if (response.status === 401) {
         console.log("Unauthorized, redirecting to login");
         redirectToLogin();
@@ -151,7 +138,6 @@ export async function sendMessage(messageText, sessionId, userId) {
       addMessageToChat("An error occurred. Please try again.", "error-message");
     }
   } catch (error) {
-    loadingAnimation.remove(); // Remove loading animation in case of error
     console.error("Error in sendMessage:", error);
     addMessageToChat("An error occurred. Please try again.", "error-message");
   } finally {

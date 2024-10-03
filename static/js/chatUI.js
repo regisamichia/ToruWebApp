@@ -1,6 +1,10 @@
 import { handleUserInput } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+import { replayAudioFromS3 } from "./audioHandling.js";
+
+// Create audioContext at the top level
+let audioContext;
 
 export function initializeChatUI() {
   const userInput = document.getElementById("userInput");
@@ -16,17 +20,65 @@ export function initializeChatUI() {
 
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) {
+    console.error("Chat messages container not found");
+    return null;
+  }
+
   const messageElement = document.createElement("div");
-  const messageId = generateUniqueId(); // Generate a unique message ID
+  const messageId = generateUniqueId();
   messageElement.id = messageId;
   messageElement.className = `message ${className}`;
-  const { html, text } = renderContent(message);
-  messageElement.innerHTML = html;
-  messageElement.dataset.plainText = text;
-  chatMessages.appendChild(messageElement);
 
+  const messageContent = document.createElement("div");
+  messageContent.className = "message-content";
+  messageElement.appendChild(messageContent);
+
+  if (message) {
+    const { html, text } = renderContent(message);
+    messageContent.innerHTML = html;
+    messageElement.dataset.plainText = text;
+  }
+
+  chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return { element: messageElement, id: messageId };
+}
+
+// New function to add play button
+export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) {
+  const playButton = document.createElement("button");
+  playButton.innerHTML = "▶️";
+  playButton.className = "replay-button";
+  playButton.onclick = () => replayAudioBuffers(audioBuffers);
+
+  // Insert the button as the first child of the message element
+  messageElement.insertBefore(playButton, messageElement.firstChild);
+}
+
+function replayAudioBuffers(audioBuffers) {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  let currentIndex = 0;
+
+  function playNextBuffer() {
+    if (currentIndex >= audioBuffers.length) {
+      return;
+    }
+
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffers[currentIndex];
+    source.connect(audioContext.destination);
+    source.onended = () => {
+      currentIndex++;
+      playNextBuffer();
+    };
+    source.start();
+  }
+
+  playNextBuffer();
 }
 
 export function addLoadingAnimation() {
@@ -65,19 +117,23 @@ export function renderContent(text) {
             strict: false,
           });
           renderedHtml += latexHtml;
-          plainText += isDisplayMode ? `\\[${latexContent}\\]` : `\\(${latexContent}\\)`;
+          plainText += isDisplayMode
+            ? `\\[${latexContent}\\]`
+            : `\\(${latexContent}\\)`;
         } catch (e) {
           console.error("KaTeX rendering error:", e);
           renderedHtml += `<span class="katex-error" title="KaTeX error: ${e.message}">${isDisplayMode ? "\\[" : "\\("}${latexContent}${isDisplayMode ? "\\]" : "\\)"}</span>`;
-          plainText += isDisplayMode ? `\\[${latexContent}\\]` : `\\(${latexContent}\\)`;
+          plainText += isDisplayMode
+            ? `\\[${latexContent}\\]`
+            : `\\(${latexContent}\\)`;
         }
       }
     }
   }
 
-  return { 
-    html: renderedHtml, 
-    text: latexToReadableText(plainText.trim())
+  return {
+    html: renderedHtml,
+    text: latexToReadableText(plainText.trim()),
   };
 }
 
@@ -95,52 +151,23 @@ export async function displayTextWithDynamicDelay(
   baseDelay = 100,
   wordsPerChunk = 1,
 ) {
-  // Regex to identify LaTeX parts (both inline and display), including newlines
-  const latexPattern = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/g;
+  const words = text.split(" ");
+  let chunk = [];
+  let displayedText = element.innerText; // Start with existing content
 
-  // Split text into LaTeX and non-LaTeX parts
-  const parts = text.split(latexPattern);
+  for (let i = 0; i < words.length; i++) {
+    chunk.push(words[i]);
 
-  let displayedText = "";
-
-  for (let i = 0; i < parts.length; i++) {
-    if (i % 3 === 0) {
-      // Non-LaTeX part
-      const words = parts[i].split(" ");
-      let chunk = [];
-
-      for (let j = 0; j < words.length; j++) {
-        if (words[j] !== undefined) {  // Add this check
-          chunk.push(words[j]);
-        }
-
-        if (chunk.length === wordsPerChunk || j === words.length - 1) {
-          displayedText += chunk.join(" ") + " ";
-          const { html } = renderContent(displayedText);
-          if (html !== undefined) {  // Add this check
-            element.innerHTML = html;
-            element.scrollIntoView({ behavior: "smooth", block: "end" });
-          }
-
-          const chunkLength = chunk.join(" ").length;
-          const delay = baseDelay + chunkLength * 20;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-
-          chunk = [];
-        }
-      }
-    } else {
-      // LaTeX part
-      displayedText +=
-        (i % 3 === 1 ? "\\[" : "\\(") +
-        parts[i] +
-        (i % 3 === 1 ? "\\]" : "\\)");
-      const { html } = renderContent(displayedText);
-      element.innerHTML = html;
+    if (chunk.length === wordsPerChunk || i === words.length - 1) {
+      displayedText += chunk.join(" ") + " ";
+      element.innerText = displayedText;
       element.scrollIntoView({ behavior: "smooth", block: "end" });
 
-      // Add a delay for LaTeX rendering
-      await new Promise((resolve) => setTimeout(resolve, baseDelay * 5));
+      const chunkLength = chunk.join(" ").length;
+      const delay = baseDelay + chunkLength * 30;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      chunk = [];
     }
   }
 }
@@ -207,7 +234,10 @@ function processLatexContent(latexContent) {
   };
 
   for (const [command, replacement] of Object.entries(latexCommands)) {
-    latexContent = latexContent.replace(new RegExp("\\" + command, "g"), replacement);
+    latexContent = latexContent.replace(
+      new RegExp("\\" + command, "g"),
+      replacement,
+    );
   }
 
   // Handle fractions
@@ -248,5 +278,5 @@ function processLatexContent(latexContent) {
 }
 
 function generateUniqueId() {
-  return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  return "id-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
 }
