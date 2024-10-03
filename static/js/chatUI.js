@@ -47,9 +47,9 @@ export function addMessageToChat(message, className) {
 
 // New function to add play button
 export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) {
-  const playButton = document.createElement("button");
-  playButton.innerHTML = "▶️";
+  const playButton = document.createElement("div");
   playButton.className = "replay-button";
+  playButton.innerHTML = '<i class="fas fa-play"></i>';
   playButton.onclick = () => replayAudioBuffers(audioBuffers);
 
   // Create a wrapper div for the message and play button
