@@ -1,4 +1,4 @@
-import { isAudioEnabled, getTtsProvider } from "./main.js";
+import { isAudioEnabled, getTtsProvider, userId } from "./main.js";
 import { startRecording, stopRecording } from "./audioRecording.js";
 import { sendAudioMessage } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
@@ -55,7 +55,7 @@ export async function handleMicrophoneClick() {
   }
 }
 
-export async function streamAudio(text) {
+export async function streamAudio(text, messageId) {
   if (!isAudioEnabled) return;
 
   if (!audioContext) {
@@ -64,31 +64,20 @@ export async function streamAudio(text) {
 
   try {
     const currentProvider = getTtsProvider();
-    let endpoint;
-
-    if (currentProvider === "openai") {
-      endpoint = `${apiBaseUrl}/api/synthesize_audio_openai`;
-    } else if (currentProvider === "elevenlabs") {
-      endpoint = `${apiBaseUrl}/api/synthesize_audio`;
-    } else {
-      console.error(`Unknown TTS provider: ${currentProvider}`);
-      return;
-    }
+    let endpoint = currentProvider === "openai" ? 
+      `${apiBaseUrl}/api/synthesize_audio_openai` : 
+      `${apiBaseUrl}/api/synthesize_audio`;
 
     console.log(`Using TTS provider: ${currentProvider}`);
     console.log(`Endpoint: ${endpoint}`);
 
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, user_id: userId, message_id: messageId }),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to synthesize audio");
-    }
+    if (!response.ok) throw new Error("Failed to synthesize audio");
 
     const arrayBuffer = await response.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);

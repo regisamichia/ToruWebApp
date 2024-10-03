@@ -17,6 +17,8 @@ export function initializeChatUI() {
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
   const messageElement = document.createElement("div");
+  const messageId = generateUniqueId(); // Generate a unique message ID
+  messageElement.id = messageId;
   messageElement.className = `message ${className}`;
   const { html, text } = renderContent(message);
   messageElement.innerHTML = html;
@@ -24,7 +26,7 @@ export function addMessageToChat(message, className) {
   chatMessages.appendChild(messageElement);
 
   chatMessages.scrollTop = chatMessages.scrollHeight;
-  return messageElement;
+  return { element: messageElement, id: messageId };
 }
 
 export function addLoadingAnimation() {
@@ -243,4 +245,8 @@ function processLatexContent(latexContent) {
   latexContent = latexContent.replace(/\s+/g, " ");
 
   return latexContent.trim();
+}
+
+function generateUniqueId() {
+  return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }

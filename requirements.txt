@@ -24,3 +24,4 @@ aiofiles
 deepgram-sdk
 elevenlabs
 psycopg2-binary
+boto3

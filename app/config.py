@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     CHROMA_API_KEY: str
     MATH_CHATBOT_URL: str
     MULTIMODAL_URL: str
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
 
     class Config:
         env_file = "/etc/secrets/.env"

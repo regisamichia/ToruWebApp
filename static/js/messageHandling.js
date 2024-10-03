@@ -91,9 +91,9 @@ export async function sendMessage(messageText, sessionId, userId) {
 
     if (response.ok) {
       console.log("Received OK response from math_chat");
-      loadingAnimation.remove(); // Remove loading animation here
+      loadingAnimation.remove();
 
-      const botMessageElement = addMessageToChat("", "bot-message");
+      const { element: botMessageElement, id: messageId } = addMessageToChat("", "bot-message");
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = "";
@@ -112,7 +112,7 @@ export async function sendMessage(messageText, sessionId, userId) {
           if (isAudioEnabled) {
             console.log("text send to speech");
             console.log(text);
-            await streamAudio(text);
+            await streamAudio(text, messageId);
           }
           await displayTextWithDynamicDelay(sentence, botMessageElement);
         }
