@@ -119,3 +119,18 @@ try {
 } catch (error) {
   console.error("Error in main script:", error);
 }
+
+async function initializeApp() {
+  // Common initialization for all pages
+  await initializeUrls();
+  
+  // Page-specific initialization
+  if (document.getElementById("chatContainer")) {
+    await initializeChatPage();
+  } else if (document.getElementById("chatHistory")) {
+    await initializeChatHistory();
+  }
+  // Add other page-specific initializations as needed
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);

@@ -8,11 +8,28 @@
         <link rel="stylesheet" href="/static/css/chat.css" />
         <link rel="stylesheet" href="/static/css/chatHistory.css" />
         <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        />
+        <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
         />
         <script
             src="https://kit.fontawesome.com/your-fontawesome-kit.js"
+            crossorigin="anonymous"
+        ></script>
+        <!-- KaTeX -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+            integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+"
+            crossorigin="anonymous"
+        />
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+            integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
             crossorigin="anonymous"
         ></script>
     </head>
@@ -57,12 +74,17 @@
                     <div class="chat-history-header">
                         <h2>Historique des conversations</h2>
                         <div class="chat-history-controls">
-                            <input type="date" id="filterDate" aria-label="Filter by date" />
+                            <input
+                                type="date"
+                                id="filterDate"
+                                aria-label="Filter by date"
+                            />
                             <button id="filterButton">
                                 <i class="fas fa-filter"></i> Filtrer
                             </button>
                             <button id="deleteHistoryButton">
-                                <i class="fas fa-trash-alt"></i> Supprimer l'historique
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                                l'historique
                             </button>
                         </div>
                     </div>

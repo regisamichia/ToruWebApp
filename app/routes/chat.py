@@ -14,7 +14,7 @@ from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
 from datetime import datetime
 from app.models.user import User
-from typing import List
+from typing import List, Optional
 
 load_dotenv()
 
@@ -40,13 +40,20 @@ class Message(BaseModel):
     role: str
     content: str
     timestamp: str
+    messageId: Optional[str] = None
+    messageIds: Optional[List[str]] = None
 
     def to_dict(self):
-        return {
+        result = {
             "role": self.role,
             "content": self.content,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
         }
+        if self.messageId:
+            result["messageId"] = self.messageId
+        if self.messageIds:
+            result["messageIds"] = self.messageIds
+        return result
 
 class Conversation(BaseModel):
     userId: str
@@ -101,27 +108,21 @@ async def extract_text_from_image(image: UploadFile = File(...), current_user: U
 @router.post("/api/save_chat_history")
 async def save_chat_history(conversation: Conversation, current_user: UserInToken = Depends(get_current_user)):
     logger.debug(f"Saving chat history for user ID: {current_user.user_id}")
-    
-    # Use the user ID from the token, not from the conversation
+
     s3_key = f"messages/{current_user.user_id}/{conversation.sessionId}.json"
 
     try:
-        # Convert the conversation to a dictionary
         conversation_dict = conversation.to_dict()
-        # Ensure we're using the correct user ID
         conversation_dict['userId'] = current_user.user_id
 
-        # First, try to get the existing file
         try:
             existing_data = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
             existing_conversation = json.loads(existing_data['Body'].read().decode('utf-8'))
             existing_conversation['messages'].extend(conversation_dict['messages'])
             updated_conversation = existing_conversation
         except s3_client.exceptions.NoSuchKey:
-            # If the file doesn't exist, use the new conversation
             updated_conversation = conversation_dict
 
-        # Save the updated conversation back to S3
         s3_client.put_object(
             Bucket=bucket_name,
             Key=s3_key,

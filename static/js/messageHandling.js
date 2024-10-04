@@ -92,6 +92,8 @@ export async function sendMessage(messageText, sessionId, userId) {
 
       let accumulatedText = "";
       let audioBuffers = [];
+      let audioSegmentIds = []; // Initialize as an empty array
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
@@ -108,9 +110,10 @@ export async function sendMessage(messageText, sessionId, userId) {
           
           if (isAudioEnabled) {
             console.log("text sent to speech:", sentence);
-            const audioBuffer = await streamAudio(sentence, messageId);
+            const audioBuffer = await streamAudio(sentence, `${messageId}_${audioSegmentIds.length}`);
             if (audioBuffer) {
               audioBuffers.push(audioBuffer);
+              audioSegmentIds.push(`${messageId}_${audioSegmentIds.length}`); // Store each segment ID
             }
           }
 
@@ -126,8 +129,8 @@ export async function sendMessage(messageText, sessionId, userId) {
       botMessageElement.dataset.plainText = accumulatedText;
       addPlayButtonToMessage(botMessageElement, messageId, audioBuffers);
 
-      // Use messageText for user message and accumulatedText for bot message
-      await storeConversation(sessionId, messageText, accumulatedText);
+      // Pass the array of audio segment IDs to storeConversation
+      await storeConversation(sessionId, messageText, accumulatedText, `user_${Date.now()}`, audioSegmentIds);
     } else {
       loadingAnimation.remove();
       if (response.status === 401) {

@@ -1,5 +1,6 @@
 import getUrls from "./config.js";
 import { renderContent } from "./chatUI.js";
+import { initializeAudioHandling, replayAudioFromS3 } from "./audioHandling.js";
 
 let apiBaseUrl;
 let userFirstName = "User"; // Default value
@@ -32,13 +33,24 @@ async function getUserInfo() {
 }
 
 async function initializeChatHistory() {
-  await initializeUrls();
-  await getUserInfo();
-  await displayChatHistory();
+  try {
+    await initializeUrls();
+    await getUserInfo();
+    await initializeAudioHandling();
+    await displayChatHistory();
+  } catch (error) {
+    console.error("Error initializing chat history:", error);
+  }
 }
 
 async function displayChatHistory() {
   console.log("Displaying chat history");
+
+  const chatHistoryElement = document.getElementById("chatHistory");
+  if (!chatHistoryElement) {
+    console.error("Chat history element not found");
+    return;
+  }
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/get_chat_history`, {
@@ -59,7 +71,6 @@ async function displayChatHistory() {
     const chatHistory = await response.json();
     console.log("Chat history received:", chatHistory);
 
-    const chatHistoryElement = document.getElementById("chatHistory");
     chatHistoryElement.innerHTML = "";
 
     if (chatHistory.length === 0) {
@@ -72,14 +83,44 @@ async function displayChatHistory() {
 
         if (Array.isArray(session.messages)) {
           session.messages.forEach((message) => {
+            console.log("Processing message:", JSON.stringify(message, null, 2));
+            
             const messageElement = document.createElement("div");
             messageElement.className = `chat-entry ${message.role}-message`;
             const { html } = renderContent(message.content);
+            
+            let replayButton = '';
+            if (message.role === 'bot') {
+              const messageIds = message.messageIds || (message.messageId ? [message.messageId] : null);
+              if (messageIds && messageIds.length > 0 && messageIds[0] !== null) {
+                replayButton = `<button class="replay-button" data-message-ids="${messageIds.join(',')}">
+                  <i class="fas fa-play"></i> Replay
+                </button>`;
+              } else {
+                console.warn("Bot message without valid messageIds:", message);
+              }
+            }
+            
             messageElement.innerHTML = `
               <p><strong>${message.role === "user" ? userFirstName : "Toru"}:</strong></p>
-              <div>${html}</div>
+              <div class="message-content">${html}</div>
+              ${replayButton}
               <p><small>${new Date(message.timestamp).toLocaleString()}</small></p>
             `;
+            
+            if (replayButton) {
+              const button = messageElement.querySelector('.replay-button');
+              if (button) {
+                button.addEventListener('click', () => {
+                  const messageIds = button.dataset.messageIds.split(',');
+                  console.log("Replaying audio for messageIds:", messageIds);
+                  replayAudioFromS3(messageIds);
+                });
+              } else {
+                console.error("Replay button not found for message:", message);
+              }
+            }
+            
             sessionElement.appendChild(messageElement);
           });
         } else {
@@ -108,9 +149,11 @@ async function displayChatHistory() {
     }
   } catch (error) {
     console.error("Error fetching chat history:", error);
-    document.getElementById("chatHistory").innerHTML =
-      "<p>Error loading chat history. Please try again later.</p>";
+    chatHistoryElement.innerHTML = "<p>Error loading chat history. Please try again later.</p>";
   }
 }
 
-document.addEventListener("DOMContentLoaded", initializeChatHistory);
+// Only initialize if we're on the chat history page
+if (document.getElementById("chatHistory")) {
+  document.addEventListener("DOMContentLoaded", initializeChatHistory);
+}

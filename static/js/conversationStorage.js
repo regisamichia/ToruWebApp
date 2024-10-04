@@ -26,6 +26,8 @@ export async function storeConversation(
   sessionId,
   userMessage,
   botMessage,
+  userMessageId,
+  botMessageIds,
 ) {
   await initializeUrls();
   const userId = await getUserId();
@@ -37,16 +39,18 @@ export async function storeConversation(
         role: "user",
         content: userMessage,
         timestamp: new Date().toISOString(),
+        messageId: userMessageId,
       },
       {
         role: "bot",
         content: botMessage,
         timestamp: new Date().toISOString(),
+        messageIds: botMessageIds, // Store as messageIds (array) instead of messageId
       },
     ],
   };
 
-  console.log("Attempting to save conversation:", conversation);
+  console.log("Attempting to save conversation:", JSON.stringify(conversation, null, 2));
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/save_chat_history`, {
@@ -59,13 +63,15 @@ export async function storeConversation(
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to save chat history: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to save chat history: ${response.status} ${response.statusText}`,
+      );
     }
 
     const responseData = await response.json();
     console.log("Chat history saved successfully:", responseData);
   } catch (error) {
     console.error("Error saving chat history:", error);
-    console.error("Conversation data:", conversation);
+    console.error("Conversation data:", JSON.stringify(conversation, null, 2));
   }
 }

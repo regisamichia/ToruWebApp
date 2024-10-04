@@ -110,38 +110,56 @@ async function playNextAudio() {
   source.start();
 }
 
-export async function replayAudioFromS3(messageId) {
+export async function replayAudioFromS3(messageIds) {
+  if (!Array.isArray(messageIds)) {
+    messageIds = [messageIds]; // Ensure backwards compatibility
+  }
+
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userId,
-        message_id: messageId,
-        region: "eu-west-3",
-        type: "audio",
-      }),
-    });
+    const audioBuffers = [];
+    for (const messageId of messageIds) {
+      const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          message_id: messageId,
+          region: "eu-west-3",
+          type: "audio",
+        }),
+      });
 
-    if (!response.ok) throw new Error("Failed to get audio URLs");
+      if (!response.ok) throw new Error("Failed to get audio URLs");
 
-    const { audioUrls } = await response.json();
+      const { audioUrls } = await response.json();
 
-    const audioBuffers = await Promise.all(
-      audioUrls.map(async (url) => {
-        const audioResponse = await fetch(url);
-        if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
-        const arrayBuffer = await audioResponse.arrayBuffer();
-        return await audioContext.decodeAudioData(arrayBuffer);
-      }),
-    );
+      const segmentBuffers = await Promise.all(
+        audioUrls.map(async (url) => {
+          const audioResponse = await fetch(url);
+          if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
+          const arrayBuffer = await audioResponse.arrayBuffer();
+          return await audioContext.decodeAudioData(arrayBuffer);
+        })
+      );
 
-    replayAudioBuffers(audioBuffers);
+      audioBuffers.push(...segmentBuffers);
+    }
+
+    playAudioBuffers(audioBuffers);
   } catch (error) {
     console.error("Error replaying audio:", error);
+  }
+}
+
+function playAudioBuffers(buffers) {
+  audioQueue = buffers;
+  if (!isPlaying) {
+    playNextAudio();
   }
 }
