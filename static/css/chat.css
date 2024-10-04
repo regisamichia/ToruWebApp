@@ -214,7 +214,7 @@ body {
     justify-content: flex-start;
     height: 30px;
     padding: 10px;
-    flex-direction: row; /* Ensure horizontal layout */
+    flex-direction: row;
 }
 
 .loading-animation .dot {
@@ -224,7 +224,16 @@ body {
     height: 8px;
     margin: 0 4px;
     animation: bounce 1.4s infinite ease-in-out both;
-    display: inline-block; /* Ensure inline layout */
+    display: inline-block;
+}
+
+/* Ensure no other styles are overriding these */
+.message .loading-animation {
+    flex-direction: row !important;
+}
+
+.message .loading-animation .dot {
+    display: inline-block !important;
 }
 
 /* Rest of the .loading-animation styles remain the same */

@@ -9,8 +9,8 @@ class UserCreate(BaseModel):
 class UserInToken(BaseModel):
     email: str
     user_id: str
+    first_name: str
     id: int | None = None
-    first_name: str | None = None
     school_class: str | None = None
 
 class UserLogin(BaseModel):

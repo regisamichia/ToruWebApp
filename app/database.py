@@ -17,19 +17,19 @@ def create_engine_with_retry(db_url, max_retries=3, retry_interval=5):
         try:
             logger.info(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})")
             logger.info(f"Database URL: {db_url}")  # Log the URL (make sure to mask any sensitive information)
-            
+
             # Parse the URL to get host and port
             from urllib.parse import urlparse
             parsed_url = urlparse(db_url)
             host = parsed_url.hostname
             port = parsed_url.port or 5432  # Default PostgreSQL port
-            
+
             # Try to establish a TCP connection first
             with socket.create_connection((host, port), timeout=10) as sock:
                 logger.info(f"TCP connection to {host}:{port} successful")
-            
+
             engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=300, connect_args={'connect_timeout': 10})
-            
+
             # Test the connection
             with engine.connect() as connection:
                 connection.execute(text("SELECT 1"))
@@ -63,19 +63,19 @@ def create_tables():
         logger.error(f"Error creating tables: {e}")
         raise
 
-def check_table_exists(table_name):
-    try:
-        with engine.connect() as connection:
-            result = connection.execute(text(f"""
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_name = '{table_name}'
-                );
-            """))
-            exists = result.scalar()
-            if exists:
-                logger.info(f"Table '{table_name}' exists.")
-            else:
-                logger.info(f"Table '{table_name}' does not exist.")
-    except Exception as e:
-        logger.error(f"Error checking table: {e}")
+# def check_table_exists(table_name):
+#     try:
+#         with engine.connect() as connection:
+#             result = connection.execute(text(f"""
+#                 SELECT EXISTS (
+#                     SELECT FROM information_schema.tables
+#                     WHERE table_name = '{table_name}'
+#                 );
+#             """))
+#             exists = result.scalar()
+#             if exists:
+#                 logger.info(f"Table '{table_name}' exists.")
+#             else:
+#                 logger.info(f"Table '{table_name}' does not exist.")
+#     except Exception as e:
+#         logger.error(f"Error checking table: {e}")

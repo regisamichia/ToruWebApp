@@ -70,7 +70,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "user_id": str(user.user_id)  # Ensure this is being returned
+        "user_id": str(user.user_id)
     }
 
 def create_refresh_token(data: dict):
@@ -97,13 +97,13 @@ async def logout(response: Response, token: str = Depends(oauth2_scheme)):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        
+
         # Here you could add the token to a blacklist if you want to invalidate it server-side
         # For example: await add_token_to_blacklist(token)
-        
+
         # Clear the cookie if you're using cookie-based authentication
         response.delete_cookie(key="access_token")
-        
+
         return {"message": "Logged out successfully"}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -112,5 +112,6 @@ async def logout(response: Response, token: str = Depends(oauth2_scheme)):
 async def get_user_info(current_user: UserInToken = Depends(get_current_user)):
     return {
         "user_id": current_user.user_id,
-        "email": current_user.email
+        "email": current_user.email,
+        "first_name": current_user.first_name
     }

@@ -65,7 +65,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         user_id: str = payload.get("user_id")
         if email is None or user_id is None:
             raise credentials_exception
-        token_data = UserInToken(email=email, user_id=user_id)
+        user = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise credentials_exception
+        token_data = UserInToken(email=email, user_id=user_id, first_name=user.first_name)
         return token_data
     except JWTError:
         raise credentials_exception

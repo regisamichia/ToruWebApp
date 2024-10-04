@@ -95,9 +95,14 @@ function replayAudioBuffers(audioBuffers) {
 export function addLoadingAnimation() {
   const chatMessages = document.getElementById("chatMessages");
   const loadingDiv = document.createElement("div");
-  loadingDiv.className = "message bot-message loading-animation";
-  loadingDiv.innerHTML =
+  loadingDiv.className = "message bot-message";
+  
+  const loadingAnimation = document.createElement("div");
+  loadingAnimation.className = "loading-animation";
+  loadingAnimation.innerHTML =
     '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  
+  loadingDiv.appendChild(loadingAnimation);
   chatMessages.appendChild(loadingDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return loadingDiv;

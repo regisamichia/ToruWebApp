@@ -7,19 +7,43 @@ async function initializeUrls() {
   apiBaseUrl = urls.apiBaseUrl;
 }
 
+async function getUserId() {
+  const response = await fetch(`${apiBaseUrl}/api/user_info`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user info");
+  }
+
+  const userData = await response.json();
+  return userData.user_id;
+}
+
 export async function storeConversation(
-  userId,
   sessionId,
   userMessage,
   botMessage,
 ) {
   await initializeUrls();
+  const userId = await getUserId();
   const conversation = {
     userId,
     sessionId,
-    userMessage,
-    botMessage,
-    timestamp: new Date().toISOString(),
+    messages: [
+      {
+        role: "user",
+        content: userMessage,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        role: "bot",
+        content: botMessage,
+        timestamp: new Date().toISOString(),
+      },
+    ],
   };
 
   console.log("Attempting to save conversation:", conversation);
@@ -35,13 +59,7 @@ export async function storeConversation(
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Server response:", errorText);
-      console.error("Response status:", response.status);
-      console.error("Response headers:", response.headers);
-      throw new Error(
-        `Failed to save chat history: ${response.status} ${response.statusText}`,
-      );
+      throw new Error(`Failed to save chat history: ${response.status} ${response.statusText}`);
     }
 
     const responseData = await response.json();

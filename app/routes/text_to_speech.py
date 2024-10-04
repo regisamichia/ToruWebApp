@@ -62,7 +62,7 @@ async def synthesize_audio_endpoint(request: TextToSpeechRequest, background_tas
             raise HTTPException(status_code=response.status_code, detail="Error from Eleven Labs API")
 
         # Add a background task to upload the audio to S3
-        s3_key = f"{request.user_id}/{request.message_id}.mp3"
+        s3_key = f"audio/{request.user_id}/{request.message_id}.mp3"
         background_tasks.add_task(upload_audio_to_s3, response.content, s3_key)
 
         # Return the audio as a streaming response

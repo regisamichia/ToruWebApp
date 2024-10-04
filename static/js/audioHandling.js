@@ -116,13 +116,14 @@ export async function replayAudioFromS3(messageId) {
   }
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/get_audio_urls`, {
+    const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: userId,
         message_id: messageId,
         region: "eu-west-3",
+        type: "audio",
       }),
     });
 
@@ -130,12 +131,14 @@ export async function replayAudioFromS3(messageId) {
 
     const { audioUrls } = await response.json();
 
-    const audioBuffers = await Promise.all(audioUrls.map(async (url) => {
-      const audioResponse = await fetch(url);
-      if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
-      const arrayBuffer = await audioResponse.arrayBuffer();
-      return await audioContext.decodeAudioData(arrayBuffer);
-    }));
+    const audioBuffers = await Promise.all(
+      audioUrls.map(async (url) => {
+        const audioResponse = await fetch(url);
+        if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
+        const arrayBuffer = await audioResponse.arrayBuffer();
+        return await audioContext.decodeAudioData(arrayBuffer);
+      }),
+    );
 
     replayAudioBuffers(audioBuffers);
   } catch (error) {

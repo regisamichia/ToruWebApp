@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai, speech_to_text_manual, waiting_list, get_audio_url
+from app.routes import auth, chat, speech_to_text, text_to_speech, text_to_speech_openai, speech_to_text_manual, waiting_list, get_presigned_url
 from app.config import settings
 from app.database import create_tables
 import uvicorn
@@ -50,7 +50,7 @@ app.include_router(speech_to_text_manual.router)
 app.include_router(text_to_speech.router)
 app.include_router(text_to_speech_openai.router)
 app.include_router(waiting_list.router)
-app.include_router(get_audio_url.router)
+app.include_router(get_presigned_url.router)
 
 @app.get("/api/environment")
 async def get_environment():

@@ -126,7 +126,8 @@ export async function sendMessage(messageText, sessionId, userId) {
       botMessageElement.dataset.plainText = accumulatedText;
       addPlayButtonToMessage(botMessageElement, messageId, audioBuffers);
 
-      await storeConversation(userId, sessionId, messageText, accumulatedText);
+      // Use messageText for user message and accumulatedText for bot message
+      await storeConversation(sessionId, messageText, accumulatedText);
     } else {
       loadingAnimation.remove();
       if (response.status === 401) {

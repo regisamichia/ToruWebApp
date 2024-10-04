@@ -9,9 +9,12 @@ from app.schemas.message import Message
 from pydantic import BaseModel
 from pathlib import Path
 import logging
+import boto3
+from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
 from datetime import datetime
 from app.models.user import User
+from typing import List
 
 load_dotenv()
 
@@ -21,9 +24,9 @@ router = APIRouter()
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Define the path where chat histories will be stored
-CHAT_HISTORY_DIR = Path("chat_histories")
-CHAT_HISTORY_DIR.mkdir(exist_ok=True)
+#AWS S3 Storage
+s3_client = boto3.client('s3')
+bucket_name = 'toruchat'
 
 # Define the ChatHistory model
 class ChatHistory(BaseModel):
@@ -33,13 +36,40 @@ class ChatHistory(BaseModel):
     botMessage: str
     timestamp: str
 
+class Message(BaseModel):
+    role: str
+    content: str
+    timestamp: str
+
+    def to_dict(self):
+        return {
+            "role": self.role,
+            "content": self.content,
+            "timestamp": self.timestamp
+        }
+
+class Conversation(BaseModel):
+    userId: str
+    sessionId: str
+    messages: List[Message]
+
+    def to_dict(self):
+        return {
+            "userId": self.userId,
+            "sessionId": self.sessionId,
+            "messages": [message.to_dict() for message in self.messages]
+        }
+
+class UserIdRequest(BaseModel):
+    user_id: str
+
 @router.post("/api/send_message")
 async def send_message(message: Message, current_user: UserInToken = Depends(get_current_user)):
     user_email = current_user.email
     if user_email is None:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
     response = f"You said: {message.message}"
-    
+
     # Store the conversation
     await save_chat_history(ChatHistory(
         userId=str(current_user.id),
@@ -48,7 +78,7 @@ async def send_message(message: Message, current_user: UserInToken = Depends(get
         botMessage=response,
         timestamp=datetime.utcnow().isoformat()
     ))
-    
+
     return {"response": response}
 
 @router.post("/api/extract_text")
@@ -69,57 +99,62 @@ async def extract_text_from_image(image: UploadFile = File(...), current_user: U
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/api/save_chat_history")
-async def save_chat_history(chat_history: ChatHistory):
-    user_file = CHAT_HISTORY_DIR / f"{chat_history.userId}.json"
+async def save_chat_history(conversation: Conversation, current_user: UserInToken = Depends(get_current_user)):
+    logger.debug(f"Saving chat history for user ID: {current_user.user_id}")
     
+    # Use the user ID from the token, not from the conversation
+    s3_key = f"messages/{current_user.user_id}/{conversation.sessionId}.json"
+
     try:
-        if user_file.exists():
-            with open(user_file, "r") as f:
-                existing_history = json.load(f)
-        else:
-            existing_history = []
+        # Convert the conversation to a dictionary
+        conversation_dict = conversation.to_dict()
+        # Ensure we're using the correct user ID
+        conversation_dict['userId'] = current_user.user_id
 
-        existing_history.append(chat_history.dict())
+        # First, try to get the existing file
+        try:
+            existing_data = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+            existing_conversation = json.loads(existing_data['Body'].read().decode('utf-8'))
+            existing_conversation['messages'].extend(conversation_dict['messages'])
+            updated_conversation = existing_conversation
+        except s3_client.exceptions.NoSuchKey:
+            # If the file doesn't exist, use the new conversation
+            updated_conversation = conversation_dict
 
-        with open(user_file, "w") as f:
-            json.dump(existing_history, f, indent=2)
-
+        # Save the updated conversation back to S3
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=s3_key,
+            Body=json.dumps(updated_conversation),
+            ContentType='application/json'
+        )
         return {"message": "Chat history saved successfully"}
     except Exception as e:
+        logger.error(f"Failed to save chat history: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to save chat history: {str(e)}")
 
-from app.schemas.user import UserInToken
-from app.services.auth_utils import get_current_user
-
-@router.get("/api/get_chat_history/{user_id}")
-async def get_chat_history(user_id: str, current_user: UserInToken = Depends(get_current_user)):
-    print(f"Attempting to get chat history for user_id: {user_id}")
-    print(f"Current user: {current_user.user_id}")
-
-    if user_id == "undefined" or user_id == "null":
-        raise HTTPException(status_code=400, detail="Invalid user ID")
-
-    if current_user.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this chat history")
-    
-    user_file = CHAT_HISTORY_DIR / f"{user_id}.json"
-    
-    if not user_file.exists():
-        return []
-
+@router.post("/api/get_chat_history")
+async def get_chat_history(current_user: UserInToken = Depends(get_current_user)):
+    # Use the user ID from the token directly, no need for a separate request body
+    prefix = f"messages/{current_user.user_id}/"
     try:
-        with open(user_file, "r") as f:
-            return json.load(f)
+        objects = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+        chat_history = []
+        for obj in objects.get('Contents', []):
+            file_data = s3_client.get_object(Bucket=bucket_name, Key=obj['Key'])
+            conversation = json.loads(file_data['Body'].read().decode('utf-8'))
+            chat_history.append(conversation)
+        return chat_history
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve chat history: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get chat history: {str(e)}")
 
 @router.delete("/api/delete_chat_history/{user_id}")
 async def delete_chat_history(user_id: str, current_user: UserInToken = Depends(get_current_user)):
     if str(current_user.id) != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this chat history")
-    
+
     user_file = CHAT_HISTORY_DIR / f"{user_id}.json"
-    
+
     if not user_file.exists():
         return {"message": "No chat history found for this user"}
 
