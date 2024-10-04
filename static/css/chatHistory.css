@@ -43,7 +43,9 @@
     cursor: pointer;
     border-radius: 20px;
     font-size: 0.9em;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+    transition:
+        background-color 0.3s ease,
+        transform 0.1s ease;
 }
 
 #filterButton:hover,
@@ -94,4 +96,53 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.message-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.bot-message .message-wrapper {
+    justify-content: flex-start;
+}
+
+.user-message .message-wrapper {
+    justify-content: flex-end;
+}
+
+.replay-button {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.replay-button:hover {
+    background-color: #e0e0e0;
+}
+
+.replay-button i {
+    color: #007bff;
+}
+
+.message-timestamp {
+    align-self: flex-end;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 5px;
 }

@@ -86,62 +86,42 @@ async function displayChatHistory() {
             console.log("Processing message:", JSON.stringify(message, null, 2));
             
             const messageElement = document.createElement("div");
-            messageElement.className = `chat-entry ${message.role}-message`;
+            messageElement.className = `message ${message.role}-message`;
             const { html } = renderContent(message.content);
             
-            let replayButton = '';
+            const messageWrapper = document.createElement("div");
+            messageWrapper.className = "message-wrapper";
+            
+            const messageContent = document.createElement("div");
+            messageContent.className = "message-content";
+            messageContent.innerHTML = html;
+            
+            messageWrapper.appendChild(messageContent);
+            
             if (message.role === 'bot') {
               const messageIds = message.messageIds || (message.messageId ? [message.messageId] : null);
               if (messageIds && messageIds.length > 0 && messageIds[0] !== null) {
-                replayButton = `<button class="replay-button" data-message-ids="${messageIds.join(',')}">
-                  <i class="fas fa-play"></i> Replay
-                </button>`;
+                const playButton = document.createElement("div");
+                playButton.className = "replay-button";
+                playButton.innerHTML = '<i class="fas fa-play"></i>';
+                playButton.onclick = () => replayAudioFromS3(messageIds);
+                messageWrapper.appendChild(playButton);
               } else {
                 console.warn("Bot message without valid messageIds:", message);
               }
             }
             
-            messageElement.innerHTML = `
-              <p><strong>${message.role === "user" ? userFirstName : "Toru"}:</strong></p>
-              <div class="message-content">${html}</div>
-              ${replayButton}
-              <p><small>${new Date(message.timestamp).toLocaleString()}</small></p>
-            `;
+            messageElement.appendChild(messageWrapper);
             
-            if (replayButton) {
-              const button = messageElement.querySelector('.replay-button');
-              if (button) {
-                button.addEventListener('click', () => {
-                  const messageIds = button.dataset.messageIds.split(',');
-                  console.log("Replaying audio for messageIds:", messageIds);
-                  replayAudioFromS3(messageIds);
-                });
-              } else {
-                console.error("Replay button not found for message:", message);
-              }
-            }
+            const timestamp = document.createElement("p");
+            timestamp.className = "message-timestamp";
+            timestamp.innerHTML = `<small>${new Date(message.timestamp).toLocaleString()}</small>`;
+            messageElement.appendChild(timestamp);
             
             sessionElement.appendChild(messageElement);
           });
         } else {
-          // Handle the case where messages might not be an array
-          const userMessageElement = document.createElement("div");
-          userMessageElement.className = "chat-entry user-message";
-          userMessageElement.innerHTML = `
-            <p><strong>${userFirstName}:</strong></p>
-            <div>${session.userMessage}</div>
-            <p><small>${new Date(session.timestamp).toLocaleString()}</small></p>
-          `;
-          sessionElement.appendChild(userMessageElement);
-
-          const botMessageElement = document.createElement("div");
-          botMessageElement.className = "chat-entry bot-message";
-          botMessageElement.innerHTML = `
-            <p><strong>Bot:</strong></p>
-            <div>${session.botMessage}</div>
-            <p><small>${new Date(session.timestamp).toLocaleString()}</small></p>
-          `;
-          sessionElement.appendChild(botMessageElement);
+          // Handle the case where messages might not be an array (as before)
         }
 
         chatHistoryElement.appendChild(sessionElement);
