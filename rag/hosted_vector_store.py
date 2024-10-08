@@ -6,11 +6,10 @@ from langchain_core.retrievers import BaseRetriever
 from openai import OpenAI
 import os
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Type, Dict, Any
 
 # Load environment variables
-load_dotenv()
-
+#load_dotenv("etc/secrets/.env")
 
 
 class ChromaAPI(VectorStore):
