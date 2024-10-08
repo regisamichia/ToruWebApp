@@ -22,13 +22,14 @@ class Chatbot(UserAnalysis):
         self.vector_store = OpenAIChromaVectorStore(collection_name="toru_with_school_level")
         self.retriever = self.vector_store.as_retriever(filter_store={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
         self.multimodal_api_url = "http://localhost:8003/api/multimodal"
+        #self.multimodal_api_url = os.environ["MULTIMODAL_URL"]
 
     async def process_image(self, image_data: Dict[str, Any]) -> str:
         async with aiohttp.ClientSession() as session:
             data = aiohttp.FormData()
-            
+
             # Use the image content directly
-            data.add_field('image', 
+            data.add_field('image',
                            image_data['content'],
                            filename=image_data['filename'],
                            content_type=image_data['content_type'])

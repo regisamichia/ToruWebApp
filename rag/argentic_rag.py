@@ -63,7 +63,7 @@ async def chat(
     print(f"Message: {message}")
     print(f"Image: {image}")
     print(f"Extracted text: {extracted_text}")
-    
+
     # Log the raw form data
     form_data = await request.form()
     print("Raw form data:", form_data)
@@ -111,12 +111,12 @@ async def chat(
 async def new_session(response: Response, request: Request):
     session_id = str(uuid4())
     sessions[session_id] = {"messages": [], "first_user_message": ""}
-    
+
     origin = request.headers.get("Origin")
-    
+
     if origin in settings.allowed_origins_list:
         response.headers["Access-Control-Allow-Origin"] = origin
-    
+
     return {"session_id": session_id}
 
 if __name__ == "__main__":

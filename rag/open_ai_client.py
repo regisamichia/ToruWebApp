@@ -7,7 +7,7 @@ load_dotenv("etc/secrets/.env")
 class OpenAILLMModel:
     """Wrapper for the language model."""
 
-    def __init__(self, model_name: str = "gpt-4o"):
+    def __init__(self, model_name: str = "gpt-4o-mini"):
         """
         Initialize the LLM model.
 

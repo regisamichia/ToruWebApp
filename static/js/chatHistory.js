@@ -4,6 +4,7 @@ import { initializeAudioHandling, replayAudioFromS3 } from "./audioHandling.js";
 
 let apiBaseUrl;
 let userFirstName = "User"; // Default value
+let userId;
 
 async function initializeUrls() {
   const urls = await getUrls();
@@ -24,14 +25,17 @@ async function getUserInfo() {
     }
 
     const userData = await response.json();
-    console.log("User data received:", userData); // Add this line
     userFirstName = userData.first_name || "User";
-    console.log("User first name set to:", userFirstName); // Add this line
+    userId = userData.user_id;
   } catch (error) {
     console.error("Error fetching user info:", error);
   }
 }
 
+/**
+ * Initializes the chat history functionality.
+ * Sets up event listeners and loads initial chat history.
+ */
 async function initializeChatHistory() {
   try {
     await initializeUrls();
@@ -52,9 +56,11 @@ async function initializeChatHistory() {
   }
 }
 
+/**
+ * Displays the chat history, optionally filtered by date.
+ * @param {string|null} filterDate - The date to filter messages by (optional).
+ */
 async function displayChatHistory(filterDate = null) {
-  console.log("Displaying chat history");
-
   const chatHistoryElement = document.getElementById("chatHistory");
   if (!chatHistoryElement) {
     console.error("Chat history element not found");
@@ -92,26 +98,46 @@ async function displayChatHistory(filterDate = null) {
         sessionElement.className = "chat-session";
 
         if (Array.isArray(session.messages)) {
-          session.messages.forEach((message) => {
-            const messageDate = new Date(message.timestamp).toISOString().split('T')[0];
-            
+          session.messages.forEach(async (message) => {
+            const messageDate = new Date(message.timestamp)
+              .toISOString()
+              .split("T")[0];
+
             if (filterDate && messageDate !== filterDate) {
               return; // Skip messages that don't match the filter date
             }
 
             hasMessagesForSelectedDate = true;
 
-            console.log("Processing message:", JSON.stringify(message, null, 2));
+            console.log(
+              "Processing message:",
+              JSON.stringify(message, null, 2),
+            );
 
             const messageElement = document.createElement("div");
             messageElement.className = `message ${message.role}-message`;
-            const { html } = renderContent(message.content);
 
             const messageWrapper = document.createElement("div");
             messageWrapper.className = "message-wrapper";
 
+            // Handle image display for user messages
+            if (message.role === "user" && message.imageId) {
+              try {
+                // Use 'images' as the type and messageId (which is the same as imageId) to retrieve the image
+                const imageUrl = await getPresignedUrl(message.messageId, 'images');
+                const img = document.createElement("img");
+                img.src = imageUrl;
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "200px";
+                messageWrapper.appendChild(img);
+              } catch (error) {
+                console.error("Error fetching image URL:", error);
+              }
+            }
+
             const messageContent = document.createElement("div");
             messageContent.className = "message-content";
+            const { html } = renderContent(message.content);
             messageContent.innerHTML = html;
 
             messageWrapper.appendChild(messageContent);
@@ -152,7 +178,8 @@ async function displayChatHistory(filterDate = null) {
       });
 
       if (filterDate && !hasMessagesForSelectedDate) {
-        chatHistoryElement.innerHTML = "<p>No messages for the selected day.</p>";
+        chatHistoryElement.innerHTML =
+          "<p>No messages for the selected day.</p>";
       }
     }
   } catch (error) {
@@ -160,6 +187,28 @@ async function displayChatHistory(filterDate = null) {
     chatHistoryElement.innerHTML =
       "<p>Error loading chat history. Please try again later.</p>";
   }
+}
+
+async function getPresignedUrl(messageId, type) {
+  const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      message_id: messageId,
+      type: type
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch presigned URL: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.urls[0]; // Assuming the first URL is the one we want
 }
 
 // Only initialize if we're on the chat history page

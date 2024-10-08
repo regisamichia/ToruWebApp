@@ -14,13 +14,17 @@ import { addPlayButtonToMessage } from "./chatUI.js";
 
 let chatUrl, apiBaseUrl;
 
+/**
+ * Initializes URLs from the config file.
+ * @returns {Promise<Object>} An object containing the chat and API base URLs.
+ * @throws {Error} If getUrls() returns undefined or if there's an error fetching URLs.
+ */
 async function initializeUrls() {
   try {
     const urls = await getUrls();
     if (!urls) {
       throw new Error("getUrls() returned undefined");
     }
-    console.log("Received URLs:", urls);
     return urls;
   } catch (error) {
     console.error("Error in initializeUrls:", error);
@@ -28,6 +32,10 @@ async function initializeUrls() {
   }
 }
 
+/**
+ * Initializes message handling by setting up URLs.
+ * @throws {Error} If URLs are invalid or undefined.
+ */
 export async function initializeMessageHandling() {
   try {
     const urls = await initializeUrls();
@@ -39,16 +47,17 @@ export async function initializeMessageHandling() {
     if (!chatUrl || !apiBaseUrl) {
       throw new Error("chatUrl or apiBaseUrl is undefined");
     }
-    console.log("MessageHandling initialized with URLs:", {
-      chatUrl,
-      apiBaseUrl,
-    });
   } catch (error) {
     console.error("Failed to initialize MessageHandling:", error);
     throw error;
   }
 }
 
+/**
+ * Handles user input from the chat interface.
+ * If there's text input, it sends the message.
+ * If input is empty and audio mode is manual, it triggers the microphone.
+ */
 export function handleUserInput() {
   const userInput = document.getElementById("userInput");
   const messageText = userInput.value.trim();
@@ -61,6 +70,12 @@ export function handleUserInput() {
   }
 }
 
+/**
+ * Sends a message to the server and handles the response.
+ * @param {string} messageText - The message to send.
+ * @param {string} sessionId - The current session ID.
+ * @param {string} userId - The current user ID.
+ */
 export async function sendMessage(messageText, sessionId, userId) {
   if (messageText.trim() === "") return;
 
@@ -82,8 +97,12 @@ export async function sendMessage(messageText, sessionId, userId) {
     if (response.ok) {
       loadingAnimation.remove();
 
-      const { element: botMessageElement, id: messageId } = addMessageToChat("", "bot-message");
-      const messageContent = botMessageElement.querySelector('.message-content');
+      const { element: botMessageElement, id: messageId } = addMessageToChat(
+        "",
+        "bot-message",
+      );
+      const messageContent =
+        botMessageElement.querySelector(".message-content");
 
       if (!messageContent) {
         console.error("Message content element not found");
@@ -92,7 +111,7 @@ export async function sendMessage(messageText, sessionId, userId) {
 
       let accumulatedText = "";
       let audioBuffers = [];
-      let audioSegmentIds = []; // Initialize as an empty array
+      let audioSegmentIds = [];
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -107,13 +126,16 @@ export async function sendMessage(messageText, sessionId, userId) {
 
         for (const sentence of sentences) {
           accumulatedText += sentence;
-          
+
           if (isAudioEnabled) {
             console.log("text sent to speech:", sentence);
-            const audioBuffer = await streamAudio(sentence, `${messageId}_${audioSegmentIds.length}`);
+            const audioBuffer = await streamAudio(
+              sentence,
+              `${messageId}_${audioSegmentIds.length}`,
+            );
             if (audioBuffer) {
               audioBuffers.push(audioBuffer);
-              audioSegmentIds.push(`${messageId}_${audioSegmentIds.length}`); // Store each segment ID
+              audioSegmentIds.push(`${messageId}_${audioSegmentIds.length}`);
             }
           }
 
@@ -123,18 +145,21 @@ export async function sendMessage(messageText, sessionId, userId) {
         buffer = buffer.substring(sentences.join("").length);
       }
 
-      // Display full message and add play button
       const { html } = renderContent(accumulatedText);
       messageContent.innerHTML = html;
       botMessageElement.dataset.plainText = accumulatedText;
       addPlayButtonToMessage(botMessageElement, messageId, audioBuffers);
 
-      // Pass the array of audio segment IDs to storeConversation
-      await storeConversation(sessionId, messageText, accumulatedText, `user_${Date.now()}`, audioSegmentIds);
+      await storeConversation(
+        sessionId,
+        messageText,
+        accumulatedText,
+        `user_${Date.now()}`,
+        audioSegmentIds,
+      );
     } else {
       loadingAnimation.remove();
       if (response.status === 401) {
-        console.log("Unauthorized, redirecting to login");
         redirectToLogin();
         return;
       }
@@ -149,6 +174,10 @@ export async function sendMessage(messageText, sessionId, userId) {
   }
 }
 
+/**
+ * Sends an audio message for transcription and processing.
+ * @param {Blob} audioBlob - The audio blob to send for transcription.
+ */
 export async function sendAudioMessage(audioBlob) {
   try {
     const formData = new FormData();
@@ -163,10 +192,8 @@ export async function sendAudioMessage(audioBlob) {
       const data = await response.json();
       const transcription = data.transcription;
 
-      // Add the transcription to the chat as a user message
       addMessageToChat(transcription, "user-message");
 
-      // Send the transcription to the chat route
       await sendMessage(transcription, sessionId, userId);
     } else {
       console.error("Failed to transcribe audio");

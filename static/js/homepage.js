@@ -1,3 +1,7 @@
+/**
+ * Initializes the homepage functionality.
+ * Sets up event listeners for navigation and accordion.
+ */
 document.addEventListener("DOMContentLoaded", () => {
   const chatLink = document.getElementById("chatLink");
   const historyLink = document.getElementById("historyLink");

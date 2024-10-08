@@ -3,6 +3,7 @@ import { initializeWebSocket } from "./websocket.js";
 import { initializeImageUpload } from "./imageUpload.js"; // Add this import
 import { initializeMessageHandling } from "./messageHandling.js";
 import { initializeChat } from "./chat.js";
+import { initializeGeoGebra } from "./geometry_geogebra.js";
 
 // Remove any imports related to login or registration
 
@@ -123,7 +124,7 @@ try {
 async function initializeApp() {
   // Common initialization for all pages
   await initializeUrls();
-  
+
   // Page-specific initialization
   if (document.getElementById("chatContainer")) {
     await initializeChatPage();
@@ -134,3 +135,8 @@ async function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+
+// document.addEventListener("DOMContentLoaded", function() {
+//   // ... other initialization code ...
+//   initializeGeoGebra();
+// });

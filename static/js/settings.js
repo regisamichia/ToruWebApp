@@ -4,16 +4,14 @@ import { setAudioMode, getAudioMode } from "./main.js";
 import { checkAuthAndFetchUserInfo, logout } from "./auth.js";
 
 async function initializeSettings() {
-  console.log("Initializing settings page...");
   const userData = await checkAuthAndFetchUserInfo();
   if (!userData) {
-    console.log("Authentication check failed, redirecting...");
     return;
   }
 
   // Authentication successful, show the main content
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
 
   // Proceed with initializing settings page
   initializeSettingsUI();
@@ -97,12 +95,12 @@ function displayErrorMessage(message) {
   }
 }
 
-async function handleUnauthorized() {
-  // Implement token refresh logic here if your backend supports it
-  // If refresh fails or is not implemented, redirect to login
-  console.log("Redirecting to login due to unauthorized access");
-  window.location.href = "/login";
-}
+// async function handleUnauthorized() {
+//   // Implement token refresh logic here if your backend supports it
+//   // If refresh fails or is not implemented, redirect to login
+//   console.log("Redirecting to login due to unauthorized access");
+//   window.location.href = "/login";
+// }
 
 function toggleAudio() {
   const toggleAudioInput = document.getElementById("toggleAudio");
@@ -161,7 +159,6 @@ function saveSettings() {
 
 function toggleTtsProvider(event) {
   const provider = event.target.value;
-  console.log(`TTS Provider set to ${provider}`);
   setTtsProvider(provider);
   // Add this line to immediately see the effect
   console.log(`Current TTS Provider: ${getTtsProvider()}`);
@@ -169,7 +166,6 @@ function toggleTtsProvider(event) {
 
 function toggleAudioMode(event) {
   const mode = event.target.value;
-  console.log(`Audio Mode set to ${mode}`);
   localStorage.setItem("audioMode", mode); // Save to localStorage
   setAudioMode(mode);
   // Add this line to immediately see the effect

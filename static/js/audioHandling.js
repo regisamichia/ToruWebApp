@@ -15,6 +15,10 @@ let audioContext;
 let audioQueue = [];
 let isPlaying = false;
 
+/**
+ * Initializes the audio handling functionality.
+ * Sets up event listeners and initializes necessary components.
+ */
 export async function initializeAudioHandling() {
   await initializeUrls();
   const micButton = document.getElementById("microphoneButton");
@@ -30,6 +34,10 @@ function updateMicrophoneButtonState() {
   // Update button state based on currentMode...
 }
 
+/**
+ * Handles the click event on the microphone button.
+ * Toggles between starting and stopping recording based on the current state.
+ */
 export async function handleMicrophoneClick() {
   const micButton = document.getElementById("microphoneButton");
   const micIcon = micButton.querySelector(".material-icons");
@@ -55,6 +63,12 @@ export async function handleMicrophoneClick() {
   }
 }
 
+/**
+ * Streams audio for the given text.
+ * @param {string} text - The text to be converted to audio.
+ * @param {string} messageId - The ID of the message associated with the audio.
+ * @returns {AudioBuffer|null} The audio buffer if successful, null otherwise.
+ */
 export async function streamAudio(text, messageId) {
   if (!isAudioEnabled) return null;
 
@@ -70,7 +84,6 @@ export async function streamAudio(text, messageId) {
         : `${apiBaseUrl}/api/synthesize_audio`;
 
     console.log(`Using TTS provider: ${currentProvider}`);
-    console.log(`Endpoint: ${endpoint}`);
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -110,6 +123,10 @@ async function playNextAudio() {
   source.start();
 }
 
+/**
+ * Replays audio from S3 for the given message IDs.
+ * @param {string|string[]} messageIds - The ID(s) of the message(s) to replay.
+ */
 export async function replayAudioFromS3(messageIds) {
   if (!Array.isArray(messageIds)) {
     messageIds = [messageIds]; // Ensure backwards compatibility
@@ -124,8 +141,8 @@ export async function replayAudioFromS3(messageIds) {
     for (const messageId of messageIds) {
       const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json"
+        headers: {
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -145,7 +162,7 @@ export async function replayAudioFromS3(messageIds) {
           if (!audioResponse.ok) throw new Error("Failed to fetch audio file");
           const arrayBuffer = await audioResponse.arrayBuffer();
           return await audioContext.decodeAudioData(arrayBuffer);
-        })
+        }),
       );
 
       audioBuffers.push(...segmentBuffers);

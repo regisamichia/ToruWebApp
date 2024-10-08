@@ -30,9 +30,10 @@ async def image_comprehension(image: UploadFile = File(...)):
 
         contents = await image.read()
 
-        response = multimodal.extract_explanation(contents)
+        response = multimodal.step_explanation(contents)
+        print(response)
 
-        return {"response": response}
+        return {"response" : response }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

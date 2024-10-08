@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Body
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Body, Form
 from fastapi.responses import JSONResponse
 from PIL import Image
 import pytesseract
@@ -10,11 +10,13 @@ from pydantic import BaseModel
 from pathlib import Path
 import logging
 import boto3
-from botocore.exceptions import NoCredentialsError
+import os
+from botocore.exceptions import NoCredentialsError,  ClientError
 from dotenv import load_dotenv
 from datetime import datetime
 from app.models.user import User
 from typing import List, Optional
+
 
 load_dotenv()
 
@@ -94,7 +96,6 @@ async def extract_text_from_image(image: UploadFile = File(...), current_user: U
     logging.info(f"Received image: {image.filename}, Content-Type: {image.content_type}")
 
     user_email = current_user.email
-    print(f"this is user email : {user_email}")
     if user_email is None:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
@@ -164,3 +165,15 @@ async def delete_chat_history(user_id: str, current_user: UserInToken = Depends(
         return {"message": "Chat history deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete chat history: {str(e)}")
+
+@router.post("/api/upload_image")
+async def upload_image(image: UploadFile = File(...), image_id: str = Form(...)):
+    try:
+        file_extension = os.path.splitext(image.filename)[1]
+        s3_key = f"images/{image_id}{file_extension}"
+
+        s3_client.upload_fileobj(image.file, bucket_name, s3_key)
+
+        return JSONResponse(content={"message": "Image uploaded successfully", "image_id": image_id}, status_code=200)
+    except ClientError as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)

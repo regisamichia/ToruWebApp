@@ -15,22 +15,28 @@ import { storeConversation } from "./conversationStorage.js";
 import { checkAuthAndFetchUserInfo, logout } from "./auth.js";
 import { getAudioMode } from "./main.js";
 
+/**
+ * Initializes the chat functionality.
+ * Checks authentication, sets up UI, and initializes components.
+ */
 export async function initializeChat() {
   const userData = await checkAuthAndFetchUserInfo();
   if (!userData) {
-    console.log("Authentication check failed, redirecting...");
     return;
   }
 
   // Authentication successful, show the main content
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById("loadingState").style.display = "none";
+  document.getElementById("mainContent").style.display = "block";
 
   initializeChatUI();
   initializeAudioHandling();
   initializeLogoutButtons();
 }
 
+/**
+ * Initializes logout buttons with event listeners.
+ */
 function initializeLogoutButtons() {
   const logoutButton = document.getElementById("logoutButton");
   const sidebarLogoutButton = document.getElementById("sidebarLogoutButton");

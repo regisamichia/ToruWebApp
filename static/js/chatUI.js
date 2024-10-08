@@ -6,6 +6,9 @@ import { replayAudioFromS3 } from "./audioHandling.js";
 // Create audioContext at the top level
 let audioContext;
 
+/**
+ * Initializes the chat UI components.
+ */
 export function initializeChatUI() {
   const userInput = document.getElementById("userInput");
   if (userInput) {
@@ -18,6 +21,12 @@ export function initializeChatUI() {
   updateMicrophoneButtonState();
 }
 
+/**
+ * Adds a message to the chat UI.
+ * @param {string} message - The message content.
+ * @param {string} className - The CSS class for the message.
+ * @returns {Object} An object containing the message element and its ID.
+ */
 export function addMessageToChat(message, className) {
   const chatMessages = document.getElementById("chatMessages");
   if (!chatMessages) {
@@ -45,7 +54,12 @@ export function addMessageToChat(message, className) {
   return { element: messageElement, id: messageId };
 }
 
-// New function to add play button
+/**
+ * Adds a play button to a message for audio replay.
+ * @param {HTMLElement} messageElement - The message element.
+ * @param {string} messageId - The ID of the message.
+ * @param {AudioBuffer[]} audioBuffers - The audio buffers to replay.
+ */
 export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) {
   const playButton = document.createElement("div");
   playButton.className = "replay-button";
@@ -92,6 +106,10 @@ function replayAudioBuffers(audioBuffers) {
   playNextBuffer();
 }
 
+/**
+ * Adds a loading animation to the chat UI.
+ * @returns {HTMLElement} The loading animation element.
+ */
 export function addLoadingAnimation() {
   const chatMessages = document.getElementById("chatMessages");
   const loadingDiv = document.createElement("div");
@@ -108,6 +126,11 @@ export function addLoadingAnimation() {
   return loadingDiv;
 }
 
+/**
+ * Renders content with Markdown and LaTeX support.
+ * @param {string} text - The text to render.
+ * @returns {Object} An object containing the rendered HTML and plain text.
+ */
 export function renderContent(text) {
   const latexPattern = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/g;
   const parts = text.split(latexPattern);
@@ -161,6 +184,13 @@ function escapeSpecialChars(text) {
     .replace(/_/g, "\\_"); // Escape underscores
 }
 
+/**
+ * Displays text with a dynamic delay for a typewriter effect.
+ * @param {string} text - The text to display.
+ * @param {HTMLElement} element - The element to display the text in.
+ * @param {number} baseDelay - The base delay between words.
+ * @param {number} wordsPerChunk - The number of words to display per chunk.
+ */
 export async function displayTextWithDynamicDelay(
   text,
   element,
@@ -169,7 +199,7 @@ export async function displayTextWithDynamicDelay(
 ) {
   const words = text.split(" ");
   let chunk = [];
-  let displayedText = element.innerText; // Start with existing content
+  let displayedText = element.innerText || ''; // Start with existing content or empty string
 
   for (let i = 0; i < words.length; i++) {
     chunk.push(words[i]);
@@ -177,7 +207,12 @@ export async function displayTextWithDynamicDelay(
     if (chunk.length === wordsPerChunk || i === words.length - 1) {
       displayedText += chunk.join(" ") + " ";
       element.innerText = displayedText;
-      element.scrollIntoView({ behavior: "smooth", block: "end" });
+      
+      // Scroll the parent element (message container) into view
+      const messageContainer = element.closest('.message');
+      if (messageContainer) {
+        messageContainer.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
 
       const chunkLength = chunk.join(" ").length;
       const delay = baseDelay + chunkLength * 30;
@@ -212,7 +247,11 @@ function updateMicrophoneButtonState() {
   }
 }
 
-// Add this function to chatUI.js
+/**
+ * Converts LaTeX content to readable text.
+ * @param {string} text - The text containing LaTeX.
+ * @returns {string} The readable text version.
+ */
 export function latexToReadableText(text) {
   // Replace both display and inline math mode
   text = text.replace(

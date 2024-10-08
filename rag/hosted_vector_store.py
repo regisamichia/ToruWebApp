@@ -63,7 +63,7 @@ class ChromaAPI(VectorStore):
         return ChromaRetriever(vector_store=self, k=k, filter=filter)
 
 # Custom retriever class
-class ChromaRetriever(BaseRetriever, BaseModel):
+class ChromaRetriever(BaseRetriever):
     vector_store: ChromaAPI
     k: int = 4
     filter: Optional[dict] = None
@@ -72,15 +72,13 @@ class ChromaRetriever(BaseRetriever, BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def __init__(self, vector_store: ChromaAPI = None, *args, **kwargs):
-        if vector_store is not None:
-            kwargs['vector_store'] = vector_store
-        super().__init__(**kwargs)
+    def __init__(self, vector_store: ChromaAPI, k: int = 4, filter: Optional[dict] = None, **kwargs: Any):
+        super().__init__(vector_store=vector_store, k=k, filter=filter, client=OpenAI(), **kwargs)
 
     def get_embeddings(self, texts):
         response = self.client.embeddings.create(
             input=texts,
-            model="text-embedding-ada-002"
+            model= "text-embedding-ada-002"
         )
         data = response.data
         embeddings = [item.embedding for item in data]

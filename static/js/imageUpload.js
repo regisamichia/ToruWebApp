@@ -9,6 +9,15 @@ import {
 } from "./chat.js";
 import { sessionId, isAudioEnabled, userId } from "./main.js";
 import getUrls from "./config.js";
+import { addPlayButtonToMessage } from "./chatUI.js";
+
+function generateUniqueId() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 let apiBaseUrl, chatUrl;
 
@@ -56,7 +65,6 @@ export async function initializeImageUpload() {
 async function sendImageMessage(imageFile) {
   try {
     const imagePreview = URL.createObjectURL(imageFile);
-
     const userMessageDiv = document.createElement("div");
     userMessageDiv.className = "message user-message";
     const img = document.createElement("img");
@@ -72,6 +80,15 @@ async function sendImageMessage(imageFile) {
     const loadingAnimation = addLoadingAnimation();
 
     try {
+      // Generate a unique ID for the message
+      const messageId = generateUniqueId();
+
+      // Upload image to S3
+      const uploadResponse = await uploadImageToS3(imageFile, messageId);
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image to S3");
+      }
+
       const extractFormData = new FormData();
       extractFormData.append("image", imageFile);
 
@@ -85,7 +102,7 @@ async function sendImageMessage(imageFile) {
         "POST",
         extractFormData,
         "multipart/form-data",
-        headers, // Add headers to the makeApiCall function
+        headers,
       );
 
       if (!extractResponse.ok) {
@@ -103,6 +120,15 @@ async function sendImageMessage(imageFile) {
       const extractData = await extractResponse.json();
       const extractedText = extractData.text;
 
+      if (!extractedText || extractedText.trim() === "") {
+        loadingAnimation.remove();
+        addMessageToChat(
+          "Je n'ai pas pu détecter de texte dans ton image, si tu veux que je t'aide à résoudre l'exercice, il me faut aussi des explications.",
+          "bot-message",
+        );
+        return;
+      }
+
       const chatFormData = new FormData();
       chatFormData.append("session_id", sessionId);
       chatFormData.append("user_id", userId);
@@ -114,16 +140,20 @@ async function sendImageMessage(imageFile) {
         "POST",
         chatFormData,
         "multipart/form-data",
-        headers, // Add headers to this request as well
+        headers,
       );
 
       if (chatResponse.ok) {
-        loadingAnimation.remove();
-        const botMessageElement = addMessageToChat("", "bot-message");
+        const botMessageId = generateUniqueId();
+        const { element: botMessageElement, id: messageId } = addMessageToChat("", "bot-message");
+        const messageContent = botMessageElement.querySelector('.message-content');
         const reader = chatResponse.body.getReader();
         const decoder = new TextDecoder();
         let accumulatedText = "";
         let buffer = "";
+        let audioBuffers = [];
+        let audioSegmentIds = [];
+        loadingAnimation.remove();
 
         while (true) {
           const { done, value } = await reader.read();
@@ -136,9 +166,13 @@ async function sendImageMessage(imageFile) {
             accumulatedText += sentence;
             const { html, text } = renderContent(sentence);
             if (isAudioEnabled) {
-              await streamAudio(text);
+              const audioBuffer = await streamAudio(text, `${botMessageId}_${audioSegmentIds.length}`);
+              if (audioBuffer) {
+                audioBuffers.push(audioBuffer);
+                audioSegmentIds.push(`${botMessageId}_${audioSegmentIds.length}`);
+              }
             }
-            await displayTextWithDynamicDelay(sentence, botMessageElement);
+            await displayTextWithDynamicDelay(sentence, messageContent);
           }
 
           buffer = buffer.substring(sentences.join("").length);
@@ -149,25 +183,44 @@ async function sendImageMessage(imageFile) {
           accumulatedText += buffer;
           const { html, text } = renderContent(buffer);
           if (isAudioEnabled) {
-            await streamAudio(text);
+            const audioBuffer = await streamAudio(text, `${botMessageId}_${audioSegmentIds.length}`);
+            if (audioBuffer) {
+              audioBuffers.push(audioBuffer);
+              audioSegmentIds.push(`${botMessageId}_${audioSegmentIds.length}`);
+            }
           }
-          await displayTextWithDynamicDelay(buffer, botMessageElement);
+          await displayTextWithDynamicDelay(buffer, messageContent);
         }
 
         // Final render
-        if (botMessageElement) {
+        if (messageContent) {
           const { html, text } = renderContent(accumulatedText);
-          botMessageElement.innerHTML = html;
-          botMessageElement.dataset.plainText = text;
+          messageContent.innerHTML = html;
+          messageContent.dataset.plainText = text;
           console.log("Final rendering complete for image message");
         }
 
+        // Add play button for audio replay
+        addPlayButtonToMessage(botMessageElement, botMessageId, audioBuffers);
+
         // Store the conversation in local storage
-        storeConversation(userId, sessionId, extractedText, accumulatedText);
+        storeConversation(
+          sessionId,
+          extractedText,
+          accumulatedText,
+          messageId,
+          audioSegmentIds,
+          messageId // Use messageId as imageId
+        );
       } else {
         console.error("Failed to process image and text in chat");
         const errorText = await chatResponse.text();
         console.error("Error details:", errorText);
+        loadingAnimation.remove();
+        addMessageToChat(
+          "I encountered an issue while processing the image. Could you please try again or provide more details about what you're asking?",
+          "bot-message",
+        );
       }
     } catch (error) {
       console.error("Error in sendImageMessage:", error);
@@ -184,4 +237,22 @@ async function sendImageMessage(imageFile) {
       "error-message",
     );
   }
+}
+
+async function uploadImageToS3(imageFile, messageId) {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+  formData.append("image_id", messageId);
+
+  const token = localStorage.getItem("token");
+  const headers = new Headers();
+  headers.append("Authorization", `Bearer ${token}`);
+
+  return await makeApiCall(
+    `${apiBaseUrl}/api/upload_image`,
+    "POST",
+    formData,
+    "multipart/form-data",
+    headers,
+  );
 }

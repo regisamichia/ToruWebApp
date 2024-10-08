@@ -3,11 +3,18 @@ import getUrls from "./config.js";
 
 let apiBaseUrl;
 
+/**
+ * Initializes the URLs for the API.
+ */
 async function initializeUrls() {
   const urls = await getUrls();
   apiBaseUrl = urls.apiBaseUrl;
 }
 
+/**
+ * Initializes a new chat session.
+ * @returns {string|null} The session ID if successful, null otherwise.
+ */
 export async function initializeSession() {
   await initializeUrls();
   try {

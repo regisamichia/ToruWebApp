@@ -17,7 +17,6 @@ let isSendingAudio = true;
 
 export async function initializeAudioRecording() {
   const micStatus = document.getElementById("micStatus");
-  console.log("try access mic");
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -26,9 +25,6 @@ export async function initializeAudioRecording() {
       },
     });
     micStatus.textContent = "Microphone: Active";
-    console.log("Microphone access granted");
-
-    console.log("Creating AudioContext...");
     audioContext = new (window.AudioContext || window.webkitAudioContext)({
       sampleRate: 16000,
     });
@@ -52,8 +48,6 @@ export async function initializeAudioRecording() {
         audioChunks.push(event.data);
       };
     }
-
-    console.log("Audio recording initialized successfully");
   } catch (error) {
     console.error("Error initializing audio:", error);
     micStatus.textContent = "Microphone: Error - " + error.message;
@@ -74,7 +68,7 @@ export function stopRecording() {
   if (getAudioMode() === "manual" && mediaRecorder) {
     return new Promise((resolve) => {
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
         resolve(audioBlob);
       };
       mediaRecorder.stop();

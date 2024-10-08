@@ -18,7 +18,6 @@ export async function initializeWebSocket() {
   await initializeUrls();
 
   if (getAudioMode() !== "continuous") {
-    console.log("WebSocket not initialized: not in continuous mode");
     return;
   }
 

@@ -3,12 +3,18 @@ import getUrls from "./config.js";
 let apiBaseUrl;
 let releaseMode;
 
+/**
+ * Initializes the URLs for the API and sets release mode.
+ */
 async function initializeUrls() {
   const urls = await getUrls();
   apiBaseUrl = urls.apiBaseUrl;
   releaseMode = urls.release_mode;
 }
 
+/**
+ * Initializes the login functionality.
+ */
 async function initializeLogin() {
   await initializeUrls();
   initializeLoginForm();
@@ -16,10 +22,18 @@ async function initializeLogin() {
 
 document.addEventListener("DOMContentLoaded", initializeLogin);
 
+/**
+ * Retrieves the authentication token from local storage.
+ * @returns {string|null} The authentication token or null if not found.
+ */
 export function getToken() {
   return localStorage.getItem("token");
 }
 
+/**
+ * Refreshes the authentication token.
+ * @returns {string|null} The new token if refresh successful, null otherwise.
+ */
 export async function refreshToken() {
   const refreshToken = localStorage.getItem("refreshToken");
   if (!refreshToken) return null;
@@ -50,6 +64,9 @@ export async function refreshToken() {
   }
 }
 
+/**
+ * Initializes the login form and register form/button based on release mode.
+ */
 function initializeLoginForm() {
   const loginForm = document.getElementById("login");
   const registerForm = document.getElementById("register");
@@ -57,7 +74,6 @@ function initializeLoginForm() {
 
   if (loginForm) {
     loginForm.addEventListener("submit", handleLogin);
-    console.log("Login form initialized");
   } else {
     console.error("Login form not found");
   }
@@ -65,7 +81,6 @@ function initializeLoginForm() {
   if (releaseMode === "beta") {
     if (registerButton) {
       registerButton.addEventListener("click", handleRegisterRedirect);
-      console.log("Register button initialized for beta mode");
     } else {
       console.log("Register button not found on this page");
     }
@@ -79,6 +94,10 @@ function initializeLoginForm() {
   }
 }
 
+/**
+ * Handles the login form submission.
+ * @param {Event} e - The form submission event.
+ */
 function handleRegisterRedirect(e) {
   e.preventDefault();
   window.location.href = "/waiting-list";
@@ -89,14 +108,11 @@ async function handleLogin(e) {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
 
-  console.log("Attempting login with email:", email);
-
   const formData = new URLSearchParams();
   formData.append("username", email);
   formData.append("password", password);
 
   try {
-    console.log("Sending login request...");
     const response = await fetch(`${apiBaseUrl}/api/login`, {
       method: "POST",
       headers: {
@@ -105,9 +121,7 @@ async function handleLogin(e) {
       body: formData,
     });
 
-    console.log("Login response status:", response.status);
     const data = await response.json();
-    console.log("Login response data:", data);
 
     if (response.ok) {
       console.log("Login successful, setting tokens and user data...");
@@ -115,16 +129,6 @@ async function handleLogin(e) {
       localStorage.setItem("refreshToken", data.refresh_token);
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("user_id", data.user_id); // Make sure this line is present
-      console.log(
-        "Data set in localStorage:",
-        JSON.stringify({
-          token: localStorage.getItem("token"),
-          refreshToken: localStorage.getItem("refreshToken"),
-          isLoggedIn: localStorage.getItem("isLoggedIn"),
-          userId: localStorage.getItem("user_id"),
-        }),
-      );
-      console.log("Redirecting to chat...");
       window.location.href = "/chat";
     } else {
       console.error("Login failed:", data.detail);
@@ -136,6 +140,10 @@ async function handleLogin(e) {
   }
 }
 
+/**
+ * Handles the register form submission.
+ * @param {Event} e - The form submission event.
+ */
 async function handleRegister(e) {
   e.preventDefault();
   const first_name = document.getElementById("registerFirstName").value;
@@ -182,13 +190,10 @@ async function handleRegister(e) {
 
       console.log("Login response status:", loginResponse.status);
       const loginData = await loginResponse.json();
-      console.log("Login response data:", loginData);
 
       if (loginResponse.ok) {
-        console.log("Auto-login successful, setting token...");
         localStorage.setItem("token", loginData.access_token);
         localStorage.setItem("isLoggedIn", "true");
-        console.log("Redirecting to chat...");
         window.location.href = "/chat";
       } else {
         console.error("Auto-login failed:", loginData.detail);
@@ -207,6 +212,11 @@ async function handleRegister(e) {
   }
 }
 
+/**
+ * Performs the login process.
+ * @param {string} username - The user's email.
+ * @param {string} password - The user's password.
+ */
 async function login(username, password) {
   try {
     const response = await fetch(`${apiBaseUrl}/api/login`, {
@@ -220,7 +230,6 @@ async function login(username, password) {
     if (response.ok) {
       const data = await response.json();
       localStorage.setItem("sessionId", data.sessionId); // Store the session ID
-      console.log("Stored sessionId:", data.sessionId); // Debugging line
       window.location.href = "/homepage";
     } else {
       console.error("Failed to log in");
@@ -232,7 +241,6 @@ async function login(username, password) {
 
 document.addEventListener("DOMContentLoaded", async function () {
   await initializeUrls();
-  console.log("DOM content loaded"); // Debug log
   initializeLoginForm();
 
   const loginForm = document.getElementById("loginForm");
