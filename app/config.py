@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     ELEVEN_VOICE_ID: str
     CHROMA_DB_URL: str
     CHROMA_COLLECTION_ID: str
+    CHROMA_COLLECTION_ID_K: str
     CHROMA_API_KEY: str
     MATH_CHATBOT_URL: str
     MULTIMODAL_URL: str
