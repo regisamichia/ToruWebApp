@@ -1,4 +1,9 @@
-import { isAudioEnabled, getTtsProvider, getUserId, getSessionId } from "./main.js";
+import {
+  isAudioEnabled,
+  getTtsProvider,
+  getUserId,
+  getSessionId,
+} from "./main.js";
 import { startRecording, stopRecording } from "./audioRecording.js";
 import { sendAudioMessage } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
@@ -64,6 +69,22 @@ export async function handleMicrophoneClick() {
 }
 
 /**
+ * Preprocesses text for text-to-speech conversion.
+ * @param {string} text - The original text to be processed.
+ * @returns {string} The processed text ready for TTS.
+ */
+function preprocessTextForTTS(text) {
+  // Replace '/' with 'divisé par'
+  // Replace '=' with 'égal à'
+  text = text.replace(/=/g, " égal à ");
+  text = text.replace(/\//g, " divisé par ");
+
+  return text;
+
+  // Add more text replacement rules here in the future
+}
+
+/**
  * Streams audio for the given text.
  * @param {string} text - The text to be converted to audio.
  * @param {string} messageId - The ID of the message associated with the audio.
@@ -85,10 +106,17 @@ export async function streamAudio(text, messageId) {
 
     console.log(`Using TTS provider: ${currentProvider}`);
 
+    // Preprocess the text for TTS
+    const processedText = preprocessTextForTTS(text);
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, user_id: getUserId(), message_id: messageId }),
+      body: JSON.stringify({
+        text: processedText,
+        user_id: getUserId(),
+        message_id: messageId,
+      }),
     });
 
     if (!response.ok) throw new Error("Failed to synthesize audio");

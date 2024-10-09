@@ -1,12 +1,16 @@
-import { isAudioEnabled, getSessionId, getUserId } from "./main.js";
+import {
+  isAudioEnabled,
+  getSessionId,
+  getUserId,
+  getAudioMode,
+} from "./main.js";
 import {
   addMessageToChat,
   addLoadingAnimation,
   renderContent,
   displayTextWithDynamicDelay,
-  latexToReadableText,
 } from "./chatUI.js";
-import { streamAudio } from "./audioHandling.js";
+import { streamAudio, handleMicrophoneClick } from "./audioHandling.js";
 import { storeConversation } from "./conversationStorage.js";
 import { pauseAudioRecording, resumeAudioRecording } from "./audioRecording.js";
 import getUrls from "./config.js";
@@ -65,8 +69,6 @@ export function handleUserInput() {
     addMessageToChat(messageText, "user-message");
     sendMessage(messageText, getSessionId(), getUserId());
     userInput.value = "";
-  } else if (getAudioMode() === "manual") {
-    handleMicrophoneClick();
   }
 }
 
@@ -128,14 +130,18 @@ export async function sendMessage(messageText) {
           accumulatedText += sentence;
 
           if (isAudioEnabled) {
-            console.log("text sent to speech:", sentence);
-            const audioBuffer = await streamAudio(
-              sentence,
-              `${messageId}_${audioSegmentIds.length}`,
-            );
-            if (audioBuffer) {
-              audioBuffers.push(audioBuffer);
-              audioSegmentIds.push(`${messageId}_${audioSegmentIds.length}`);
+            if (sentence.trim().length >= 4) {
+              console.log("text sent to speech:", sentence);
+              const audioBuffer = await streamAudio(
+                sentence,
+                `${messageId}_${audioSegmentIds.length}`,
+              );
+              if (audioBuffer) {
+                audioBuffers.push(audioBuffer);
+                audioSegmentIds.push(`${messageId}_${audioSegmentIds.length}`);
+              }
+            } else {
+              console.log("Skipping short sentence for TTS:", sentence);
             }
           }
 
