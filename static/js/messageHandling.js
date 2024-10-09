@@ -97,8 +97,6 @@ export async function sendMessage(messageText) {
     });
 
     if (response.ok) {
-      loadingAnimation.remove();
-
       const { element: botMessageElement, id: messageId } = addMessageToChat(
         "",
         "bot-message",
@@ -118,6 +116,7 @@ export async function sendMessage(messageText) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let isFirstSentence = true;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -127,6 +126,11 @@ export async function sendMessage(messageText) {
         const sentences = buffer.match(/[^.!?]+[.!?]+/g) || [];
 
         for (const sentence of sentences) {
+          if (isFirstSentence) {
+            loadingAnimation.remove(); // Remove loading animation just before displaying the first sentence
+            isFirstSentence = false;
+          }
+
           accumulatedText += sentence;
 
           if (isAudioEnabled) {
@@ -184,6 +188,8 @@ export async function sendMessage(messageText) {
  * @param {Blob} audioBlob - The audio blob to send for transcription.
  */
 export async function sendAudioMessage(audioBlob) {
+  const loadingAnimation = addLoadingAnimation();
+
   try {
     const formData = new FormData();
     formData.append("audio", audioBlob, "audio.webm");
@@ -197,6 +203,7 @@ export async function sendAudioMessage(audioBlob) {
       const data = await response.json();
       const transcription = data.transcription;
 
+      loadingAnimation.remove(); // Remove loading animation just before displaying the transcription
       addMessageToChat(transcription, "user-message");
 
       await sendMessage(transcription, getSessionId(), getUserId());
@@ -204,8 +211,12 @@ export async function sendAudioMessage(audioBlob) {
       console.error("Failed to transcribe audio");
       const errorText = await response.text();
       console.error("Error details:", errorText);
+      loadingAnimation.remove(); // Remove loading animation in case of error
+      addMessageToChat("Failed to transcribe audio. Please try again.", "error-message");
     }
   } catch (error) {
     console.error("Error:", error);
+    loadingAnimation.remove(); // Remove loading animation in case of error
+    addMessageToChat("An error occurred while processing your audio. Please try again.", "error-message");
   }
 }
