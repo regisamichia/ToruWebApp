@@ -15,6 +15,7 @@ import { storeConversation } from "./conversationStorage.js";
 import { pauseAudioRecording, resumeAudioRecording } from "./audioRecording.js";
 import getUrls from "./config.js";
 import { addPlayButtonToMessage } from "./chatUI.js";
+import { addUserLoadingAnimation } from "./chatUI.js";
 
 let chatUrl, apiBaseUrl;
 
@@ -188,7 +189,7 @@ export async function sendMessage(messageText) {
  * @param {Blob} audioBlob - The audio blob to send for transcription.
  */
 export async function sendAudioMessage(audioBlob) {
-  const loadingAnimation = addLoadingAnimation();
+  const loadingAnimation = addUserLoadingAnimation();
 
   try {
     const formData = new FormData();

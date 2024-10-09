@@ -360,3 +360,20 @@ function processLatexContent(latexContent) {
 function generateUniqueId() {
   return "id-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
 }
+
+// Add this new function
+export function addUserLoadingAnimation() {
+  const chatMessages = document.getElementById("chatMessages");
+  const loadingDiv = document.createElement("div");
+  loadingDiv.className = "message user-message user-loading-animation";
+
+  const loadingAnimation = document.createElement("div");
+  loadingAnimation.className = "loading-animation";
+  loadingAnimation.innerHTML =
+    '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+
+  loadingDiv.appendChild(loadingAnimation);
+  chatMessages.appendChild(loadingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return loadingDiv;
+}
