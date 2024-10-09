@@ -1,7 +1,12 @@
 import { handleUserInput } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+import { requestLesson } from "./mathLesson.js";
 import { replayAudioFromS3 } from "./audioHandling.js";
+import {
+  handleMicrophoneClick,
+  updateMicrophoneButtonState,
+} from "./audioHandling.js";
 
 // Create audioContext at the top level
 let audioContext;
@@ -11,6 +16,10 @@ let audioContext;
  */
 export function initializeChatUI() {
   const userInput = document.getElementById("userInput");
+  const microphoneButton = document.getElementById("microphoneButton");
+  const uploadButton = document.getElementById("uploadButton");
+  const imageInput = document.getElementById("imageInput");
+
   if (userInput) {
     userInput.addEventListener("keypress", function (e) {
       if (e.key === "Enter") {
@@ -18,6 +27,19 @@ export function initializeChatUI() {
       }
     });
   }
+
+  if (microphoneButton) {
+    microphoneButton.addEventListener("click", handleMicrophoneClick);
+  }
+
+  if (uploadButton && imageInput) {
+    uploadButton.addEventListener("click", () => {
+      imageInput.click();
+    });
+
+    //imageInput.addEventListener("change", handleImageUpload);
+  }
+
   updateMicrophoneButtonState();
 }
 
@@ -25,9 +47,10 @@ export function initializeChatUI() {
  * Adds a message to the chat UI.
  * @param {string} message - The message content.
  * @param {string} className - The CSS class for the message.
+ * @param {string} sessionId - The session ID.
  * @returns {Object} An object containing the message element and its ID.
  */
-export function addMessageToChat(message, className) {
+export function addMessageToChat(message, className, sessionId) {
   const chatMessages = document.getElementById("chatMessages");
   if (!chatMessages) {
     console.error("Chat messages container not found");
@@ -50,6 +73,15 @@ export function addMessageToChat(message, className) {
   }
 
   chatMessages.appendChild(messageElement);
+
+  // Show the lesson button after bot messages
+  if (className === "bot-message") {
+    const lessonButton = document.getElementById("lessonButton");
+    if (lessonButton) {
+      lessonButton.style.display = "block";
+    }
+  }
+
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return { element: messageElement, id: messageId };
 }
@@ -60,7 +92,11 @@ export function addMessageToChat(message, className) {
  * @param {string} messageId - The ID of the message.
  * @param {AudioBuffer[]} audioBuffers - The audio buffers to replay.
  */
-export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) {
+export function addPlayButtonToMessage(
+  messageElement,
+  messageId,
+  audioBuffers,
+) {
   const playButton = document.createElement("div");
   playButton.className = "replay-button";
   playButton.innerHTML = '<i class="fas fa-play"></i>';
@@ -71,13 +107,13 @@ export function addPlayButtonToMessage(messageElement, messageId, audioBuffers) 
   wrapper.className = "message-wrapper";
 
   // Move the message content into the wrapper
-  wrapper.appendChild(messageElement.querySelector('.message-content'));
-  
+  wrapper.appendChild(messageElement.querySelector(".message-content"));
+
   // Add the play button to the wrapper
   wrapper.appendChild(playButton);
 
   // Replace the message content with the wrapper
-  messageElement.innerHTML = '';
+  messageElement.innerHTML = "";
   messageElement.appendChild(wrapper);
 }
 
@@ -114,12 +150,12 @@ export function addLoadingAnimation() {
   const chatMessages = document.getElementById("chatMessages");
   const loadingDiv = document.createElement("div");
   loadingDiv.className = "message bot-message";
-  
+
   const loadingAnimation = document.createElement("div");
   loadingAnimation.className = "loading-animation";
   loadingAnimation.innerHTML =
     '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-  
+
   loadingDiv.appendChild(loadingAnimation);
   chatMessages.appendChild(loadingDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -199,7 +235,7 @@ export async function displayTextWithDynamicDelay(
 ) {
   const words = text.split(" ");
   let chunk = [];
-  let displayedText = element.innerText || ''; // Start with existing content or empty string
+  let displayedText = element.innerText || ""; // Start with existing content or empty string
 
   for (let i = 0; i < words.length; i++) {
     chunk.push(words[i]);
@@ -207,9 +243,9 @@ export async function displayTextWithDynamicDelay(
     if (chunk.length === wordsPerChunk || i === words.length - 1) {
       displayedText += chunk.join(" ") + " ";
       element.innerText = displayedText;
-      
+
       // Scroll the parent element (message container) into view
-      const messageContainer = element.closest('.message');
+      const messageContainer = element.closest(".message");
       if (messageContainer) {
         messageContainer.scrollIntoView({ behavior: "smooth", block: "end" });
       }
@@ -234,17 +270,6 @@ function getAllTextNodes(node) {
     }
   }
   return textNodes;
-}
-
-function updateMicrophoneButtonState() {
-  const micButton = document.getElementById("microphoneButton");
-  const currentMode = getAudioMode();
-
-  if (currentMode === "manual") {
-    micButton.style.display = "inline-block";
-  } else {
-    micButton.style.display = "none";
-  }
 }
 
 /**
@@ -304,7 +329,7 @@ function processLatexContent(latexContent) {
   // Handle superscripts (exponents)
   latexContent = latexContent.replace(
     /\^(\{[^}]+\}|\d+)/g,
-    (match, p1) => ` à la puissance ${p1.replace(/[{}]/g, "")}`,
+    (match, p1) => `  la puissance ${p1.replace(/[{}]/g, "")}`,
   );
 
   // Handle subscripts

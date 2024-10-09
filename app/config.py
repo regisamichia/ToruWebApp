@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     MULTIMODAL_URL: str
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
+    WOLFRAM_ALPHA_APPID : str
 
     class Config:
         env_file = "/etc/secrets/.env"

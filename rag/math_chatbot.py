@@ -3,6 +3,7 @@ import json
 import yaml
 from typing import Dict, Any, Union, AsyncGenerator
 from hosted_vector_store import ChromaAPI
+from wolfram_query import WolframQuery
 from prompt_builder import PromptBuilder
 from langchain_core.messages import SystemMessage, HumanMessage
 from open_ai_client import OpenAILLMModel
@@ -28,14 +29,25 @@ class Chatbot(OpenAILLMModel):
 
         return "\n".join([f"{message.type}: {message.content}" for message in state["messages"]])
 
-    def build_exercice_prompt(self, state):
+    async def get_solution_from_wolfram(self, state):
+        query_wolfram = WolframQuery()
+        state = await query_wolfram.wolfram_solution(state)
+        return state
+
+    async def build_exercice_prompt(self, state):
+
+        if "solution" not in state or state["solution"] == "":
+
+            state = await self.get_solution_from_wolfram(state)
+
 
         prompt_template = PromptTemplate(
-            input_variables=self.prompts["system_messages"]["default_placeholder"],
+            input_variables=self.prompts["system_messages"]["exercice_placeholder"],
             template=self.prompts["system_messages"]["exercice_resolution"]
         )
         return prompt_template.format(
             chat_history=self.build_message_history(state),
+            solution=state["solution"]
         )
 
     async def process_image(self, image_data: Dict[str, Any]) -> str:
@@ -74,11 +86,12 @@ class Chatbot(OpenAILLMModel):
                 pass
 
         #ici la requête du doc retriever se fait avec le premier message uniquement, à modifier
+        #print("starting retriever")
         docs = self.retriever.invoke(state["messages"][0].content)
 
         state["lesson_example"] = docs
 
-        prompt = self.build_exercice_prompt(state)
+        prompt = await self.build_exercice_prompt(state)
         print(f"PROMPT : {prompt}")
         response_generator = self.llm.stream(prompt)
 

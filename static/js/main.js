@@ -1,70 +1,67 @@
+import {
+  initializeSession as initializeSessionFromAPI,
+  getSessionId as getSessionIdFromSession,
+  getUserIdFromSession,
+} from "./session.js";
+import { initializeChatUI, addMessageToChat } from "./chatUI.js";
 import { initializeAudioRecording } from "./audioRecording.js";
 import { initializeWebSocket } from "./websocket.js";
-import { initializeImageUpload } from "./imageUpload.js"; // Add this import
+import { initializeImageUpload } from "./imageUpload.js";
 import { initializeMessageHandling } from "./messageHandling.js";
 import { initializeChat } from "./chat.js";
-import { initializeGeoGebra } from "./geometry_geogebra.js";
+import getUrls from "./config.js";
+import { closeLesson } from './mathLesson.js';
+import { requestLesson } from './mathLesson.js';
 
-// Remove any imports related to login or registration
+let sessionId = null;
+let userId = null;
+let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false";
+let audioMode = localStorage.getItem("audioMode") || "continuous";
+let apiBaseUrl, chatUrl, multiModalUrl;
 
-export let sessionId = null;
-export let userId = null;
-export let isAudioEnabled = localStorage.getItem("audioEnabled") !== "false";
-export let audioMode = localStorage.getItem("audioMode") || "continuous"; // Add this line
-
-// Function to generate a session ID
-function generateSessionId() {
-  return "session_" + Math.random().toString(36).substr(2, 9);
+async function initializeUrls() {
+  const urls = await getUrls();
+  window.apiBaseUrl = urls.apiBaseUrl;
+  window.chatUrl = urls.chatUrl;
+  window.multiModalUrl = urls.multiModalUrl;
+  console.log("URLs initialized:", { apiBaseUrl, chatUrl, multiModalUrl });
 }
 
-// Function to get or set user ID
-function getUserId() {
-  let id = localStorage.getItem("userId");
-  if (!id) {
-    id = "user_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("userId", id);
+async function initializeSession() {
+  sessionId = await initializeSessionFromAPI();
+  if (!sessionId) {
+    console.error("Failed to initialize session");
+    // You might want to add some user-facing error handling here
+    return;
   }
-  return id;
+  userId = getUserIdFromSession();
+  console.log("Session initialized with sessionId:", sessionId, "and userId:", userId);
 }
 
-// Initialize session and user ID
-export function initializeSession() {
-  sessionId = generateSessionId();
-  userId = getUserId();
-  console.log(
-    "Session initialized with sessionId:",
-    sessionId,
-    "and userId:",
-    userId,
-  );
-}
-
-// Call this function when your app starts, perhaps in your main init function or DOMContentLoaded event
-document.addEventListener("DOMContentLoaded", () => {
-  initializeSession();
-  // ... other initialization code ...
-});
-
-export function setAudioEnabled(enabled) {
+function setAudioEnabled(enabled) {
   isAudioEnabled = enabled;
   localStorage.setItem("audioEnabled", enabled);
 }
 
-export function getTtsProvider() {
+function getTtsProvider() {
   return localStorage.getItem("ttsProvider") || "elevenlabs";
 }
 
-export function setTtsProvider(provider) {
+function setTtsProvider(provider) {
   localStorage.setItem("ttsProvider", provider);
 }
 
-export function setAudioMode(mode) {
+function setAudioMode(mode) {
   audioMode = mode;
-  localStorage.setItem("audioMode", mode); // Save to localStorage when set
+  localStorage.setItem("audioMode", mode);
 }
 
-export function getAudioMode() {
+function getAudioMode() {
   return audioMode;
+}
+
+function getAudioEnabled() {
+  return isAudioEnabled;
 }
 
 async function initializeChatPage() {
@@ -84,59 +81,118 @@ async function initializeChatPage() {
     console.log("Message handling initialized successfully");
 
     console.log("Initializing WebSocket...");
-    await initializeWebSocket(); // Make this async if it's not already
+    await initializeWebSocket();
     console.log("WebSocket initialized successfully");
 
     console.log("Initializing image upload...");
-    await initializeImageUpload(); // Make this async if it's not already
+    await initializeImageUpload();
     console.log("Image upload initialized successfully");
+
+    console.log("Initializing chat UI...");
+    initializeChatUI();
+    console.log("Chat UI initialized successfully");
   } catch (error) {
     console.error("Failed to initialize:", error);
-    // You might want to add some user-facing error handling here
   }
 
   console.log("Chat page initialization complete");
 }
 
+async function initializeApp() {
+  try {
+    console.log("Starting initializeApp...");
+    await initializeSession();
+    if (!sessionId) {
+      console.error("Failed to initialize session. Aborting app initialization.");
+      // Add user-facing error handling here
+      return;
+    }
+    console.log("Session initialized, sessionId:", sessionId);
+
+    const chatContainer = document.querySelector(".chat-container");
+    const chatHistory = document.getElementById("chatHistory");
+
+    console.log("chatContainer:", chatContainer ? "Found" : "Not found");
+    console.log("chatHistory:", chatHistory ? "Found" : "Not found");
+
+    if (chatContainer) {
+      console.log("Chat container found, about to call initializeChatPage...");
+      await initializeChatPage();
+      console.log("initializeChatPage completed");
+      document.getElementById("loadingState").style.display = "none";
+      document.getElementById("mainContent").style.display = "block";
+    } else if (chatHistory) {
+      console.log("Chat history found, initializing chat history...");
+      // Implement initializeChatHistory function if needed
+      // await initializeChatHistory();
+    } else {
+      console.log("Neither chat container nor chat history found.");
+    }
+    console.log("initializeApp completed.");
+  } catch (error) {
+    console.error("Error in initializeApp:", error);
+    // Add user-facing error handling here
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM content loaded, initializing chat page...");
-  initializeChatPage().catch((error) => {
-    console.error("Error during chat page initialization:", error);
-    // Add some user-facing error handling here
+  console.log("DOM content loaded, initializing app...");
+  initializeApp().catch((error) => {
+    console.error("Error during app initialization:", error);
   });
+
+  const closeLessonButton = document.getElementById('closeLessonButton');
+  closeLessonButton.addEventListener('click', closeLesson);
+
+  const lessonButton = document.getElementById('lessonButton');
+  if (lessonButton) {
+    lessonButton.addEventListener('click', () => {
+      const currentSessionId = getSessionIdFromSession();
+      console.log("Requesting lesson with sessionId:", currentSessionId);
+      requestLesson(currentSessionId);
+    });
+  }
+
+  window.showLessonButton = function() {
+    lessonButton.style.display = 'block';
+  }
 });
 
-console.log("Script is running");
-
-try {
-  // Your main initialization code here
-  // For example:
-  document.addEventListener("DOMContentLoaded", async function () {
-    console.log("DOM content loaded");
-    await initializeAudioRecording();
-    console.log("Audio recording initialized");
-    // ... other initialization code
-  });
-} catch (error) {
-  console.error("Error in main script:", error);
+function addMessage(message, isUser = false) {
+  const className = isUser ? "user-message" : "bot-message";
+  addMessageToChat(message, className, sessionId);
 }
 
-async function initializeApp() {
-  // Common initialization for all pages
-  await initializeUrls();
-
-  // Page-specific initialization
-  if (document.getElementById("chatContainer")) {
-    await initializeChatPage();
-  } else if (document.getElementById("chatHistory")) {
-    await initializeChatHistory();
+function getSessionId() {
+  const currentSessionId = getSessionIdFromSession();
+  console.log("getSessionId in main.js, currentSessionId:", currentSessionId);
+  if (!currentSessionId) {
+    console.error("No valid session ID available in main.js");
+    // You might want to add some user-facing error handling here
   }
-  // Add other page-specific initializations as needed
+  return currentSessionId;
 }
 
-document.addEventListener("DOMContentLoaded", initializeApp);
+function getUserId() {
+  return userId;
+}
 
-// document.addEventListener("DOMContentLoaded", function() {
-//   // ... other initialization code ...
-//   initializeGeoGebra();
-// });
+console.log("Main script loaded");
+
+// Export everything at once at the end of the file
+export {
+  initializeSession,
+  setAudioEnabled,
+  getTtsProvider,
+  setTtsProvider,
+  setAudioMode,
+  getAudioMode,
+  getAudioEnabled,
+  addMessage,
+  getSessionId,
+  getUserId,
+  isAudioEnabled,
+  apiBaseUrl,
+  chatUrl,
+  multiModalUrl,
+};

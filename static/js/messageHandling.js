@@ -1,4 +1,4 @@
-import { isAudioEnabled, sessionId, userId } from "./main.js";
+import { isAudioEnabled, getSessionId, getUserId } from "./main.js";
 import {
   addMessageToChat,
   addLoadingAnimation,
@@ -63,7 +63,7 @@ export function handleUserInput() {
   const messageText = userInput.value.trim();
   if (messageText !== "") {
     addMessageToChat(messageText, "user-message");
-    sendMessage(messageText, sessionId, userId);
+    sendMessage(messageText, getSessionId(), getUserId());
     userInput.value = "";
   } else if (getAudioMode() === "manual") {
     handleMicrophoneClick();
@@ -76,7 +76,7 @@ export function handleUserInput() {
  * @param {string} sessionId - The current session ID.
  * @param {string} userId - The current user ID.
  */
-export async function sendMessage(messageText, sessionId, userId) {
+export async function sendMessage(messageText) {
   if (messageText.trim() === "") return;
 
   const loadingAnimation = addLoadingAnimation();
@@ -85,9 +85,9 @@ export async function sendMessage(messageText, sessionId, userId) {
     pauseAudioRecording();
 
     const formData = new FormData();
-    formData.append("session_id", sessionId);
+    formData.append("session_id", getSessionId());
     formData.append("message", messageText);
-    formData.append("user_id", userId);
+    formData.append("user_id", getUserId());
 
     const response = await fetch(`${chatUrl}/api/math_chat`, {
       method: "POST",
@@ -151,7 +151,6 @@ export async function sendMessage(messageText, sessionId, userId) {
       addPlayButtonToMessage(botMessageElement, messageId, audioBuffers);
 
       await storeConversation(
-        sessionId,
         messageText,
         accumulatedText,
         `user_${Date.now()}`,
@@ -194,7 +193,7 @@ export async function sendAudioMessage(audioBlob) {
 
       addMessageToChat(transcription, "user-message");
 
-      await sendMessage(transcription, sessionId, userId);
+      await sendMessage(transcription, getSessionId(), getUserId());
     } else {
       console.error("Failed to transcribe audio");
       const errorText = await response.text();

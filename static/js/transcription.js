@@ -1,5 +1,5 @@
 import { addMessageToChat, sendMessage } from "./chat.js";
-import { sessionId, userId } from "./main.js"; // Import userId
+import { getSessionId, getUserId } from "./main.js";
 
 let currentTranscription = "";
 let fullTranscription = "";
@@ -55,7 +55,7 @@ function finalizeTranscription() {
   if (fullTranscription.trim() !== "") {
     console.log("Final Transcription:", fullTranscription);
     addMessageToChat(fullTranscription.trim(), "user-message");
-    sendMessage(fullTranscription.trim(), sessionId, userId);  // Include sessionId and userId here
+    sendMessage(fullTranscription.trim(), getSessionId(), getUserId());
 
     fullTranscription = "";
     currentTranscription = "";

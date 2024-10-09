@@ -10,6 +10,7 @@ class MathState(TypedDict):
     image_description : str
     is_geometry : bool
     lesson_example : str
+    solution: str
 
 
 class State(TypedDict):

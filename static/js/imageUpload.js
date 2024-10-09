@@ -7,7 +7,7 @@ import {
   streamAudio,
   storeConversation,
 } from "./chat.js";
-import { sessionId, isAudioEnabled, userId } from "./main.js";
+import { getSessionId, isAudioEnabled, getUserId } from "./main.js";
 import getUrls from "./config.js";
 import { addPlayButtonToMessage } from "./chatUI.js";
 
@@ -45,21 +45,23 @@ export async function initializeImageUpload() {
       console.log("Image input clicked");
     });
 
-    imageInput.addEventListener("change", function () {
-      console.log("Image input changed");
-      const imageFile = imageInput.files[0];
-      if (imageFile) {
-        console.log("Image file selected:", imageFile.name);
-        sendImageMessage(imageFile);
-      } else {
-        console.log("No image file selected");
-      }
-    });
+    imageInput.addEventListener("change", handleImageUpload);
   } else {
     console.error("Upload button or image input not found");
   }
 
   console.log("Image upload initialization complete");
+}
+
+export function handleImageUpload(event) {
+  console.log("Image input changed");
+  const imageFile = event.target.files[0];
+  if (imageFile) {
+    console.log("Image file selected:", imageFile.name);
+    sendImageMessage(imageFile);
+  } else {
+    console.log("No image file selected");
+  }
 }
 
 async function sendImageMessage(imageFile) {
@@ -130,8 +132,8 @@ async function sendImageMessage(imageFile) {
       }
 
       const chatFormData = new FormData();
-      chatFormData.append("session_id", sessionId);
-      chatFormData.append("user_id", userId);
+      chatFormData.append("session_id", getSessionId());
+      chatFormData.append("user_id", getUserId());
       chatFormData.append("image", imageFile);
       chatFormData.append("extracted_text", extractedText);
 
@@ -205,7 +207,7 @@ async function sendImageMessage(imageFile) {
 
         // Store the conversation in local storage
         storeConversation(
-          sessionId,
+          getSessionId(),
           extractedText,
           accumulatedText,
           messageId,

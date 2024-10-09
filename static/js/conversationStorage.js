@@ -1,3 +1,4 @@
+import { getSessionId, getUserId } from "./main.js";
 import getUrls from "./config.js";
 
 let apiBaseUrl;
@@ -15,20 +16,20 @@ async function initializeUrls() {
  * Retrieves the user ID from the API.
  * @returns {string} The user ID.
  */
-async function getUserId() {
-  const response = await fetch(`${apiBaseUrl}/api/user_info`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
+// async function getUserId() {
+//   const response = await fetch(`${apiBaseUrl}/api/user_info`, {
+//     headers: {
+//       Authorization: `Bearer ${localStorage.getItem("token")}`,
+//     },
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch user info");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch user info");
+//   }
 
-  const userData = await response.json();
-  return userData.user_id;
-}
+//   const userData = await response.json();
+//   return userData.user_id;
+// }
 
 /**
  * Stores a conversation in the database.
@@ -39,18 +40,29 @@ async function getUserId() {
  * @param {string[]} botMessageIds - The IDs of the bot's message(s).
  */
 export async function storeConversation(
-  sessionId,
   userMessage,
   botMessage,
   userMessageId,
   botMessageIds,
-  imageId = null
+  imageId = null,
 ) {
   await initializeUrls();
-  const userId = await getUserId();
+  const currentSessionId = getSessionId();
+  const currentUserId = getUserId();
+
+  console.log("storeConversation called");
+  console.log("Current sessionId:", currentSessionId);
+  console.log("Current userId:", currentUserId);
+
+  if (!currentSessionId || typeof currentSessionId !== 'string') {
+    console.error("No valid sessionId available. Cannot store conversation.");
+    // You might want to add some user-facing error handling here
+    return;
+  }
+
   const conversation = {
-    userId,
-    sessionId,
+    userId: currentUserId,
+    sessionId: currentSessionId,
     messages: [
       {
         role: "user",
@@ -68,7 +80,7 @@ export async function storeConversation(
     ],
   };
 
-  console.log("Attempting to save conversation:", JSON.stringify(conversation, null, 2));
+  console.log("Conversation object:", JSON.stringify(conversation, null, 2));
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/save_chat_history`, {
@@ -81,8 +93,10 @@ export async function storeConversation(
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Server response:", errorText);
       throw new Error(
-        `Failed to save chat history: ${response.status} ${response.statusText}`
+        `Failed to save chat history: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -90,20 +104,39 @@ export async function storeConversation(
     console.log("Chat history saved successfully:", responseData);
 
     // Store conversation in localStorage as well
-    storeConversationLocally(userId, sessionId, userMessage, botMessage, userMessageId, botMessageIds, imageId);
+    storeConversationLocally(
+      getUserId(),
+      getSessionId(),
+      userMessage,
+      botMessage,
+      userMessageId,
+      botMessageIds,
+      imageId,
+    );
   } catch (error) {
     console.error("Error saving chat history:", error);
     console.error("Conversation data:", JSON.stringify(conversation, null, 2));
   }
 }
 
-function storeConversationLocally(userId, sessionId, userMessage, botMessage, userMessageId, botMessageIds, imageId = null) {
-  const conversation = JSON.parse(localStorage.getItem(`conversation_${userId}_${sessionId}`)) || [];
-  
+function storeConversationLocally(
+  userId,
+  sessionId,
+  userMessage,
+  botMessage,
+  userMessageId,
+  botMessageIds,
+  imageId = null,
+) {
+  const conversation =
+    JSON.parse(
+      localStorage.getItem(`conversation_${getUserId()}_${getSessionId()}`),
+    ) || [];
+
   const userMessageObject = {
     content: userMessage,
     timestamp: new Date().toISOString(),
-    id: userMessageId
+    id: userMessageId,
   };
 
   if (imageId) {
@@ -115,9 +148,12 @@ function storeConversationLocally(userId, sessionId, userMessage, botMessage, us
     botMessage: {
       content: botMessage,
       timestamp: new Date().toISOString(),
-      ids: botMessageIds
-    }
+      ids: botMessageIds,
+    },
   });
 
-  localStorage.setItem(`conversation_${userId}_${sessionId}`, JSON.stringify(conversation));
+  localStorage.setItem(
+    `conversation_${getUserId()}_${getSessionId()}`,
+    JSON.stringify(conversation),
+  );
 }

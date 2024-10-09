@@ -13,10 +13,10 @@ from typing import Optional, Type, Dict, Any
 
 
 class ChromaAPI(VectorStore):
-    def __init__(self, base_url=os.environ["CHROMA_DB_URL"], api_key=os.environ["CHROMA_API_KEY"]):
+    def __init__(self, base_url=os.environ["CHROMA_DB_URL"], api_key=os.environ["CHROMA_API_KEY"], collection_id=os.environ["CHROMA_COLLECTION_ID_K"]):
         self.base_url = base_url
         self.api_key = api_key
-        self.collection_id = os.environ["CHROMA_COLLECTION_ID"]
+        self.collection_id = collection_id
         self.headers = {
             "X-Chroma-Token": self.api_key,
             "Content-Type": "application/json"
@@ -51,7 +51,7 @@ class ChromaAPI(VectorStore):
         response = requests.post(url, json=payload, headers=self.headers)
         if response.status_code == 200:
             documents = response.json()["documents"]
-            print(documents)
+            #print(documents)
             return documents[0]
         else:
             raise Exception(f"Error querying: {response.text}")

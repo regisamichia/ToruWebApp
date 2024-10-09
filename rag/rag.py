@@ -6,15 +6,21 @@ import asyncio
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.config import settings
+from config.argentic_rag_model import MathState as State
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Response
 from math_chatbot import Chatbot
+from math_lesson import MathLesson
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import asyncio
+from dotenv import load_dotenv
+
+# Load environment variables
+#load_dotenv("etc/secrets/.env")
 
 app = FastAPI()
 
@@ -26,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-sessions: Dict[str, Dict[str, Any]] = {}
+sessions: Dict[str, State] = {}
 chatbot = Chatbot()
+math_lesson = MathLesson()
 
 class ChatInput(BaseModel):
     session_id: str
@@ -35,11 +42,36 @@ class ChatInput(BaseModel):
     image: Optional[UploadFile]
     extracted_text: Optional[str]
 
-def get_or_create_session(session_id: str) -> Dict[str, Any]:
-    if (session_id not in sessions):
-        sessions[session_id] = {"messages": [], "first_user_message": ""}
+def get_or_create_session(session_id: str) -> State:
+    if session_id not in sessions:
+        sessions[session_id] = State(
+            messages=[],
+            first_user_message="",
+            end_conversation=False,
+            image_description="",
+            is_geometry=False,
+            lesson_example=""
+        )
     return sessions[session_id]
 
+
+@app.post("/api/math_lesson")
+async def lesson(
+    request: Request,
+    session_id: str = Form(...),
+    message: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None),
+    extracted_text: Optional[str] = Form(None)
+):
+    print(f"Received lesson request with session_id: {session_id}")
+    session = get_or_create_session(session_id)
+    print(f"Lesson Session: {session}")
+
+    async def stream_response():
+        async for chunk in math_lesson.generate_lesson(session):
+            yield chunk
+
+    return StreamingResponse(stream_response(), media_type="text/plain")
 
 @app.post("/api/math_chat")
 async def chat(
@@ -51,6 +83,7 @@ async def chat(
 ):
     form_data = await request.form()
     session = get_or_create_session(session_id)
+    print(f"Chat Session ID: {session_id}")
 
     try:
         if message is not None:
@@ -84,7 +117,14 @@ async def chat(
 @app.post("/new_session")
 async def new_session(response: Response, request: Request):
     session_id = str(uuid4())
-    sessions[session_id] = {"messages": [], "first_user_message": ""}
+    sessions[session_id] = State(
+        messages=[],
+        first_user_message="",
+        end_conversation=False,
+        image_description="",
+        is_geometry=False,
+        lesson_example=""
+    )
 
     origin = request.headers.get("Origin")
 

@@ -1,4 +1,4 @@
-import { isAudioEnabled, getTtsProvider, userId } from "./main.js";
+import { isAudioEnabled, getTtsProvider, getUserId, getSessionId } from "./main.js";
 import { startRecording, stopRecording } from "./audioRecording.js";
 import { sendAudioMessage } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
@@ -28,7 +28,7 @@ export async function initializeAudioHandling() {
   updateMicrophoneButtonState();
 }
 
-function updateMicrophoneButtonState() {
+export function updateMicrophoneButtonState() {
   const micButton = document.getElementById("microphoneButton");
   const currentMode = getAudioMode();
   // Update button state based on currentMode...
@@ -51,7 +51,7 @@ export async function handleMicrophoneClick() {
       const audioBlob = await stopRecording();
       micButton.classList.remove("recording");
       micIcon.textContent = "mic";
-      await sendAudioMessage(audioBlob);
+      await sendAudioMessage(audioBlob, getSessionId());
     } else {
       console.log("Starting recording");
       startRecording();
@@ -88,7 +88,7 @@ export async function streamAudio(text, messageId) {
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, user_id: userId, message_id: messageId }),
+      body: JSON.stringify({ text, user_id: getUserId(), message_id: messageId }),
     });
 
     if (!response.ok) throw new Error("Failed to synthesize audio");
@@ -145,7 +145,7 @@ export async function replayAudioFromS3(messageIds) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: userId,
+          user_id: getUserId(),
           message_id: messageId,
           region: "eu-west-3",
           type: "audio",
