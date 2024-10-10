@@ -62,5 +62,5 @@ export {
   getAudioMode,
   displayTextWithDynamicDelay,
   renderContent,
-  streamAudio, // Add this line
+  streamAudio,
 };

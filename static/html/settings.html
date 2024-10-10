@@ -5,8 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Settings - Toru Chatbot</title>
         <link rel="stylesheet" href="/static/css/styles.css" />
-        <link rel="stylesheet" href="/static/css/chat.css" />
+        <link rel="stylesheet" href="/static/css/main.css" />
+        <link rel="stylesheet" href="/static/css/chat/layout.css" />
+        <link rel="stylesheet" href="/static/css/chat/sidebar.css" />
         <link rel="stylesheet" href="/static/css/settings.css" />
+        <!-- <link rel="stylesheet" href="/static/css/chat/sidebar.css" />
+        <link rel="stylesheet" href="/static/css/main.css" />
+        <link rel="stylesheet" href="/static/css/chat/layout.css" /> -->
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
             rel="stylesheet"
@@ -125,8 +130,8 @@
                                 <div class="setting-info">
                                     <label>Text-to-Speech Provider</label>
                                     <p class="setting-description">
-                                        Choose between OpenAI and Eleven Labs for
-                                        text-to-speech synthesis.
+                                        Choose between OpenAI and Eleven Labs
+                                        for text-to-speech synthesis.
                                     </p>
                                 </div>
                                 <div class="radio-group">
@@ -160,7 +165,8 @@
                                 <div class="setting-info">
                                     <label>Audio Recording Mode</label>
                                     <p class="setting-description">
-                                        Choose between continuous recording or manual start/stop.
+                                        Choose between continuous recording or
+                                        manual start/stop.
                                     </p>
                                 </div>
                                 <div class="radio-group">
@@ -172,7 +178,9 @@
                                             value="continuous"
                                             checked
                                         />
-                                        <label for="audioModeContinuous">Continuous</label>
+                                        <label for="audioModeContinuous"
+                                            >Continuous</label
+                                        >
                                     </div>
                                     <div class="radio-option">
                                         <input
@@ -181,7 +189,9 @@
                                             name="audioMode"
                                             value="manual"
                                         />
-                                        <label for="audioModeManual">Manual</label>
+                                        <label for="audioModeManual"
+                                            >Manual</label
+                                        >
                                     </div>
                                 </div>
                             </div>
@@ -202,7 +212,9 @@
                             </div>
                             <div class="setting-item">
                                 <div class="setting-info">
-                                    <label for="newPassword">New Password:</label>
+                                    <label for="newPassword"
+                                        >New Password:</label
+                                    >
                                     <input
                                         type="password"
                                         id="newPassword"
