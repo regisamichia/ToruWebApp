@@ -10,10 +10,10 @@ from config.argentic_rag_model import MathState as State
 from langchain_core.prompts import PromptTemplate
 import os
 
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv("etc/secrets/.env")
+#load_dotenv("etc/secrets/.env")
 
 class MathLesson(OpenAILLMModel):
 

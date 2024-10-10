@@ -6,9 +6,9 @@ import io
 import tempfile
 from pydub import AudioSegment
 import logging
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
-load_dotenv()
+#load_dotenv()
 router = APIRouter()
 
 #Set up logging

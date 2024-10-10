@@ -5,12 +5,12 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
 import logging
 import io
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import NoCredentialsError
 
 # Load environment variables
-load_dotenv()
+#load_dotenv("etc/secrets/.env")
 
 router = APIRouter()
 

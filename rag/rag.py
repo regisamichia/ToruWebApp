@@ -17,10 +17,10 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import asyncio
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 # Load environment variables
-#load_dotenv("etc/secrets/.env")
+#load_dotenv()
 
 app = FastAPI()
 
@@ -50,7 +50,11 @@ def get_or_create_session(session_id: str) -> State:
             end_conversation=False,
             image_description="",
             is_geometry=False,
-            lesson_example=""
+            lesson_example="",
+            solution="",
+            intermediate_solution=[""],
+            intermediate_calculation=[""],
+            intermediate_calculation_explanation=[""]
         )
     return sessions[session_id]
 
@@ -83,7 +87,6 @@ async def chat(
 ):
     form_data = await request.form()
     session = get_or_create_session(session_id)
-    print(f"Chat Session ID: {session_id}")
 
     try:
         if message is not None:
@@ -123,7 +126,11 @@ async def new_session(response: Response, request: Request):
         end_conversation=False,
         image_description="",
         is_geometry=False,
-        lesson_example=""
+        lesson_example="",
+        solution="",
+        intermediate_solution=[""],
+        intermediate_calculation=[""],
+        intermediate_calculation_explanation=[""]
     )
 
     origin = request.headers.get("Origin")

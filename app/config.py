@@ -22,7 +22,8 @@ class Settings(BaseSettings):
     WOLFRAM_ALPHA_APPID : str
 
     class Config:
-        env_file = "/etc/secrets/.env"
+        #env_file = "etc/secrets/.env"
+        pass
 
     @property
     def allowed_origins_list(self) -> List[str]:

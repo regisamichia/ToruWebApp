@@ -11,6 +11,15 @@ class MathState(TypedDict):
     is_geometry : bool
     lesson_example : str
     solution: str
+    intermediate_calculation : list[str]
+    intermediate_solution : list[str]
+    intermediate_calculation_explanation : list[str]
+
+
+class WolframIntermediateQuery(BaseModel):
+    # This data class encapsulate the current state of the student to be used by the user_analysis_introduction step
+    wolfram_queries: list[str] = Field(description="All the wolfram queries")
+    calculation_explanation: list[str] = Field(description="the translation of wolfram query into natural language in French")
 
 
 class State(TypedDict):

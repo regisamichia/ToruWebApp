@@ -2,10 +2,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import boto3
 import logging
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv("etc/secrets/.env")
+#load_dotenv("etc/secrets/.env")
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)

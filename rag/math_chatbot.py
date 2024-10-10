@@ -11,6 +11,10 @@ from config.argentic_rag_model import MathState as State
 from langchain_core.prompts import PromptTemplate
 import os
 
+#from dotenv import load_dotenv
+
+# Load environment variables
+#load_dotenv("etc/secrets/.env")
 
 class Chatbot(OpenAILLMModel):
 
@@ -34,12 +38,31 @@ class Chatbot(OpenAILLMModel):
         state = await query_wolfram.wolfram_solution(state)
         return state
 
+    async def get_intermediate_solution_from_wolfram(self, state):
+        query_wolfram = WolframQuery()
+        state = await query_wolfram.wolfram_query_intermediate(state)
+        return state
+
+    def build_prompt_intermediate_results(self, state):
+
+        start_prompt = "Voici les calculs intermédiaires que l'élève est en train de faire et leurs résultats : "
+        for i in range(len(state["intermediate_calculation_explanation"])):
+
+            start_prompt += f'''{state["intermediate_calculation_explanation"][i]} et le résultat est  {state["intermediate_solution"][i]}
+
+            '''
+
+        return start_prompt
+
+
     async def build_exercice_prompt(self, state):
 
+        #if we did not store the result of the exercice, need to find a way to clear this value for new exercices
         if "solution" not in state or state["solution"] == "":
-
             state = await self.get_solution_from_wolfram(state)
 
+        if len(state["messages"]) >= 2:
+            state = await self.get_intermediate_solution_from_wolfram(state)
 
         prompt_template = PromptTemplate(
             input_variables=self.prompts["system_messages"]["exercice_placeholder"],
@@ -47,7 +70,9 @@ class Chatbot(OpenAILLMModel):
         )
         return prompt_template.format(
             chat_history=self.build_message_history(state),
-            solution=state["solution"]
+            solution=state["solution"],
+            intermediate_explanation = self.build_prompt_intermediate_results(state),
+            exercice = state["first_user_message"]
         )
 
     async def process_image(self, image_data: Dict[str, Any]) -> str:
@@ -86,10 +111,8 @@ class Chatbot(OpenAILLMModel):
                 pass
 
         #ici la requête du doc retriever se fait avec le premier message uniquement, à modifier
-        #print("starting retriever")
-        docs = self.retriever.invoke(state["messages"][0].content)
-
-        state["lesson_example"] = docs
+        #docs = self.retriever.invoke(state["messages"][0].content)
+        #state["lesson_example"] = docs
 
         prompt = await self.build_exercice_prompt(state)
         print(f"PROMPT : {prompt}")
@@ -100,12 +123,12 @@ class Chatbot(OpenAILLMModel):
             chunk_str = str(chunk.content)  # Convert chunk to string
             accumulated_response += chunk_str
             yield chunk_str  # Yield each chunk as it is received
-
         new_message = SystemMessage(content=accumulated_response)
         state["messages"].append(new_message)
         state["end_conversation"] = True
 
     async def process_input(self, user_input: Union[str, Dict[str, Any]], state: Dict[str, Any]) -> AsyncGenerator[str, None]:
+
         if isinstance(user_input, str):
             state["messages"].append(HumanMessage(content=user_input))
         elif isinstance(user_input, dict) and 'image' in user_input and 'extracted_text' in user_input:

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, Type, Dict, Any
 
 # Load environment variables
-#load_dotenv("etc/secrets/.env")
+load_dotenv("etc/secrets/.env")
 
 
 class ChromaAPI(VectorStore):

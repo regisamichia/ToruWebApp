@@ -12,13 +12,13 @@ import logging
 import boto3
 import os
 from botocore.exceptions import NoCredentialsError,  ClientError
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from datetime import datetime
 from app.models.user import User
 from typing import List, Optional
 
 
-load_dotenv()
+#load_dotenv()
 
 router = APIRouter()
 
