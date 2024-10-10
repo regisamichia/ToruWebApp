@@ -10,8 +10,7 @@ import { initializeImageUpload } from "./imageUpload.js";
 import { initializeMessageHandling } from "./messageHandling.js";
 import { initializeChat } from "./chat.js";
 import getUrls from "./config.js";
-import { closeLesson } from './mathLesson.js';
-import { requestLesson } from './mathLesson.js';
+import { closeLesson, requestLesson, clearLesson } from './mathLesson.js';
 
 let sessionId = null;
 let userId = null;
@@ -146,11 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const lessonButton = document.getElementById('lessonButton');
   if (lessonButton) {
-    lessonButton.addEventListener('click', () => {
-      const currentSessionId = getSessionIdFromSession();
-      console.log("Requesting lesson with sessionId:", currentSessionId);
-      requestLesson(currentSessionId);
-    });
+    lessonButton.addEventListener('click', requestLesson);
   }
 
   window.showLessonButton = function() {

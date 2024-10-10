@@ -3,6 +3,7 @@ import getUrls from "./config.js";
 import { renderContent } from "./chatUI.js";
 
 let chatUrl;
+let lessonContent = null; // Store the lesson content
 
 async function initializeUrls() {
   const urls = await getUrls();
@@ -30,8 +31,15 @@ export async function requestLesson() {
   lessonButton.style.display = "none"; // Hide the lesson button
 
   const lessonMessages = document.getElementById("lessonMessages");
-  lessonMessages.innerHTML =
-    '<div class="message">Toru est en train de créer la leçon, encore quelques secondes...</div>';
+
+  if (lessonContent) {
+    console.log("Using stored lesson content");
+    lessonMessages.innerHTML = lessonContent;
+    return; // Exit the function early if we have stored content
+  }
+
+  console.log("Generating new lesson content");
+  lessonMessages.innerHTML = '<div class="message">Toru est en train de créer la leçon, encore quelques secondes...</div>';
 
   try {
     const response = await fetch(`${chatUrl}/api/math_lesson`, {
@@ -71,13 +79,16 @@ export async function requestLesson() {
         // Scroll to the bottom of the lesson messages
         lessonMessages.scrollTop = lessonMessages.scrollHeight;
       }
+
+      // Store the generated lesson content
+      lessonContent = lessonMessages.innerHTML;
+      console.log("Lesson content stored");
     } else {
       throw new Error("Failed to fetch lesson");
     }
   } catch (error) {
     console.error("Error:", error);
-    lessonMessages.innerHTML =
-      '<div class="message">Failed to generate lesson. Please try again.</div>';
+    lessonMessages.innerHTML = '<div class="message">Failed to generate lesson. Please try again.</div>';
   }
 }
 
@@ -91,4 +102,12 @@ export function closeLesson() {
   chatContainer.style.width = "100%";
   lessonContainer.style.width = "0";
   lessonButton.style.display = "block"; // Show the lesson button again
+}
+
+// Add a function to clear the lesson content
+export function clearLesson() {
+  lessonContent = null;
+  const lessonMessages = document.getElementById("lessonMessages");
+  lessonMessages.innerHTML = "";
+  console.log("Lesson content cleared");
 }
