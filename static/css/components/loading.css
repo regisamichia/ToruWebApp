@@ -1,0 +1,39 @@
+.loading-animation {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 30px;
+    padding: 10px;
+    flex-direction: row;
+}
+
+.loading-animation .dot {
+    background-color: #3498db;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    animation: bounce 1.4s infinite ease-in-out both;
+    display: inline-block;
+}
+
+.message .loading-animation {
+    flex-direction: row !important;
+}
+
+.message .loading-animation .dot {
+    display: inline-block !important;
+}
+
+.user-loading-animation {
+    align-self: flex-end;
+    background-color: var(--primary-color);
+}
+
+.user-loading-animation .loading-animation {
+    justify-content: flex-end;
+}
+
+.user-loading-animation .dot {
+    background-color: #ffffff;
+}

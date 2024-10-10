@@ -1,0 +1,85 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+#mainContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden; /* Prevent scrolling on the main content */
+}
+
+.chat-header {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.chat-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    padding: 20px;
+    background-color: #f0f2f5;
+    height: calc(100vh - 60px); /* Subtract header height */
+}
+
+.chat-container,
+.lesson-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.chat-container h3,
+.lesson-container h3 {
+    margin: 0;
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.lesson-container {
+    flex: 0;
+    display: none;
+    margin-left: 20px;
+    transition: flex 0.3s ease, width 0.3s ease;
+}
+
+.lesson-container.active {
+    flex: 1;
+    display: flex;
+}
+
+.chat-footer {
+    background-color: #f0f2f5;
+    padding: 5px 20px;
+    text-align: center;
+    border-top: 1px solid var(--light-gray);
+    font-size: 0.8em;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

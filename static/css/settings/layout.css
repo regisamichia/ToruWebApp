@@ -1,0 +1,44 @@
+.settings-content {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.settings-content h1 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h2 {
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--light-gray);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.setting-info {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+.setting-description {
+    font-size: 14px;
+    color: var(--dark-gray);
+    margin-top: 5px;
+}

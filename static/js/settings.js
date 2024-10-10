@@ -95,13 +95,6 @@ function displayErrorMessage(message) {
   }
 }
 
-// async function handleUnauthorized() {
-//   // Implement token refresh logic here if your backend supports it
-//   // If refresh fails or is not implemented, redirect to login
-//   console.log("Redirecting to login due to unauthorized access");
-//   window.location.href = "/login";
-// }
-
 function toggleAudio() {
   const toggleAudioInput = document.getElementById("toggleAudio");
   const isAudioEnabled = toggleAudioInput.checked;

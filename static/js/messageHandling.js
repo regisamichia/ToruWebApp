@@ -213,11 +213,17 @@ export async function sendAudioMessage(audioBlob) {
       const errorText = await response.text();
       console.error("Error details:", errorText);
       loadingAnimation.remove(); // Remove loading animation in case of error
-      addMessageToChat("Failed to transcribe audio. Please try again.", "error-message");
+      addMessageToChat(
+        "Failed to transcribe audio. Please try again.",
+        "error-message",
+      );
     }
   } catch (error) {
     console.error("Error:", error);
     loadingAnimation.remove(); // Remove loading animation in case of error
-    addMessageToChat("An error occurred while processing your audio. Please try again.", "error-message");
+    addMessageToChat(
+      "An error occurred while processing your audio. Please try again.",
+      "error-message",
+    );
   }
 }

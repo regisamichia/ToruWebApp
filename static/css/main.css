@@ -1,0 +1,15 @@
+@import url("styles.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css");
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+#mainContent {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}

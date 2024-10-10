@@ -116,7 +116,9 @@ body {
     flex-direction: column;
     overflow: hidden;
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     transition: width 0.3s ease;
 }
@@ -127,10 +129,14 @@ body {
     flex-direction: column;
     overflow: hidden;
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     margin-left: 20px;
-    transition: flex 0.3s ease, width 0.3s ease;
+    transition:
+        flex 0.3s ease,
+        width 0.3s ease;
 }
 
 .lesson-container.active {
@@ -503,9 +509,25 @@ body {
     border-radius: 999px;
     box-shadow: var(--primary-color) 0 10px 20px -10px;
     box-sizing: border-box;
-    color: #FFFFFF;
+    color: #ffffff;
     cursor: pointer;
-    font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
+    font-family:
+        Inter,
+        Helvetica,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        NotoColorEmoji,
+        "Noto Color Emoji",
+        "Segoe UI Symbol",
+        "Android Emoji",
+        EmojiSymbols,
+        -apple-system,
+        system-ui,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        "Noto Sans",
+        sans-serif;
     font-size: 14px;
     font-weight: 700;
     line-height: 24px;
@@ -546,43 +568,43 @@ body {
 
 /* Add these new styles */
 .user-loading-animation {
-  align-self: flex-end;
-  background-color: var(--primary-color);
+    align-self: flex-end;
+    background-color: var(--primary-color);
 }
 
 .user-loading-animation .loading-animation {
-  justify-content: flex-end;
+    justify-content: flex-end;
 }
 
 .user-loading-animation .dot {
-  background-color: #ffffff;
+    background-color: #ffffff;
 }
 
 /* Modify the existing loading animation styles */
 .loading-animation {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  height: 30px;
-  padding: 10px;
-  flex-direction: row;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 30px;
+    padding: 10px;
+    flex-direction: row;
 }
 
 .loading-animation .dot {
-  background-color: #3498db;
-  border-radius: 50%;
-  width: 8px;
-  height: 8px;
-  margin: 0 4px;
-  animation: bounce 1.4s infinite ease-in-out both;
-  display: inline-block;
+    background-color: #3498db;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    animation: bounce 1.4s infinite ease-in-out both;
+    display: inline-block;
 }
 
 /* Ensure no other styles are overriding these */
 .message .loading-animation {
-  flex-direction: row !important;
+    flex-direction: row !important;
 }
 
 .message .loading-animation .dot {
-  display: inline-block !important;
+    display: inline-block !important;
 }

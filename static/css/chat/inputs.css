@@ -1,0 +1,23 @@
+.chat-input-container {
+    background-color: var(--white);
+    border-top: 1px solid var(--light-gray);
+    padding: 20px;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+}
+
+#userInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--light-gray);
+    border-radius: 5px;
+}
+
+#micStatus {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}

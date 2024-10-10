@@ -1,0 +1,103 @@
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.icon-button .material-icons {
+    font-size: 24px;
+    vertical-align: middle;
+}
+
+.icon-button.recording .material-icons {
+    color: red;
+}
+
+.replay-button {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    background: #efeeee;
+    border-radius: 50%;
+    transition: all 0.3s ease-in;
+    box-shadow:
+        3px 3px 3px rgba(0, 0, 0, 0.1),
+        -3px -3px 3px rgba(255, 255, 255, 0.6);
+    margin-left: 10px;
+}
+
+.replay-button .fas {
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    color: gray;
+}
+
+.replay-button:active {
+    box-shadow:
+        inset 3px 3px 3px rgba(0, 0, 0, 0.1),
+        inset -3px -3px 3px rgba(255, 255, 255, 0.6);
+}
+
+.replay-button:active .fas {
+    color: #721efa;
+}
+
+.button-34 {
+    background: var(--primary-color);
+    border-radius: 999px;
+    box-shadow: var(--primary-color) 0 10px 20px -10px;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    font-family:
+        Inter,
+        Helvetica,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        NotoColorEmoji,
+        "Noto Color Emoji",
+        "Segoe UI Symbol",
+        "Android Emoji",
+        EmojiSymbols,
+        -apple-system,
+        system-ui,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        "Noto Sans",
+        sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 24px;
+    opacity: 1;
+    outline: 0 solid transparent;
+    padding: 8px 18px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: fit-content;
+    word-break: break-word;
+    border: 0;
+    margin-top: 10px;
+    align-self: center;
+}
+
+.button-34:hover {
+    background-color: #4a4af0;
+}
+
+.button-34:active {
+    box-shadow: #3c3c9e 0 3px 7px inset;
+    transform: translateY(2px);
+}
+
+#lessonButton {
+    margin: 10px auto;
+    display: none;
+    position: sticky;
+    bottom: 10px;
+    z-index: 10;
+}

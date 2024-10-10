@@ -39,7 +39,8 @@ export async function requestLesson() {
   }
 
   console.log("Generating new lesson content");
-  lessonMessages.innerHTML = '<div class="message">Toru est en train de créer la leçon, encore quelques secondes...</div>';
+  lessonMessages.innerHTML =
+    '<div class="message">Toru est en train de créer la leçon, encore quelques secondes...</div>';
 
   try {
     const response = await fetch(`${chatUrl}/api/math_lesson`, {
@@ -88,7 +89,8 @@ export async function requestLesson() {
     }
   } catch (error) {
     console.error("Error:", error);
-    lessonMessages.innerHTML = '<div class="message">Failed to generate lesson. Please try again.</div>';
+    lessonMessages.innerHTML =
+      '<div class="message">Failed to generate lesson. Please try again.</div>';
   }
 }
 

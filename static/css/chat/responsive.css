@@ -1,0 +1,64 @@
+@media (max-width: 1024px) {
+    .chat-main {
+        flex-direction: column;
+    }
+
+    .chat-container,
+    .lesson-container {
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+
+    .chat-container {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .chat-body {
+        flex-direction: column;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .chat-main {
+        height: auto;
+        padding: 10px;
+    }
+
+    .chat-container {
+        max-width: 100%;
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+
+    #uploadButton {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    #ggb-element {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-header,
+    .chat-sidebar,
+    .chat-messages,
+    .chat-input-container {
+        padding: 10px;
+    }
+
+    #userInput,
+    #uploadButton {
+        font-size: 14px;
+    }
+}
