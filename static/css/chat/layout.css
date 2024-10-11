@@ -85,3 +85,44 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+.fixed-message-container {
+    padding: 10px;
+    border-bottom: 1px solid var(--light-gray);
+    background-color: #ffffff;
+    z-index: 1;
+    position: sticky;
+    top: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.first-message-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.first-message-wrapper .message {
+    align-self: flex-start;
+    margin-bottom: 10px;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.first-message-wrapper .message img,
+.first-message-wrapper .message audio {
+    max-width: 100%;
+    margin-top: 10px;
+}
+
+.first-message-wrapper .validate-button {
+    align-self: flex-end;
+    margin-top: 10px;
+}
+
+.validate-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    margin: 0; /* Override margin from button-34 */
+}
