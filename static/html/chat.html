@@ -64,7 +64,7 @@
         <div id="loadingState">Loading...</div>
         <div id="mainContent">
             <header class="chat-header">
-                <button id="logoutButton" class="logout-button">Logout</button>
+                <!-- <button id="logoutButton" class="logout-button">Logout</button> -->
             </header>
             <div class="chat-body">
                 <aside class="chat-sidebar">
@@ -99,50 +99,91 @@
                     </div>
                 </aside>
                 <main class="chat-main">
-                    <div class="chat-container">
-                        <h3 class="lesson-header">Chatbot</h3>
-                        <div class="fixed-message-container" id="fixedMessageContainer">
-                            <!-- The first user message will be placed here -->
-                        </div>
-                        <div class="chat-messages" id="chatMessages">
-                            <!-- Other messages will be dynamically added here -->
-                        </div>
-                        <button
-                            id="lessonButton"
-                            class="button-34"
-                            style="display: none"
-                        >
-                            Voir la leçon
-                        </button>
-                        <div
-                            id="currentTranscription"
-                            class="current-transcription"
-                        ></div>
-                        <div class="chat-input-container">
-                            <div class="input-row">
-                                <input
-                                    type="text"
-                                    id="userInput"
-                                    placeholder="Type your message..."
-                                />
-                                <button
-                                    id="microphoneButton"
-                                    class="icon-button"
-                                >
-                                    <span class="material-icons">mic</span>
-                                </button>
-                                <button id="uploadButton">
-                                    Envoie une photo de ton exercice
-                                </button>
-                                <input
-                                    type="file"
-                                    id="imageInput"
-                                    accept="image/*"
-                                    style="display: none"
-                                />
+                    <div class="chat-and-control-container">
+                        <div class="chat-container">
+                            <h3 class="lesson-header">
+                                Pose toutes tes questions ici
+                            </h3>
+                            <div
+                                class="fixed-message-container"
+                                id="fixedMessageContainer"
+                            >
+                                <!-- The first user message will be placed here -->
                             </div>
-                            <div id="micStatus">
-                                Microphone: Initializing...
+                            <div class="chat-messages" id="chatMessages">
+                                <!-- Other messages will be dynamically added here -->
+                            </div>
+                            <button
+                                id="lessonButton"
+                                class="button-34"
+                                style="display: none"
+                            >
+                                Voir la leçon
+                            </button>
+                            <div
+                                id="currentTranscription"
+                                class="current-transcription"
+                            ></div>
+                            <div class="chat-input-container">
+                                <div class="input-row">
+                                    <input
+                                        type="text"
+                                        id="userInput"
+                                        placeholder="Type your message..."
+                                    />
+                                    <button
+                                        id="microphoneButton"
+                                        class="icon-button"
+                                    >
+                                        <span class="material-icons">mic</span>
+                                    </button>
+                                    <button
+                                        id="uploadButton"
+                                        class="icon-button"
+                                    >
+                                        <i class="fas fa-images"></i>
+                                    </button>
+                                    <input
+                                        type="file"
+                                        id="imageInput"
+                                        accept="image/*"
+                                        style="display: none"
+                                    />
+                                </div>
+                                <div id="micStatus">
+                                    Microphone: Initializing...
+                                </div>
+                            </div>
+                        </div>
+                        <div class="control-panel">
+                            <h3 class="control-panel-header">
+                                Panneau de commande
+                            </h3>
+                            <div class="control-panel-content">
+                                <div class="control-panel-section">
+                                    <p class="control-panel-text">
+                                        Pour recommencer un nouvel exercice
+                                        clique sur ce bouton
+                                    </p>
+                                    <button
+                                        id="newExerciseButton"
+                                        class="button-34"
+                                    >
+                                        New Exercise
+                                    </button>
+                                </div>
+                                <div class="control-panel-section">
+                                    <p class="control-panel-text">
+                                        Tu as besoin de revoir le tutoriel ? Pas
+                                        de soucis, clique sur ce bouton
+                                    </p>
+                                    <button
+                                        id="tutorialButton"
+                                        class="button-34"
+                                    >
+                                        Tutorial
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

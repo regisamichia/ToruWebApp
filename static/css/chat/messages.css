@@ -6,7 +6,9 @@
     display: flex;
     flex-direction: column;
     background-color: #ffffff;
-    max-height: calc(100% - 110px); /* Adjust for the header and fixed message container */
+    max-height: calc(
+        100% - 110px
+    ); /* Adjust for the header and fixed message container */
 }
 
 .message {
@@ -27,6 +29,13 @@
 
 .user-message {
     background-color: var(--primary-color);
+    color: var(--white);
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.first-user-message {
+    background-color: #8e6fc1;
     color: var(--white);
     align-self: flex-end;
     margin-left: auto;

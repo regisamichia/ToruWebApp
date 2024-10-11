@@ -101,19 +101,3 @@
     bottom: 10px;
     z-index: 10;
 }
-
-/* Add this at the end of the file */
-.validate-button {
-    background-color: var(--primary-color);
-    font-size: 12px;
-    padding: 6px 14px;
-}
-
-.validate-button:hover {
-    background-color: #4a4af0;
-}
-
-.validate-button:active {
-    box-shadow: #3e8e41 0 3px 7px inset;
-    transform: translateY(2px);
-}

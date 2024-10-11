@@ -22,12 +22,14 @@ export async function requestLesson() {
 
   const lessonContainer = document.querySelector(".lesson-container");
   const chatContainer = document.querySelector(".chat-container");
+  const controlPanel = document.querySelector(".control-panel");
   const lessonButton = document.getElementById("lessonButton");
 
-  // Show lesson container and adjust layout
+  // Show lesson container, adjust layout, and hide control panel
   lessonContainer.classList.add("active");
   chatContainer.style.width = "50%";
   lessonContainer.style.width = "50%";
+  controlPanel.style.display = "none"; // Hide the control panel
   lessonButton.style.display = "none"; // Hide the lesson button
 
   const lessonMessages = document.getElementById("lessonMessages");
@@ -94,19 +96,21 @@ export async function requestLesson() {
   }
 }
 
-// Add a function to close the lesson
+// Update the closeLesson function
 export function closeLesson() {
   const lessonContainer = document.querySelector(".lesson-container");
   const chatContainer = document.querySelector(".chat-container");
+  const controlPanel = document.querySelector(".control-panel");
   const lessonButton = document.getElementById("lessonButton");
 
   lessonContainer.classList.remove("active");
-  chatContainer.style.width = "100%";
+  chatContainer.style.width = "80%"; // Adjust this value if needed
   lessonContainer.style.width = "0";
+  controlPanel.style.display = "flex"; // Show the control panel again
   lessonButton.style.display = "block"; // Show the lesson button again
 }
 
-// Add a function to clear the lesson content
+// The clearLesson function remains unchanged
 export function clearLesson() {
   lessonContent = null;
   const lessonMessages = document.getElementById("lessonMessages");

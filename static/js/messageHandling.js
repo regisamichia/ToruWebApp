@@ -110,22 +110,20 @@ export function addFirstMessageToChat(content, type = 'text') {
 
   fixedMessageContainer.innerHTML = `
     <div class="first-message-wrapper">
-      <div class="message user-message">
+      <div class="message first-user-message">
         ${messageContent}
       </div>
-      <button class="button-34 validate-button">Validate</button>
     </div>
   `;
 
-  const validateButton = fixedMessageContainer.querySelector('.validate-button');
-  validateButton.addEventListener('click', validateFirstMessage);
+  // Remove the validateButton-related code since the button no longer exists
 }
 
-// We'll implement this function later
-function validateFirstMessage() {
-  console.log("First message validated!");
-  // Add your validation logic here
-}
+// Remove or comment out the validateFirstMessage function if it's not used elsewhere
+// function validateFirstMessage() {
+//   console.log("First message validated!");
+//   // Add your validation logic here
+// }
 
 /**
  * Sends a message to the server and handles the response.

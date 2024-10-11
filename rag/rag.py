@@ -109,7 +109,7 @@ async def chat(
 
         async def stream_response():
             async for chunk in chatbot.process_input(user_input, session):
-                yield chunk
+                yield chunk.replace("system: ", "")
 
         return StreamingResponse(stream_response(), media_type="text/plain")
 
