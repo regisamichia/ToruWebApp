@@ -2,7 +2,7 @@ import logging
 import asyncio
 import os
 from queue import Queue
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from threading import Thread
 from fastapi import APIRouter, WebSocket, HTTPException
 from starlette.websockets import WebSocketState, WebSocketDisconnect
@@ -13,7 +13,7 @@ from deepgram import (
     LiveOptions,
 )
 
-#load_dotenv("etc/secrets/.env")
+load_dotenv("/etc/secrets/.env")
 router = APIRouter()
 
 #Set up logging
