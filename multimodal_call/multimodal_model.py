@@ -7,7 +7,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from geometry_data_class import MathReasoning
 # Load environment variables
-load_dotenv("etc/secrets/.env")
+load_dotenv("/etc/secrets/.env")
 class MultimodalOpenAI:
 
     def __init__(self, model_name = "gpt-4o") -> None:

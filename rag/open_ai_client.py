@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv("etc/secrets/.env")
+load_dotenv("/etc/secrets/.env")
 
 class OpenAILLMModel:
     """Wrapper for the language model."""
