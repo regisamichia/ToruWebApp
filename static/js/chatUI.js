@@ -1,18 +1,21 @@
 import { handleUserInput } from "./messageHandling.js";
 import { getAudioMode } from "./main.js";
 import { requestLesson } from "./mathLesson.js";
-import { 
-  handleMicrophoneClick, 
+import {
+  handleMicrophoneClick,
   updateMicrophoneButtonState,
-  replayAudioFromS3
+  replayAudioFromS3,
 } from "./audioHandling.js";
-import { 
-  addMessageToChat, 
-  addLoadingAnimation, 
+import {
+  addMessageToChat,
+  addLoadingAnimation,
   addUserLoadingAnimation,
-  addPlayButtonToMessage
+  addPlayButtonToMessage,
 } from "./uiHelpers.js";
-import { renderContent, displayTextWithDynamicDelay } from "./messageRendering.js";
+import {
+  renderContent,
+  displayTextWithDynamicDelay,
+} from "./messageRendering.js";
 
 // Create audioContext at the top level
 let audioContext;
@@ -75,11 +78,11 @@ export function replayAudioBuffers(audioBuffers) {
 }
 
 // Re-export functions from uiHelpers.js and messageRendering.js
-export { 
-  addMessageToChat, 
-  addLoadingAnimation, 
-  addUserLoadingAnimation, 
+export {
+  addMessageToChat,
+  addLoadingAnimation,
+  addUserLoadingAnimation,
   addPlayButtonToMessage,
   renderContent,
-  displayTextWithDynamicDelay
+  displayTextWithDynamicDelay,
 };

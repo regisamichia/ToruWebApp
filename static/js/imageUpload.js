@@ -10,6 +10,11 @@ import {
 import { getSessionId, isAudioEnabled, getUserId } from "./main.js";
 import getUrls from "./config.js";
 import { addPlayButtonToMessage } from "./chatUI.js";
+import {
+  getIsFirstMessage,
+  setIsFirstMessage,
+  addFirstMessageToChat,
+} from "./messageHandling.js";
 
 function generateUniqueId() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -67,17 +72,23 @@ export function handleImageUpload(event) {
 async function sendImageMessage(imageFile) {
   try {
     const imagePreview = URL.createObjectURL(imageFile);
-    const userMessageDiv = document.createElement("div");
-    userMessageDiv.className = "message user-message";
-    const img = document.createElement("img");
-    img.src = imagePreview;
-    img.style.maxWidth = "100%";
-    img.style.maxHeight = "200px";
-    userMessageDiv.appendChild(img);
-    document.getElementById("chatMessages").appendChild(userMessageDiv);
 
-    document.getElementById("chatMessages").scrollTop =
-      document.getElementById("chatMessages").scrollHeight;
+    if (getIsFirstMessage()) {
+      addFirstMessageToChat(imagePreview, 'image');
+      setIsFirstMessage(false);
+    } else {
+      const userMessageDiv = document.createElement("div");
+      userMessageDiv.className = "message user-message";
+      const img = document.createElement("img");
+      img.src = imagePreview;
+      img.style.maxWidth = "100%";
+      img.style.maxHeight = "200px";
+      userMessageDiv.appendChild(img);
+      document.getElementById("chatMessages").appendChild(userMessageDiv);
+
+      document.getElementById("chatMessages").scrollTop =
+        document.getElementById("chatMessages").scrollHeight;
+    }
 
     const loadingAnimation = addLoadingAnimation();
 
@@ -147,8 +158,12 @@ async function sendImageMessage(imageFile) {
 
       if (chatResponse.ok) {
         const botMessageId = generateUniqueId();
-        const { element: botMessageElement, id: messageId } = addMessageToChat("", "bot-message");
-        const messageContent = botMessageElement.querySelector('.message-content');
+        const { element: botMessageElement, id: messageId } = addMessageToChat(
+          "",
+          "bot-message",
+        );
+        const messageContent =
+          botMessageElement.querySelector(".message-content");
         const reader = chatResponse.body.getReader();
         const decoder = new TextDecoder();
         let accumulatedText = "";
@@ -168,10 +183,15 @@ async function sendImageMessage(imageFile) {
             accumulatedText += sentence;
             const { html, text } = renderContent(sentence);
             if (isAudioEnabled) {
-              const audioBuffer = await streamAudio(text, `${botMessageId}_${audioSegmentIds.length}`);
+              const audioBuffer = await streamAudio(
+                text,
+                `${botMessageId}_${audioSegmentIds.length}`,
+              );
               if (audioBuffer) {
                 audioBuffers.push(audioBuffer);
-                audioSegmentIds.push(`${botMessageId}_${audioSegmentIds.length}`);
+                audioSegmentIds.push(
+                  `${botMessageId}_${audioSegmentIds.length}`,
+                );
               }
             }
             await displayTextWithDynamicDelay(sentence, messageContent);
@@ -185,7 +205,10 @@ async function sendImageMessage(imageFile) {
           accumulatedText += buffer;
           const { html, text } = renderContent(buffer);
           if (isAudioEnabled) {
-            const audioBuffer = await streamAudio(text, `${botMessageId}_${audioSegmentIds.length}`);
+            const audioBuffer = await streamAudio(
+              text,
+              `${botMessageId}_${audioSegmentIds.length}`,
+            );
             if (audioBuffer) {
               audioBuffers.push(audioBuffer);
               audioSegmentIds.push(`${botMessageId}_${audioSegmentIds.length}`);
@@ -212,7 +235,7 @@ async function sendImageMessage(imageFile) {
           accumulatedText,
           messageId,
           audioSegmentIds,
-          messageId // Use messageId as imageId
+          messageId, // Use messageId as imageId
         );
       } else {
         console.error("Failed to process image and text in chat");

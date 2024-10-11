@@ -64,7 +64,9 @@ body {
     flex: 0;
     display: none;
     margin-left: 20px;
-    transition: flex 0.3s ease, width 0.3s ease;
+    transition:
+        flex 0.3s ease,
+        width 0.3s ease;
 }
 
 .lesson-container.active {

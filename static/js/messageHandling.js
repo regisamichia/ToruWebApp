@@ -18,6 +18,15 @@ import { addPlayButtonToMessage } from "./chatUI.js";
 import { addUserLoadingAnimation } from "./chatUI.js";
 
 let chatUrl, apiBaseUrl;
+let isFirstMessage = true;
+
+export function getIsFirstMessage() {
+  return isFirstMessage;
+}
+
+export function setIsFirstMessage(value) {
+  isFirstMessage = value;
+}
 
 /**
  * Initializes URLs from the config file.
@@ -67,10 +76,55 @@ export function handleUserInput() {
   const userInput = document.getElementById("userInput");
   const messageText = userInput.value.trim();
   if (messageText !== "") {
-    addMessageToChat(messageText, "user-message");
+    if (isFirstMessage) {
+      addFirstMessageToChat(messageText, 'text');
+      isFirstMessage = false;
+    } else {
+      addMessageToChat(messageText, "user-message");
+    }
     sendMessage(messageText, getSessionId(), getUserId());
     userInput.value = "";
   }
+}
+
+export function addFirstMessageToChat(content, type = 'text') {
+  const fixedMessageContainer = document.getElementById("fixedMessageContainer");
+  let messageContent;
+
+  switch (type) {
+    case 'text':
+      messageContent = `<p class="message-content">${content}</p>`;
+      break;
+    case 'audio':
+      messageContent = `
+        <p class="message-content">Audio message transcription:</p>
+        <p class="transcription">${content}</p>
+      `;
+      break;
+    case 'image':
+      messageContent = `<img src="${content}" alt="Uploaded image" style="max-width: 100%; max-height: 200px;">`;
+      break;
+    default:
+      messageContent = `<p class="message-content">${content}</p>`;
+  }
+
+  fixedMessageContainer.innerHTML = `
+    <div class="first-message-wrapper">
+      <div class="message user-message">
+        ${messageContent}
+      </div>
+      <button class="button-34 validate-button">Validate</button>
+    </div>
+  `;
+
+  const validateButton = fixedMessageContainer.querySelector('.validate-button');
+  validateButton.addEventListener('click', validateFirstMessage);
+}
+
+// We'll implement this function later
+function validateFirstMessage() {
+  console.log("First message validated!");
+  // Add your validation logic here
 }
 
 /**
@@ -188,7 +242,7 @@ export async function sendMessage(messageText) {
  * Sends an audio message for transcription and processing.
  * @param {Blob} audioBlob - The audio blob to send for transcription.
  */
-export async function sendAudioMessage(audioBlob) {
+export async function sendAudioMessage(audioBlob, sessionId) {
   const loadingAnimation = addUserLoadingAnimation();
 
   try {
@@ -205,9 +259,15 @@ export async function sendAudioMessage(audioBlob) {
       const transcription = data.transcription;
 
       loadingAnimation.remove(); // Remove loading animation just before displaying the transcription
-      addMessageToChat(transcription, "user-message");
+      
+      if (isFirstMessage) {
+        addFirstMessageToChat(transcription, 'text');
+        isFirstMessage = false;
+      } else {
+        addMessageToChat(transcription, "user-message");
+      }
 
-      await sendMessage(transcription, getSessionId(), getUserId());
+      await sendMessage(transcription, sessionId, getUserId());
     } else {
       console.error("Failed to transcribe audio");
       const errorText = await response.text();
