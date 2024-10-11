@@ -10,7 +10,8 @@ import { initializeImageUpload } from "./imageUpload.js";
 import { initializeMessageHandling } from "./messageHandling.js";
 import { initializeChat } from "./chat.js";
 import getUrls from "./config.js";
-import { closeLesson, requestLesson, clearLesson } from './mathLesson.js';
+import { closeLesson, requestLesson, clearLesson } from "./mathLesson.js";
+import { initializeControlPanel } from "./controlPanel.js";
 
 let sessionId = null;
 let userId = null;
@@ -34,7 +35,12 @@ async function initializeSession() {
     return;
   }
   userId = getUserIdFromSession();
-  console.log("Session initialized with sessionId:", sessionId, "and userId:", userId);
+  console.log(
+    "Session initialized with sessionId:",
+    sessionId,
+    "and userId:",
+    userId,
+  );
 }
 
 function setAudioEnabled(enabled) {
@@ -90,6 +96,10 @@ async function initializeChatPage() {
     console.log("Initializing chat UI...");
     initializeChatUI();
     console.log("Chat UI initialized successfully");
+
+    console.log("Initializing control panel...");
+    initializeControlPanel();
+    console.log("Control panel initialized successfully");
   } catch (error) {
     console.error("Failed to initialize:", error);
   }
@@ -102,7 +112,9 @@ async function initializeApp() {
     console.log("Starting initializeApp...");
     await initializeSession();
     if (!sessionId) {
-      console.error("Failed to initialize session. Aborting app initialization.");
+      console.error(
+        "Failed to initialize session. Aborting app initialization.",
+      );
       // Add user-facing error handling here
       return;
     }
@@ -140,17 +152,17 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Error during app initialization:", error);
   });
 
-  const closeLessonButton = document.getElementById('closeLessonButton');
-  closeLessonButton.addEventListener('click', closeLesson);
+  const closeLessonButton = document.getElementById("closeLessonButton");
+  closeLessonButton.addEventListener("click", closeLesson);
 
-  const lessonButton = document.getElementById('lessonButton');
+  const lessonButton = document.getElementById("lessonButton");
   if (lessonButton) {
-    lessonButton.addEventListener('click', requestLesson);
+    lessonButton.addEventListener("click", requestLesson);
   }
 
-  window.showLessonButton = function() {
-    lessonButton.style.display = 'block';
-  }
+  window.showLessonButton = function () {
+    lessonButton.style.display = "block";
+  };
 });
 
 function addMessage(message, isUser = false) {

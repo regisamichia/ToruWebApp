@@ -28,6 +28,11 @@ export function setIsFirstMessage(value) {
   isFirstMessage = value;
 }
 
+export function resetFirstMessageState() {
+  isFirstMessage = true;
+  console.log("First message state reset to true");
+}
+
 /**
  * Initializes URLs from the config file.
  * @returns {Promise<Object>} An object containing the chat and API base URLs.

@@ -1,4 +1,5 @@
 import getUrls from "./config.js";
+import { resetFirstMessageState } from './messageHandling.js';
 
 export let sessionId = null;
 let chatUrl;
@@ -81,4 +82,34 @@ export function getSessionId() {
 export function getUserIdFromSession() {
   // Implement this function to get userId from the session
   return localStorage.getItem('userId');
+}
+
+// Add this function to the existing session.js file
+export async function clearAndCreateNewSession() {
+  try {
+    await initializeUrls();
+    const response = await fetch(`${chatUrl}/new_session`, {
+      method: 'POST',
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.session_id && typeof data.session_id === 'string') {
+        sessionId = data.session_id;
+        localStorage.setItem('sessionId', sessionId);
+        console.log("New session created:", sessionId);
+        
+        // Reset the first message state
+        resetFirstMessageState();
+        
+        return sessionId;
+      } else {
+        console.error("Invalid session ID received from server");
+      }
+    } else {
+      console.error("Failed to create new session");
+    }
+  } catch (error) {
+    console.error("Error creating new session:", error);
+  }
+  return null;
 }

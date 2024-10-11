@@ -17,10 +17,10 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import asyncio
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 # Load environment variables
-#load_dotenv()
+load_dotenv("/etc/secrets/.env")
 
 app = FastAPI()
 
@@ -139,6 +139,7 @@ async def new_session(response: Response, request: Request):
         response.headers["Access-Control-Allow-Origin"] = origin
 
     return {"session_id": session_id}
+
 
 if __name__ == "__main__":
     import uvicorn

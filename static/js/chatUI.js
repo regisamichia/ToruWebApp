@@ -77,6 +77,21 @@ export function replayAudioBuffers(audioBuffers) {
   playNextBuffer();
 }
 
+export function clearChatContainer() {
+  console.log("Clearing chat container");
+  const chatMessages = document.getElementById('chatMessages');
+  const fixedMessageContainer = document.getElementById('fixedMessageContainer');
+
+  if (chatMessages) chatMessages.innerHTML = '';
+  if (fixedMessageContainer) fixedMessageContainer.innerHTML = '';
+}
+
+export function clearLessonContainer() {
+  console.log("Clearing lesson container");
+  const lessonMessages = document.getElementById('lessonMessages');
+  if (lessonMessages) lessonMessages.innerHTML = '';
+}
+
 // Re-export functions from uiHelpers.js and messageRendering.js
 export {
   addMessageToChat,
@@ -86,3 +101,6 @@ export {
   renderContent,
   displayTextWithDynamicDelay,
 };
+
+
+
