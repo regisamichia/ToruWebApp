@@ -1,3 +1,8 @@
+.chat-body {
+    display: flex;
+    transition: all 0.3s ease;
+}
+
 .chat-sidebar {
     width: 250px;
     background-color: var(--white);
@@ -6,6 +11,8 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .chat-sidebar h1 {
@@ -64,4 +71,32 @@
     width: 100%;
     padding-top: 10px;
     padding-bottom: 10px;
+}
+
+.sidebar-toggle {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Add this to ensure the toggle is always visible */
+.chat-sidebar.collapsed .sidebar-toggle {
+    display: block !important;
+    margin: 0 auto;
+}
+
+.chat-sidebar.collapsed h1,
+.chat-sidebar.collapsed nav,
+.chat-sidebar.collapsed .sidebar-footer {
+    display: none !important;
+}
+
+/* New styles for the main content */
+.chat-main {
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
 }

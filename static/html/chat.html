@@ -59,6 +59,13 @@
             #mainContent {
                 display: none;
             }
+            .chat-sidebar.collapsed {
+                width: 60px !important;
+                padding: 20px 10px !important;
+            }
+            .chat-body.sidebar-collapsed .chat-main {
+                margin-left: 60px !important;
+            }
         </style>
     </head>
     <body>
@@ -69,6 +76,9 @@
             </header>
             <div class="chat-body">
                 <aside class="chat-sidebar">
+                    <button id="sidebarToggle" class="sidebar-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
                     <h1>Toru</h1>
                     <nav>
                         <ul>
@@ -156,7 +166,9 @@
                                     />
                                 </div>
                                 <!-- Hide the micStatus div using inline CSS -->
-                                <div id="micStatus" style="display: none;">Microphone: Initializing...</div>
+                                <div id="micStatus" style="display: none">
+                                    Microphone: Initializing...
+                                </div>
                             </div>
                         </div>
                         <div class="control-panel">
@@ -223,5 +235,17 @@
             </div>
         </div>
         <script type="module" src="/static/js/main.js"></script>
+        <script src="/static/js/sidebar.js"></script>
+        <!-- Add this just before the closing </body> tag -->
+        <script>
+          document.getElementById('sidebarToggle').addEventListener('click', function() {
+            setTimeout(() => {
+              const sidebar = document.querySelector('.chat-sidebar');
+              const computedStyle = window.getComputedStyle(sidebar);
+              console.log('Computed sidebar width:', computedStyle.width);
+              console.log('Computed sidebar padding:', computedStyle.padding);
+            }, 300); // Wait for the transition to complete
+          });
+        </script>
     </body>
 </html>

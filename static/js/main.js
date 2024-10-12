@@ -135,7 +135,7 @@ async function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM content loaded, initializing app...");
+  console.log("DOM content loaded in main.js");
   initializeApp().catch((error) => {
     console.error("Error during app initialization:", error);
   });
@@ -151,6 +151,19 @@ document.addEventListener("DOMContentLoaded", () => {
   window.showLessonButton = function () {
     lessonButton.style.display = "block";
   };
+
+  // Ensure sidebar.js has a chance to set up its event listeners
+  setTimeout(() => {
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    if (sidebarToggle && !sidebarToggle.hasEventListener) {
+      console.warn("Sidebar toggle event listener not set up by sidebar.js, setting up now");
+      const sidebar = document.querySelector(".chat-sidebar");
+      sidebarToggle.addEventListener("click", function () {
+        sidebar.classList.toggle("collapsed");
+      });
+      sidebarToggle.hasEventListener = true;
+    }
+  }, 100);
 });
 
 function addMessage(message, isUser = false) {
