@@ -80,8 +80,12 @@ export function getSessionId() {
 }
 
 export function getUserIdFromSession() {
-  // Implement this function to get userId from the session
-  return localStorage.getItem('userId');
+  const userId = localStorage.getItem('user_id');
+  if (!userId) {
+    console.error("No user ID found in local storage");
+    return null;
+  }
+  return userId;
 }
 
 // Add this function to the existing session.js file

@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="/static/css/chat/animations.css" />
         <link rel="stylesheet" href="/static/css/components/buttons.css" />
         <link rel="stylesheet" href="/static/css/components/loading.css" />
+        <link rel="stylesheet" href="/static/css/settings/toggles.css" />
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
@@ -156,9 +157,7 @@
                             </div>
                         </div>
                         <div class="control-panel">
-                            <h3 class="control-panel-header">
-                                Panneau de commande
-                            </h3>
+                            <h3 class="control-panel-header">Control Panel</h3>
                             <div class="control-panel-content">
                                 <div class="control-panel-section">
                                     <p class="control-panel-text">
@@ -183,6 +182,23 @@
                                     >
                                         Tutorial
                                     </button>
+                                </div>
+                                <div class="control-panel-section">
+                                    <p class="control-panel-text">
+                                        Enable Audio Responses:
+                                    </p>
+                                    <div class="toggle-switch">
+                                        <input
+                                            type="checkbox"
+                                            id="toggleAudioControl"
+                                            class="toggle-input"
+                                            checked
+                                        />
+                                        <label
+                                            for="toggleAudioControl"
+                                            class="toggle-label"
+                                        ></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

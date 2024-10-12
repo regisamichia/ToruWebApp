@@ -29,23 +29,29 @@ async function initializeUrls() {
 
 async function initializeSession() {
   sessionId = await initializeSessionFromAPI();
-  if (!sessionId) {
-    console.error("Failed to initialize session");
+  userId = getUserIdFromSession();  // Initialize userId here
+  console.log(`Session initialized with sessionId: ${sessionId} and userId: ${userId}`);
+  if (!sessionId || !userId) {
+    console.error("Failed to initialize session or retrieve user ID");
     // You might want to add some user-facing error handling here
-    return;
+    return false;
   }
-  userId = getUserIdFromSession();
-  console.log(
-    "Session initialized with sessionId:",
-    sessionId,
-    "and userId:",
-    userId,
-  );
+  return true;
 }
 
 function setAudioEnabled(enabled) {
   isAudioEnabled = enabled;
   localStorage.setItem("audioEnabled", enabled);
+  // Update the toggle in the settings page if it exists
+  const settingsToggle = document.getElementById("toggleAudio");
+  if (settingsToggle) {
+    settingsToggle.checked = enabled;
+  }
+  // Update the toggle in the control panel if it exists
+  const controlPanelToggle = document.getElementById("toggleAudioControl");
+  if (controlPanelToggle) {
+    controlPanelToggle.checked = enabled;
+  }
 }
 
 function getTtsProvider() {

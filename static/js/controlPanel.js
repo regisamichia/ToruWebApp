@@ -1,11 +1,13 @@
 import { clearAndCreateNewSession } from "./session.js";
 import { clearChatContainer, clearLessonContainer } from "./chatUI.js";
 import { resetFirstMessageState } from "./messageHandling.js";
+import { setAudioEnabled, getAudioEnabled } from "./main.js";
 
 export function initializeControlPanel() {
   console.log("Initializing control panel...");
   const newExerciseButton = document.getElementById("newExerciseButton");
   const tutorialButton = document.getElementById("tutorialButton");
+  const toggleAudioControl = document.getElementById("toggleAudioControl");
 
   if (newExerciseButton) {
     console.log("New Exercise button found, adding event listener");
@@ -19,6 +21,14 @@ export function initializeControlPanel() {
     tutorialButton.addEventListener("click", handleTutorial);
   } else {
     console.error("Tutorial button not found");
+  }
+
+  if (toggleAudioControl) {
+    console.log("Audio toggle found, initializing");
+    toggleAudioControl.checked = getAudioEnabled();
+    toggleAudioControl.addEventListener("change", handleAudioToggle);
+  } else {
+    console.error("Audio toggle not found");
   }
 }
 
@@ -51,4 +61,11 @@ async function handleNewExercise() {
 function handleTutorial() {
   console.log("Tutorial button clicked");
   alert("Tutorial functionality not implemented yet."); // Placeholder
+}
+
+function handleAudioToggle(event) {
+  const isAudioEnabled = event.target.checked;
+  console.log(`Audio ${isAudioEnabled ? "enabled" : "disabled"}`);
+  localStorage.setItem("audioEnabled", isAudioEnabled);
+  setAudioEnabled(isAudioEnabled);
 }

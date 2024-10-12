@@ -125,10 +125,12 @@ async function handleLogin(e) {
 
     if (response.ok) {
       console.log("Login successful, setting tokens and user data...");
+      console.log("Full response data:", data);
       localStorage.setItem("token", data.access_token);
       localStorage.setItem("refreshToken", data.refresh_token);
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("user_id", data.user_id); // Make sure this line is present
+      localStorage.setItem("user_id", data.user_id);
+      console.log("data user after login:", data);
       window.location.href = "/chat";
     } else {
       console.error("Login failed:", data.detail);
