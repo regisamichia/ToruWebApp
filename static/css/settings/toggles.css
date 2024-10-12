@@ -42,3 +42,21 @@
 .toggle-input:checked + .toggle-label:before {
     transform: translateX(26px);
 }
+
+/* New styles for Yes/No text */
+.toggle-label:after {
+    content: 'No';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.toggle-input:checked + .toggle-label:after {
+    content: 'Yes';
+    left: 10px;
+    right: auto;
+}

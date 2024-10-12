@@ -82,7 +82,7 @@ export function handleUserInput() {
   const messageText = userInput.value.trim();
   if (messageText !== "") {
     if (isFirstMessage) {
-      addFirstMessageToChat(messageText, 'text');
+      addFirstMessageToChat(messageText, "text");
       isFirstMessage = false;
     } else {
       addMessageToChat(messageText, "user-message");
@@ -92,27 +92,34 @@ export function handleUserInput() {
   }
 }
 
-export function addFirstMessageToChat(content, type = 'text') {
+export function addFirstMessageToChat(content, type = "text") {
   const fixedMessageContainer = document.getElementById("fixedMessageContainer");
+  const initialMessage = document.getElementById("initialMessage");
   let messageContent;
 
   switch (type) {
-    case 'text':
+    case "text":
       messageContent = `<p class="message-content">${content}</p>`;
       break;
-    case 'audio':
+    case "audio":
       messageContent = `
         <p class="message-content">Audio message transcription:</p>
         <p class="transcription">${content}</p>
       `;
       break;
-    case 'image':
+    case "image":
       messageContent = `<img src="${content}" alt="Uploaded image" style="max-width: 100%; max-height: 200px;">`;
       break;
     default:
       messageContent = `<p class="message-content">${content}</p>`;
   }
 
+  // Remove the initial message
+  if (initialMessage) {
+    initialMessage.remove();
+  }
+
+  // Add the user's first message
   fixedMessageContainer.innerHTML = `
     <div class="first-message-wrapper">
       <div class="message first-user-message">
@@ -120,8 +127,6 @@ export function addFirstMessageToChat(content, type = 'text') {
       </div>
     </div>
   `;
-
-  // Remove the validateButton-related code since the button no longer exists
 }
 
 // Remove or comment out the validateFirstMessage function if it's not used elsewhere
@@ -262,9 +267,9 @@ export async function sendAudioMessage(audioBlob, sessionId) {
       const transcription = data.transcription;
 
       loadingAnimation.remove(); // Remove loading animation just before displaying the transcription
-      
+
       if (isFirstMessage) {
-        addFirstMessageToChat(transcription, 'text');
+        addFirstMessageToChat(transcription, "text");
         isFirstMessage = false;
       } else {
         addMessageToChat(transcription, "user-message");

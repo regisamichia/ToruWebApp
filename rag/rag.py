@@ -108,8 +108,12 @@ async def chat(
             raise HTTPException(status_code=400, detail="Either message or both image and extracted_text must be provided")
 
         async def stream_response():
-            async for chunk in chatbot.process_input(user_input, session):
-                yield chunk.replace("system: ", "")
+            try:
+                async for chunk in chatbot.process_input(user_input, session):
+                    yield chunk.replace("system: ", "")
+            except Exception as e:
+                print(f"Error in stream_response: {str(e)}")
+                yield "Je suis désolé, mais je rencontre des difficultés pour traiter votre demande en ce moment. Veuillez réessayer plus tard."
 
         return StreamingResponse(stream_response(), media_type="text/plain")
 

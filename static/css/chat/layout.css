@@ -144,6 +144,7 @@ body {
 }
 
 .fixed-message-container {
+    display: block; /* Always visible */
     padding: 10px;
     border-bottom: 1px solid var(--light-gray);
     background-color: #ffffff;
@@ -223,4 +224,15 @@ body {
 .control-panel .button-34 {
     width: 100%;
     max-width: 200px;
+}
+
+.fixed-message-container .initial-message {
+    color: #999 !important; /* Light grey color */
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+    background-color: transparent;
+    border: none;
+    max-width: 100%;
+    margin: 0 auto;
 }

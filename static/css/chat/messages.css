@@ -69,3 +69,10 @@
     background-color: var(--primary-color);
     color: #ffffff;
 }
+
+.fixed-message-container .initial-message {
+    background-color: transparent;
+    color: #999;
+    max-width: 100%;
+    margin: 0 auto;
+}

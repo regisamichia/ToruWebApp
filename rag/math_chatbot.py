@@ -44,10 +44,12 @@ class Chatbot(OpenAILLMModel):
         return state
 
     def build_prompt_intermediate_results(self, state):
-
         start_prompt = "Voici les calculs intermédiaires que l'élève est en train de faire et leurs résultats : "
-        for i in range(len(state["intermediate_calculation_explanation"])):
+        
+        if all(result == "Wolfram Alpha service unavailable" for result in state["intermediate_solution"]):
+            return start_prompt + "Désolé, le service Wolfram Alpha n'est pas disponible pour le moment. Nous ne pouvons pas fournir de calculs intermédiaires."
 
+        for i in range(len(state["intermediate_calculation_explanation"])):
             start_prompt += f'''{state["intermediate_calculation_explanation"][i]} et le résultat est  {state["intermediate_solution"][i]}
 
             '''
@@ -71,8 +73,8 @@ class Chatbot(OpenAILLMModel):
         return prompt_template.format(
             chat_history=self.build_message_history(state),
             solution=state["solution"],
-            intermediate_explanation = self.build_prompt_intermediate_results(state),
-            exercice = state["first_user_message"]
+            intermediate_explanation=self.build_prompt_intermediate_results(state),
+            exercice=state["first_user_message"]
         )
 
     async def process_image(self, image_data: Dict[str, Any]) -> str:

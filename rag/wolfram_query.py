@@ -11,6 +11,7 @@ from config.argentic_rag_model import WolframIntermediateQuery
 import os
 import asyncio
 import re
+import httpx
 
 #from dotenv import load_dotenv
 
@@ -49,14 +50,17 @@ class WolframQuery(OpenAILLMModel):
 
     async def wolfram_solution(self, state):
         query = self.wolfram_query(state)
-
-        # Use asyncio.to_thread to run the synchronous Wolfram Alpha query in a separate thread
-        response = await asyncio.to_thread(self.wolfram.run, query)
-        match = re.search(r"Answer: (.+)", response)
         try:
-            state["solution"] = match.group(1).replace("x = ","")
-        except:
-            pass
+            # Use asyncio.to_thread to run the synchronous Wolfram Alpha query in a separate thread
+            response = await asyncio.to_thread(self.wolfram.run, query)
+            match = re.search(r"Answer: (.+)", response)
+            try:
+                state["solution"] = match.group(1).replace("x = ","")
+            except:
+                state["solution"] = "Unable to parse Wolfram Alpha response"
+        except (httpx.RemoteProtocolError, Exception) as e:
+            print(f"Error in wolfram_solution: {str(e)}")
+            state["solution"] = "Wolfram Alpha service unavailable"
         return state
 
     async def wolfram_query_intermediate(self, state):
@@ -74,13 +78,16 @@ class WolframQuery(OpenAILLMModel):
         state["intermediate_calculation_explanation"] = query.calculation_explanation
         list_solution = []
         for query in state["intermediate_calculation"]:
-            response = await asyncio.to_thread(self.wolfram.run, query)
-            match = re.search(r"Answer: (.+)", response)
             try:
-                list_solution.append(match.group(1))
-            except:
-                list_solution.append("")
-                continue
+                response = await asyncio.to_thread(self.wolfram.run, query)
+                match = re.search(r"Answer: (.+)", response)
+                try:
+                    list_solution.append(match.group(1))
+                except:
+                    list_solution.append("Unable to parse Wolfram Alpha response")
+            except (httpx.RemoteProtocolError, Exception) as e:
+                print(f"Error in wolfram_query_intermediate: {str(e)}")
+                list_solution.append("Wolfram Alpha service unavailable")
 
         state["intermediate_solution"] = list_solution
 

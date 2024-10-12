@@ -102,14 +102,18 @@
                 <main class="chat-main">
                     <div class="chat-and-control-container">
                         <div class="chat-container">
-                            <h3 class="lesson-header">
-                                Pose toutes tes questions ici
-                            </h3>
+                            <h3 class="lesson-header">Mathématiques</h3>
                             <div
                                 class="fixed-message-container"
                                 id="fixedMessageContainer"
                             >
-                                <!-- The first user message will be placed here -->
+                                <div
+                                    class="initial-message"
+                                    id="initialMessage"
+                                >
+                                    Ton premier message apparaitra ici et sera
+                                    l'exercice à résoudre
+                                </div>
                             </div>
                             <div class="chat-messages" id="chatMessages">
                                 <!-- Other messages will be dynamically added here -->
@@ -130,7 +134,7 @@
                                     <input
                                         type="text"
                                         id="userInput"
-                                        placeholder="Type your message..."
+                                        placeholder="Ecris ton message ici..."
                                     />
                                     <button
                                         id="microphoneButton"
@@ -157,7 +161,7 @@
                             </div>
                         </div>
                         <div class="control-panel">
-                            <h3 class="control-panel-header">Control Panel</h3>
+                            <h3 class="control-panel-header">Réglages</h3>
                             <div class="control-panel-content">
                                 <div class="control-panel-section">
                                     <p class="control-panel-text">
@@ -185,7 +189,7 @@
                                 </div>
                                 <div class="control-panel-section">
                                     <p class="control-panel-text">
-                                        Enable Audio Responses:
+                                        Réponse à l'oral et à l'écrit
                                     </p>
                                     <div class="toggle-switch">
                                         <input
