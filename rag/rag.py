@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Response
 from math_chatbot import Chatbot
 from math_lesson import MathLesson
+from multimodal_model import MultimodalOpenAI
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
@@ -147,6 +148,21 @@ async def new_session(response: Response, request: Request):
         response.headers["Access-Control-Allow-Origin"] = origin
 
     return {"session_id": session_id}
+
+@app.post("/api/multimodal")
+async def image_comprehension(image: UploadFile = File(...)):
+    print("Received image comprehension request")
+    multimodal = MultimodalOpenAI()
+    try:
+
+        contents = await image.read()
+
+        response = multimodal.step_explanation(contents)
+        print(response)
+
+        return {"response" : response }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

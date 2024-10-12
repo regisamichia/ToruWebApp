@@ -23,8 +23,8 @@ class Chatbot(OpenAILLMModel):
 
         self.vector_store = ChromaAPI()
         self.retriever = self.vector_store.as_retriever(filter={"school_level" : "6e"}) #modifier le niveau pour le récupérer depuis le profil utilisateur
-        #self.multimodal_api_url = "http://localhost:8003/api/multimodal"
-        self.multimodal_api_url = os.environ["MULTIMODAL_URL"]
+        self.multimodal_api_url = "http://localhost:8001/api/multimodal"
+        #self.multimodal_api_url = os.environ["MULTIMODAL_URL"]
         with open('rag/config/contextualize_prompts.yaml', 'r') as file:
             self.prompts = yaml.safe_load(file)
 
@@ -45,7 +45,7 @@ class Chatbot(OpenAILLMModel):
 
     def build_prompt_intermediate_results(self, state):
         start_prompt = "Voici les calculs intermédiaires que l'élève est en train de faire et leurs résultats : "
-        
+
         if all(result == "Wolfram Alpha service unavailable" for result in state["intermediate_solution"]):
             return start_prompt + "Désolé, le service Wolfram Alpha n'est pas disponible pour le moment. Nous ne pouvons pas fournir de calculs intermédiaires."
 
