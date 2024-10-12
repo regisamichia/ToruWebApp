@@ -13,10 +13,12 @@
     flex-direction: column;
     transition: all 0.3s ease;
     flex-shrink: 0;
+    position: relative; /* Add this to allow absolute positioning of children */
 }
 
 .chat-sidebar h1 {
     color: var(--primary-color);
+    margin-top: 50px; /* Increase top margin to make room for the toggle */
     margin-bottom: 20px;
     text-align: center;
 }
@@ -74,19 +76,24 @@
 }
 
 .sidebar-toggle {
-    align-self: flex-end;
+    position: absolute; /* Change to absolute positioning */
+    top: 20px; /* Align with the top padding of the sidebar */
+    left: 20px; /* Align with the left padding of the sidebar */
     background: none;
     border: none;
     font-size: 1.5em;
     cursor: pointer;
-    margin-bottom: 20px;
     transition: all 0.3s ease;
+    z-index: 10; /* Ensure it's above other sidebar content */
 }
 
 /* Add this to ensure the toggle is always visible */
 .chat-sidebar.collapsed .sidebar-toggle {
     display: block !important;
     margin: 0 auto;
+    left: 50%; /* Center horizontally when collapsed */
+    transform: translateX(-50%); /* Ensure perfect centering */
+    top: 20px; /* Keep it at the top */
 }
 
 .chat-sidebar.collapsed h1,
