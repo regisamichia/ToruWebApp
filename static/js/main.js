@@ -29,8 +29,10 @@ async function initializeUrls() {
 
 async function initializeSession() {
   sessionId = await initializeSessionFromAPI();
-  userId = getUserIdFromSession();  // Initialize userId here
-  console.log(`Session initialized with sessionId: ${sessionId} and userId: ${userId}`);
+  userId = getUserIdFromSession(); // Initialize userId here
+  console.log(
+    `Session initialized with sessionId: ${sessionId} and userId: ${userId}`,
+  );
   if (!sessionId || !userId) {
     console.error("Failed to initialize session or retrieve user ID");
     // You might want to add some user-facing error handling here
@@ -79,33 +81,13 @@ async function initializeChatPage() {
   console.log("Initializing chat page...");
 
   try {
-    console.log("Initializing chat...");
     await initializeChat();
-    console.log("Chat initialized successfully");
-
-    console.log("About to initialize audio recording...");
     await initializeAudioRecording();
-    console.log("Audio recording initialized successfully");
-
-    console.log("About to initialize message handling...");
     await initializeMessageHandling();
-    console.log("Message handling initialized successfully");
-
-    console.log("Initializing WebSocket...");
     await initializeWebSocket();
-    console.log("WebSocket initialized successfully");
-
-    console.log("Initializing image upload...");
     await initializeImageUpload();
-    console.log("Image upload initialized successfully");
-
-    console.log("Initializing chat UI...");
     initializeChatUI();
-    console.log("Chat UI initialized successfully");
-
-    console.log("Initializing control panel...");
     initializeControlPanel();
-    console.log("Control panel initialized successfully");
   } catch (error) {
     console.error("Failed to initialize:", error);
   }

@@ -19,6 +19,8 @@ async function initializeUrls() {
 let audioContext;
 let audioQueue = [];
 let isPlaying = false;
+let isReplaying = false;
+let currentSource = null;
 
 /**
  * Initializes the audio handling functionality.
@@ -140,16 +142,23 @@ export async function streamAudio(text, messageId) {
 async function playNextAudio() {
   if (audioQueue.length === 0) {
     isPlaying = false;
+    isReplaying = false;
     return;
   }
 
   isPlaying = true;
   const audioBuffer = audioQueue.shift();
-  const source = audioContext.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(audioContext.destination);
-  source.onended = playNextAudio;
-  source.start();
+  currentSource = audioContext.createBufferSource();
+  currentSource.buffer = audioBuffer;
+  currentSource.connect(audioContext.destination);
+  
+  return new Promise((resolve) => {
+    currentSource.onended = async () => {
+      await playNextAudio();
+      resolve();
+    };
+    currentSource.start();
+  });
 }
 
 /**
@@ -157,6 +166,10 @@ async function playNextAudio() {
  * @param {string|string[]} messageIds - The ID(s) of the message(s) to replay.
  */
 export async function replayAudioFromS3(messageIds) {
+  if (isReplaying) {
+    return;
+  }
+
   if (!Array.isArray(messageIds)) {
     messageIds = [messageIds]; // Ensure backwards compatibility
   }
@@ -166,6 +179,9 @@ export async function replayAudioFromS3(messageIds) {
   }
 
   try {
+    isReplaying = true;
+    stopCurrentPlayback();
+    
     const audioBuffers = [];
     for (const messageId of messageIds) {
       const response = await fetch(`${apiBaseUrl}/api/get_presigned_urls`, {
@@ -197,15 +213,27 @@ export async function replayAudioFromS3(messageIds) {
       audioBuffers.push(...segmentBuffers);
     }
 
-    playAudioBuffers(audioBuffers);
+    await playAudioBuffers(audioBuffers);
   } catch (error) {
-    console.error("Error replaying audio:", error);
+    console.error("Error in replayAudioFromS3:", error);
+  } finally {
+    isReplaying = false;
   }
 }
 
-function playAudioBuffers(buffers) {
+function stopCurrentPlayback() {
+  if (currentSource) {
+    currentSource.stop();
+    currentSource.disconnect();
+    currentSource = null;
+  }
+  audioQueue = [];
+  isPlaying = false;
+}
+
+async function playAudioBuffers(buffers) {
   audioQueue = buffers;
   if (!isPlaying) {
-    playNextAudio();
+    await playNextAudio();
   }
 }

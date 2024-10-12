@@ -1,5 +1,6 @@
 import { renderContent } from "./messageRendering.js";
 import { replayAudioBuffers } from "./chatUI.js";
+import { replayAudioFromS3 } from "./audioHandling.js";
 
 /**
  * Adds a message to the chat UI.
@@ -94,7 +95,9 @@ export function addPlayButtonToMessage(
   const playButton = document.createElement("div");
   playButton.className = "replay-button";
   playButton.innerHTML = '<i class="fas fa-play"></i>';
-  playButton.onclick = () => replayAudioBuffers(audioBuffers);
+  playButton.onclick = () => {
+    replayAudioFromS3(messageId);
+  };
 
   // Create a wrapper div for the message and play button
   const wrapper = document.createElement("div");

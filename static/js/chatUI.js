@@ -22,6 +22,8 @@ let audioContext;
 
 let messageCount = 0;
 
+let isPlaying = false;
+
 /**
  * Initializes the chat UI components.
  */
@@ -55,6 +57,10 @@ export function initializeChatUI() {
 }
 
 export function replayAudioBuffers(audioBuffers) {
+  if (isPlaying) {
+    return;
+  }
+
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
   }
@@ -63,6 +69,7 @@ export function replayAudioBuffers(audioBuffers) {
 
   function playNextBuffer() {
     if (currentIndex >= audioBuffers.length) {
+      isPlaying = false;
       return;
     }
 
@@ -76,6 +83,7 @@ export function replayAudioBuffers(audioBuffers) {
     source.start();
   }
 
+  isPlaying = true;
   playNextBuffer();
 }
 

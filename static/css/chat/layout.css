@@ -208,9 +208,6 @@ body {
 }
 
 .control-panel-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     text-align: center;
 }
 
@@ -235,4 +232,15 @@ body {
     border: none;
     max-width: 100%;
     margin: 0 auto;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.toggle {
+    position: relative;
+    left: calc(-1 * (var(--sz) * 2.5)); /* Half the width of the toggle */
 }

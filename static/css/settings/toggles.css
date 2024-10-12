@@ -45,7 +45,7 @@
 
 /* New styles for Yes/No text */
 .toggle-label:after {
-    content: 'No';
+    content: "No";
     position: absolute;
     top: 50%;
     right: 10px;
@@ -56,7 +56,7 @@
 }
 
 .toggle-input:checked + .toggle-label:after {
-    content: 'Yes';
+    content: "Yes";
     left: 10px;
     right: auto;
 }
