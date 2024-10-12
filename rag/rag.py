@@ -22,6 +22,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv("/etc/secrets/.env")
 
+# Print all environment variables
+for key, value in os.environ.items():
+    print(f'env available in rag.py : {key}: {value}')
+
 app = FastAPI()
 
 app.add_middleware(

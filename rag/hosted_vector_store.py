@@ -10,6 +10,8 @@ from typing import Optional, Type, Dict, Any
 
 # Load environment variables
 load_dotenv()
+for key, value in os.environ.items():
+    print(f'env available in hosted_vector_store.py : {key}: {value}')
 
 
 class ChromaAPI(VectorStore):
