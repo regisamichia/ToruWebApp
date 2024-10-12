@@ -20,6 +20,8 @@ import {
 // Create audioContext at the top level
 let audioContext;
 
+let messageCount = 0;
+
 /**
  * Initializes the chat UI components.
  */
@@ -79,17 +81,39 @@ export function replayAudioBuffers(audioBuffers) {
 
 export function clearChatContainer() {
   console.log("Clearing chat container");
-  const chatMessages = document.getElementById('chatMessages');
-  const fixedMessageContainer = document.getElementById('fixedMessageContainer');
+  const chatMessages = document.getElementById("chatMessages");
+  const fixedMessageContainer = document.getElementById(
+    "fixedMessageContainer",
+  );
 
-  if (chatMessages) chatMessages.innerHTML = '';
-  if (fixedMessageContainer) fixedMessageContainer.innerHTML = '';
+  if (chatMessages) chatMessages.innerHTML = "";
+  if (fixedMessageContainer) fixedMessageContainer.innerHTML = "";
+
+  messageCount = 0;
+  hideLessonButton(); // Ensure this line is present and not commented out
 }
 
 export function clearLessonContainer() {
   console.log("Clearing lesson container");
-  const lessonMessages = document.getElementById('lessonMessages');
-  if (lessonMessages) lessonMessages.innerHTML = '';
+  const lessonMessages = document.getElementById("lessonMessages");
+  if (lessonMessages) lessonMessages.innerHTML = "";
+}
+
+export function hideLessonButton() {
+  console.log("Hiding lesson button");
+  const lessonButton = document.getElementById("lessonButton");
+  if (lessonButton) {
+    lessonButton.style.display = "none";
+  } else {
+    console.error("Lesson button not found");
+  }
+}
+
+export function showLessonButton() {
+  const lessonButton = document.getElementById("lessonButton");
+  if (lessonButton && messageCount > 0) {
+    lessonButton.style.display = "block";
+  }
 }
 
 // Re-export functions from uiHelpers.js and messageRendering.js
@@ -101,6 +125,3 @@ export {
   renderContent,
   displayTextWithDynamicDelay,
 };
-
-
-

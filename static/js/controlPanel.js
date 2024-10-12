@@ -1,7 +1,8 @@
 import { clearAndCreateNewSession } from "./session.js";
-import { clearChatContainer, clearLessonContainer } from "./chatUI.js";
+import { clearChatContainer, clearLessonContainer, hideLessonButton } from "./chatUI.js";
 import { resetFirstMessageState } from "./messageHandling.js";
 import { setAudioEnabled, getAudioEnabled } from "./main.js";
+import { clearLesson } from "./mathLesson.js";
 
 export function initializeControlPanel() {
   console.log("Initializing control panel...");
@@ -45,6 +46,12 @@ async function handleNewExercise() {
 
     // Clear lesson container
     clearLessonContainer();
+
+    // Clear lesson content
+    clearLesson();
+
+    // Explicitly hide the lesson button
+    hideLessonButton();
 
     // Reset the first message state
     resetFirstMessageState();

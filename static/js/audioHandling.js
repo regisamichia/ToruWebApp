@@ -77,6 +77,7 @@ function preprocessTextForTTS(text) {
   // Replace '/' with 'divisé par'
   // Replace '=' with 'égal à'
   text = text.replace(/=/g, " égal à ");
+  text = text.replace(/ x /g, " fois ");
   text = text.replace(/\//g, " divisé par ");
 
   return text;
