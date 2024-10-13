@@ -2,7 +2,7 @@ const config = {
   development: {
     apiBaseUrl: "http://localhost:8000",
     chatUrl: "http://localhost:8001",
-    multiModalUrl: "http://localhost:8003",
+    multiModalUrl: "http://localhost:8001",
     release_mode: "beta",
   },
   production: {
@@ -35,7 +35,8 @@ async function getUrls() {
       return {
         apiBaseUrl: data.API_BASE_URL || config.development.apiBaseUrl,
         chatUrl: data.MATH_CHATBOT_URL || config.development.chatUrl,
-        multiModalUrl: data.MULTIMODAL_URL || config.development.multiModalUrl,
+        multiModalUrl:
+          data.MATH_CHATBOT_URL || config.development.multiModalUrl,
       };
     } catch (error) {
       console.error("Failed to get production URLs:", error);

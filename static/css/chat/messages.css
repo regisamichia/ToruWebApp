@@ -35,10 +35,11 @@
 }
 
 .first-user-message {
-    background-color: #8e6fc1;
-    color: var(--white);
-    align-self: flex-end;
-    margin-left: auto;
+    background-color: #8adae5;
+    color: var(--black);
+    align-self: center;
+    margin: 0 auto;
+    max-width: 80%;
 }
 
 .message-wrapper {
@@ -75,4 +76,10 @@
     color: #999;
     max-width: 100%;
     margin: 0 auto;
+}
+
+.first-message-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }

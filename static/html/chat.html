@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Chat - Toru Chatbot</title>
+        <title>Chat - Owllie Chatbot</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/opus-recorder/8.0.5/recorder.min.js"></script>
         <link rel="stylesheet" href="/static/css/styles.css" />
         <link rel="stylesheet" href="/static/css/main.css" />
@@ -79,7 +79,7 @@
                     <button id="sidebarToggle" class="sidebar-toggle">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <h1>Toru</h1>
+                    <h1>Owllie</h1>
                     <nav>
                         <ul>
                             <li>
@@ -144,7 +144,7 @@
                                     <input
                                         type="text"
                                         id="userInput"
-                                        placeholder="Ecris ton message ici..."
+                                        placeholder="Tu peux écrire ici..."
                                     />
                                     <button
                                         id="microphoneButton"
@@ -176,26 +176,26 @@
                             <div class="control-panel-content">
                                 <div class="control-panel-section">
                                     <p class="control-panel-text">
-                                        Pour recommencer un nouvel exercice
-                                        clique sur ce bouton
+                                        Pour recommencer un nouvel exercice et
+                                        repartir d'une page blanche
                                     </p>
                                     <button
                                         id="newExerciseButton"
                                         class="button-34"
                                     >
-                                        New Exercise
+                                        Nouvel exercice
                                     </button>
                                 </div>
                                 <div class="control-panel-section">
                                     <p class="control-panel-text">
-                                        Tu as besoin de revoir le tutoriel ? Pas
-                                        de soucis, clique sur ce bouton
+                                        Tu as besoin de revoir le tutoriel ? Ça
+                                        se passe ici
                                     </p>
                                     <button
                                         id="tutorialButton"
                                         class="button-34"
                                     >
-                                        Tutorial
+                                        Tutoriel
                                     </button>
                                 </div>
                                 <div class="control-panel-section">
@@ -238,14 +238,22 @@
         <script src="/static/js/sidebar.js"></script>
         <!-- Add this just before the closing </body> tag -->
         <script>
-          document.getElementById('sidebarToggle').addEventListener('click', function() {
-            setTimeout(() => {
-              const sidebar = document.querySelector('.chat-sidebar');
-              const computedStyle = window.getComputedStyle(sidebar);
-              console.log('Computed sidebar width:', computedStyle.width);
-              console.log('Computed sidebar padding:', computedStyle.padding);
-            }, 300); // Wait for the transition to complete
-          });
+            document
+                .getElementById("sidebarToggle")
+                .addEventListener("click", function () {
+                    setTimeout(() => {
+                        const sidebar = document.querySelector(".chat-sidebar");
+                        const computedStyle = window.getComputedStyle(sidebar);
+                        console.log(
+                            "Computed sidebar width:",
+                            computedStyle.width,
+                        );
+                        console.log(
+                            "Computed sidebar padding:",
+                            computedStyle.padding,
+                        );
+                    }, 300); // Wait for the transition to complete
+                });
         </script>
     </body>
 </html>

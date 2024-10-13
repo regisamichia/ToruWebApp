@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Toru - Aide aux devoirs intelligente</title>
+        <title>Owllie - Aide aux devoirs intelligente</title>
         <link rel="stylesheet" href="/static/css/homepage.css" />
         <link
             href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
@@ -13,29 +13,58 @@
     <body>
         <header>
             <nav>
-                <div class="logo">Toru</div>
+                <div class="logo">Owllie</div>
                 <ul>
-                    <li><a href="/chat" id="chatLink">Chat</a></li>
+                    <li><a href="/chat" id="chatLink">Accéder au chat</a></li>
                     <li>
-                        <a href="/chatHistory" id="historyLink">Historique</a>
+                        <a href="/waiting-list" id="waiting-list-link"
+                            >Créer votre compte</a
+                        >
                     </li>
                     <li>
-                        <a href="/settings" id="settingsLink">Paramètres</a>
+                        <a href="/login" id="settingsLink">Connexion</a>
                     </li>
-                    <li><a href="#" id="logoutLink">Déconnexion</a></li>
                 </ul>
             </nav>
         </header>
 
         <main>
             <section class="hero">
-                <h1>
-                    L'aide aux devoirs intelligente pour
-                    <span class="highlight">apprendre</span> et
-                    <span class="highlight">progresser</span>
-                </h1>
-                <h3>De la 6e à la 3e</h3>
-                <button class="cta-button">Commencer maintenant</button>
+                <div class="hero-content">
+                    <h1>
+                        Aidez vos enfants à réussir avec un
+                        <span class="highlight">accès illimité</span> à
+                        <span class="highlight">professeur virtuel</span>
+                    </h1>
+                    <!-- <span class="hero-subtitle"
+                        >Un soutien scolaire disponible tous les jours
+                        <span class="highlight">à prix fixe</span></span
+                    > -->
+                    <div class="hero-cta-container">
+                        <h3>
+                            Du CE1 à la Terminale, des réponses adaptées à
+                            toutes les classes et tous les niveaux
+                        </h3>
+                        <button class="cta-button">Commencer maintenant</button>
+                    </div>
+                </div>
+                <div class="hero-image"></div>
+            </section>
+
+            <section class="info-section">
+                <div class="info-image"></div>
+                <div class="info-content">
+                    <h2>Découvrez Owllie</h2>
+                    <p>
+                        Plus qu'un simple contenu, votre professeur personnel
+                        disponible à tout moment
+                    </p>
+                    <p>
+                        Un accompagnement en direct quand vous en avez besoin.
+                    </p>
+                    <p>Owllie vous écoute et vous répond</p>
+                    <button class="info-button">En savoir plus</button>
+                </div>
             </section>
 
             <section class="features">
@@ -85,8 +114,8 @@
                     />
                     <h3>Envoyer les photos des exercices</h3>
                     <p>
-                        Toru peut lire les images n'hésite pas à lui en envoyer
-                        tes exercies de géometrie.
+                        Owllie peut lire les images n'hésite pas à lui en
+                        envoyer tes exercies de géometrie.
                     </p>
                 </div>
                 <div class="feature-card">
@@ -94,10 +123,10 @@
                         src="/static/media/homepage/enregistreur-audio.png"
                         alt="Audio"
                     />
-                    <h3>Tu peux parler à Toru qui te répondra</h3>
+                    <h3>Tu peux parler à Owllie qui te répondra</h3>
                     <p>
                         Comme avec un vrai professeur, l'élève peut expliquer
-                        ses problèmes à l'oral à Toru qui lui répondra
+                        ses problèmes à l'oral à Owllie qui lui répondra
                     </p>
                 </div>
                 <div class="feature-card">
@@ -109,7 +138,7 @@
                     <p>
                         <br />
                         Tu veux en faire plus ? Pas de problème, demande de
-                        nouveaux exercices à Toru qui sera ravi de t'aider
+                        nouveaux exercices à Owllie qui sera ravi de t'aider
                     </p>
                 </div>
                 <div class="feature-card">
@@ -146,22 +175,26 @@
                     <div class="accordion">
                         <div class="accordion-item">
                             <div class="accordion-header">
-                                Quelles classes couvre Toru ?
+                                Quelles classes couvre Owllie ?
                             </div>
                             <div class="accordion-content">
-                                <p>Toru couvre les classes de la 6e à la 3e.</p>
+                                <p>
+                                    Owllie couvre les classes de la 6e à la 3e.
+                                </p>
                             </div>
                         </div>
                         <div class="accordion-item">
                             <div class="accordion-header">
-                                Quelles sont les matières accessibles sur Toru ?
+                                Quelles sont les matières accessibles sur Owllie
+                                ?
                             </div>
                             <div class="accordion-content">
                                 <p>
-                                    Toru couvre toutes les matières principales
-                                    du collège, incluant les mathématiques, le
-                                    français, l'histoire-géographie, les
-                                    sciences, et les langues étrangères.
+                                    Owllie couvre toutes les matières
+                                    principales du collège, incluant les
+                                    mathématiques, le français,
+                                    l'histoire-géographie, les sciences, et les
+                                    langues étrangères.
                                 </p>
                             </div>
                         </div>
@@ -171,7 +204,7 @@
             </section>
 
             <footer>
-                <p>&copy; 2024 Toru. Tous droits réservés.</p>
+                <p>&copy; 2024 Owllie. Tous droits réservés.</p>
             </footer>
 
             <script src="/static/js/homepage.js"></script>

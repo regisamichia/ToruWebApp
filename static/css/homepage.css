@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #4a6fff;
-    --secondary-color: #ff6b6b;
+    --primary-color: #375e97;
+    --secondary-color: #375e97;
     --background-color: #f8f9fa;
     --text-color: #333;
 }
@@ -49,23 +49,69 @@ nav ul li a {
 }
 
 main {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem 5%;
+    padding: 2rem 7%;
+}
+
+.hero,
+.info-section,
+.features,
+.faq {
+    width: 100%;
+    margin-bottom: 4rem;
+    padding: 0 2%;
 }
 
 .hero {
-    text-align: center;
-    margin-bottom: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
 }
 
-h1 {
+.hero-content {
+    flex: 1.5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-content h1,
+.hero-subtitle {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    width: 100%;
+    font-weight: bold;
+    font-family: inherit;
+    line-height: 1.2;
+    color: var(--text-color);
 }
 
 .highlight {
-    color: var(--primary-color);
+    color: #375e97; /* Specific color for highlighted text */
+}
+
+.hero-subtitle {
+    margin-top: 0.5rem;
+}
+
+.hero-image {
+    flex: 1;
+    min-height: 400px;
+    background-image: url("/static/media/homepage/stay-home-5205390_1280.png");
+    background-size: contain;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
+.hero-cta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
 }
 
 .cta-button {
@@ -83,11 +129,54 @@ h1 {
     background-color: #3a5fef;
 }
 
+.info-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-right: 2%;
+}
+
+.info-image {
+    flex: 1.7;
+    background-image: url("/static/media/homepage/fille.png");
+    background-size: auto 100%;
+    background-position: left center;
+    background-repeat: no-repeat;
+    min-height: 400px;
+}
+
+.info-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+    align-self: center;
+}
+
+.info-button:hover {
+    background-color: #3a5fef;
+}
+
 .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
-    margin-bottom: 4rem;
 }
 
 .feature-card {
@@ -104,20 +193,36 @@ h1 {
     margin-bottom: 1rem;
 }
 
-.stats {
+.faq-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.accordion-item {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.accordion-header {
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 4rem;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.stat-item {
-    text-align: center;
-}
-
-.stat-item h2 {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+.accordion-content {
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
 }
 
 footer {
@@ -125,6 +230,65 @@ footer {
     color: var(--primary-color);
     text-align: center;
     padding: 1rem;
+}
+
+@media (max-width: 1200px) {
+    main {
+        padding: 2rem 5%;
+    }
+
+    .hero,
+    .info-section {
+        flex-direction: column;
+    }
+
+    .hero-image,
+    .info-image {
+        width: 100%;
+        min-height: 300px;
+        background-position: center;
+    }
+
+    .info-content {
+        padding-right: 0;
+        padding: 2rem;
+    }
+
+    .info-image {
+        background-size: contain;
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        padding: 1rem 3%;
+    }
+
+    nav {
+        flex-direction: column;
+    }
+
+    nav ul {
+        margin-top: 1rem;
+    }
+
+    nav ul li {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .hero-content,
+    .info-content {
+        padding: 1rem 0;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .info-image {
+        min-height: 200px;
+    }
 }
 
 /* New styles for FAQ section */
@@ -166,39 +330,4 @@ footer {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
-}
-
-/* ... rest of the styles ... */
-
-@media (max-width: 768px) {
-    .faq {
-        flex-direction: column;
-    }
-
-    .faq-image {
-        max-width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-    }
-
-    nav ul {
-        margin-top: 1rem;
-    }
-
-    nav ul li {
-        margin-left: 1rem;
-        margin-right: 1rem;
-    }
-
-    .stats {
-        flex-direction: column;
-    }
-
-    .stat-item {
-        margin-bottom: 2rem;
-    }
 }

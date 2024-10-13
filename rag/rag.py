@@ -23,9 +23,6 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv("/etc/secrets/.env")
 
-# Print all environment variables
-for key, value in os.environ.items():
-    print(f'env available in rag.py : {key}: {value}')
 
 app = FastAPI()
 
@@ -115,7 +112,7 @@ async def chat(
         async def stream_response():
             try:
                 async for chunk in chatbot.process_input(user_input, session):
-                    yield chunk.replace("system: ", "")
+                    yield chunk.replace("system: ", "").replace("System: ", "")
             except Exception as e:
                 print(f"Error in stream_response: {str(e)}")
                 yield "Je suis désolé, mais je rencontre des difficultés pour traiter votre demande en ce moment. Veuillez réessayer plus tard."
