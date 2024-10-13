@@ -25,7 +25,8 @@ async def log_requests(request: Request, call_next):
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins_list,
+    #allow_origins=settings.allowed_origins_list,
+    allow_origins=settings["*"], #à changer
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
